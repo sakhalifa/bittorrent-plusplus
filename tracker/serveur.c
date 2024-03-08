@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,6 +23,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERROR, no port provided\n");
         exit(1);
     }
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
         error("ERROR opening socket");
