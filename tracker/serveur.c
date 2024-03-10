@@ -37,9 +37,11 @@ int main(int argc, char *argv[])
         error("ERROR on binding");
     listen(sockfd, 5); // peut-être modifier la longueur de la queue
     clilen = sizeof(cli_addr);
+    printf("Waiting for client connection\n");
     newsockfd = accept(sockfd,
                        (struct sockaddr *)&cli_addr,
                        &clilen);
+    printf("Accepted client connection\n");
     if (newsockfd < 0)
         error("ERROR on accept");
     bzero(buffer, 256);
