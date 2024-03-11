@@ -6,26 +6,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "peer_file.h"
+#include "peer.h"
+
 void error(char *msg)
 {
     perror(msg);
     exit(1);
 }
 
-struct peer_file{
-    char* name;
-    char* hash;
-    unsigned long long length;
-};
-
-struct peer{
-    char* ip;
-    unsigned short port;
-    //hashmap peer_files
-};
-
 int main(int argc, char const *argv[])
 {
-    /* code */
+    const struct peer_file_list *FILES = NULL;
     return 0;
 }
