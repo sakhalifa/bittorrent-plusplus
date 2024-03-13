@@ -3,6 +3,7 @@ package commands;
 import lombok.Getter;
 import server.Counter;
 
+@CommandAnnotation("incr")
 @Getter
 public class IncrCounterCommand implements ICommand {
 	private final int value;
