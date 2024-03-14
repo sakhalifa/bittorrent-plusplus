@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 public class ListParser<T> implements IParser<List<T>> {
 
-	private final Function<String, Pair<T, Integer>> consumerFunction;
+	private final ParserConsumerFunction<T> consumerFunction;
 
 	@Override
 	public List<T> parse(String input) throws ParserException {
@@ -28,7 +28,7 @@ public class ListParser<T> implements IParser<List<T>> {
 		return toReturn;
 	}
 
-	public ListParser(Function<String, Pair<T, Integer>> consumerFunc){
+	public ListParser(ParserConsumerFunction<T> consumerFunc){
 		// consumerFUnc consumes the list input.
 		// As in, imagine having the input "el1 el2 el3 el4" and imagine the consumerFunc taking 2 elements from this list
 		// and compacting it into a single object.
