@@ -1,8 +1,9 @@
 package server;
 
-import commands.CommandParser;
 import commands.ICommand;
+import commands.ICommandParser;
 import commands.exceptions.CommandException;
+import parser.exceptions.ParserException;
 
 import java.io.*;
 import java.net.Socket;
@@ -13,14 +14,16 @@ public class ClientHandler implements Runnable, Closeable {
 	private final PrintWriter out;
 	private final BufferedReader in;
 	private final Counter counter;
+	private final ICommandParser parser;
 
-	public ClientHandler(Socket clientSocket, Counter counter) throws IOException {
+	public ClientHandler(Socket clientSocket, Counter counter, ICommandParser parser) throws IOException {
 		this.clientSocket = clientSocket;
 		this.out =
 				new PrintWriter(clientSocket.getOutputStream(), true);
 		this.in = new BufferedReader(
 				new InputStreamReader(clientSocket.getInputStream()));
 		this.counter = counter;
+		this.parser = parser;
 	}
 
 	@Override
@@ -31,13 +34,15 @@ public class ClientHandler implements Runnable, Closeable {
 				inputLine = in.readLine();
 				if (inputLine == null)
 					break;
-				ICommand parsedCommand = CommandParser.parseInput(inputLine);
+				ICommand parsedCommand = parser.parse(inputLine);
 				outputLine = parsedCommand.apply(counter);
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;
 			} catch (CommandException e) {
-				outputLine = "ERROR " + e.getMessage();
+				outputLine = "COMMAND_ERROR " + e.getMessage();
+			} catch (ParserException  e){
+				outputLine = "PARSER_EXCEPTION " + e.getMessage();
 			}
 			out.println(outputLine);
 		}
