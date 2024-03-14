@@ -1,4 +1,4 @@
-package commands.server.parser;
+package parser;
 
 import commands.ICommand;
 import commands.ICommandParser;
