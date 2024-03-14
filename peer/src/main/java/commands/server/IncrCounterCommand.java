@@ -1,10 +1,11 @@
 package commands.server;
 
+import commands.CommandAnnotation;
 import commands.ICommand;
 import lombok.Getter;
 import server.Counter;
 
-@CommandAnnotation("incr")
+@CommandAnnotation(value = "increment", parser = CommandParsers.INCREMENT)
 @Getter
 public class IncrCounterCommand implements ICommand {
 	private final int value;
@@ -22,5 +23,4 @@ public class IncrCounterCommand implements ICommand {
 	public String serialize() {
 		return "increment " + value;
 	}
-
 }

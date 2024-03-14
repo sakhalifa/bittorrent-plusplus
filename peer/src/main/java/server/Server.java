@@ -1,6 +1,6 @@
 package server;
 
-import commands.server.ServerCommandParser;
+import commands.server.CommandParsers;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,9 +23,11 @@ public class Server {
 			try {
 				System.out.println("Waiting for connection");
 				Socket clientSocket = serverSocket.accept();
-				threadExecutor.execute(new ClientHandler(clientSocket, counter, new ServerCommandParser()));
+				threadExecutor.execute(
+						new ClientHandler(clientSocket, counter, input -> CommandParsers.beginParsing(input.trim()))
+				);
 			} catch (IOException e) {
-				System.out.println("Error listening to a connection");
+				System.err.println("Error listening to a connection");
 				e.printStackTrace();
 				break;
 			}

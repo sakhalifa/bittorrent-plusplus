@@ -9,7 +9,8 @@ public interface ICommand extends Serializable {
 
 	String apply(Counter counter) throws CommandException;
 
-	String serialize();
-
-
+	@SuppressWarnings("unused")
+	default String serialize(){
+		return getClass().getAnnotation(CommandAnnotation.class).value();
+	}
 }

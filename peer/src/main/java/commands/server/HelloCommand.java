@@ -6,15 +6,10 @@ import server.Counter;
 
 
 @CommandAnnotation("hello")
+@SuppressWarnings("unused")
 public class HelloCommand implements ICommand {
-
 	@Override
 	public String apply(Counter counter) {
 		return "hewwo";
-	}
-
-	@Override
-	public String serialize(){
-		return "hello";
 	}
 }

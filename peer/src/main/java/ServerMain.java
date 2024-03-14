@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 public class ServerMain {
 
-	private static int PORT_NUMBER = 5697;
+	private static final int PORT_NUMBER = 5697;
 
 	public static void main(String[] args) {
 		Executor threadPool = Executors.newCachedThreadPool();
