@@ -1,5 +1,6 @@
-package commands;
+package commands.server;
 
+import commands.ICommand;
 import server.Counter;
 
 @CommandAnnotation("print")
@@ -10,7 +11,7 @@ public class PrintCounterCommand implements ICommand {
 	}
 
 	@Override
-	public String toString(){
+	public String serialize(){
 		return "print";
 	}
 }

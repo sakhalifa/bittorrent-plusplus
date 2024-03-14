@@ -1,6 +1,6 @@
 package server;
 
-import org.apache.logging.log4j.simple.SimpleLoggerContextFactory;
+import commands.server.ServerCommandParser;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,7 +23,7 @@ public class Server {
 			try {
 				System.out.println("Waiting for connection");
 				Socket clientSocket = serverSocket.accept();
-				threadExecutor.execute(new ClientHandler(clientSocket, counter));
+				threadExecutor.execute(new ClientHandler(clientSocket, counter, new ServerCommandParser()));
 			} catch (IOException e) {
 				System.out.println("Error listening to a connection");
 				e.printStackTrace();

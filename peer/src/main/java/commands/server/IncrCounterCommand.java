@@ -1,5 +1,6 @@
-package commands;
+package commands.server;
 
+import commands.ICommand;
 import lombok.Getter;
 import server.Counter;
 
@@ -18,7 +19,8 @@ public class IncrCounterCommand implements ICommand {
 	}
 
 	@Override
-	public String toString(){
+	public String serialize() {
 		return "increment " + value;
 	}
+
 }
