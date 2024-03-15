@@ -1,4 +1,4 @@
-package commands.exceptions;
+package fr.ystat.commands.exceptions;
 
 public class IncrementInvalidValue extends CommandException{
 	public IncrementInvalidValue(int wrongValue){

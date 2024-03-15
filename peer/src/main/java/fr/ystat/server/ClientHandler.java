@@ -1,9 +1,9 @@
-package server;
+package fr.ystat.server;
 
-import commands.ICommand;
-import commands.ICommandParser;
-import commands.exceptions.CommandException;
-import parser.exceptions.ParserException;
+import fr.ystat.commands.ICommand;
+import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.parser.exceptions.ParserException;
 
 import java.io.*;
 import java.net.Socket;

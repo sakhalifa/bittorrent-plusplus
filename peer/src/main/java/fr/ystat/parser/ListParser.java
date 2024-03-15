@@ -1,13 +1,13 @@
-package parser;
+package fr.ystat.parser;
 
-import commands.ICommand;
-import commands.ICommandParser;
-import commands.exceptions.CommandException;
+import fr.ystat.commands.ICommand;
+import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.exceptions.CommandException;
 import lombok.AllArgsConstructor;
 import lombok.Value;
-import parser.IParser;
-import parser.exceptions.ParserException;
-import util.Pair;
+import fr.ystat.parser.IParser;
+import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,12 +1,12 @@
-package commands.server;
+package fr.ystat.commands.server;
 
-import commands.CommandAnnotation;
-import commands.ICommand;
-import commands.ICommandParser;
+import fr.ystat.commands.CommandAnnotation;
+import fr.ystat.commands.ICommand;
+import fr.ystat.commands.ICommandParser;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
-import parser.exceptions.InvalidInputException;
-import parser.exceptions.ParserException;
+import fr.ystat.parser.exceptions.InvalidInputException;
+import fr.ystat.parser.exceptions.ParserException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

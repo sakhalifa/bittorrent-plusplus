@@ -1,4 +1,4 @@
-package util;
+package fr.ystat.util;
 
 import lombok.Value;
 

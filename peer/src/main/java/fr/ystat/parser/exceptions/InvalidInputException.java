@@ -1,4 +1,4 @@
-package parser.exceptions;
+package fr.ystat.parser.exceptions;
 
 public class InvalidInputException extends ParserException{
 	public InvalidInputException(String input){

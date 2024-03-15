@@ -1,7 +1,7 @@
-package commands;
+package fr.ystat.commands;
 
-import commands.exceptions.CommandException;
-import server.Counter;
+import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.server.Counter;
 
 import java.io.Serializable;
 

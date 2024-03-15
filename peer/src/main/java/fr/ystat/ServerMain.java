@@ -1,4 +1,6 @@
-import server.Server;
+package fr.ystat;
+
+import fr.ystat.server.Server;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;

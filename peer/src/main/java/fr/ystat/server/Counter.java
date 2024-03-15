@@ -1,4 +1,4 @@
-package server;
+package fr.ystat.server;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -1,6 +1,6 @@
-package parser;
+package fr.ystat.parser;
 
-import parser.exceptions.ParserException;
+import fr.ystat.parser.exceptions.ParserException;
 
 public interface IParser<T> {
 

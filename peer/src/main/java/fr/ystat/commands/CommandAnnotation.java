@@ -1,6 +1,6 @@
-package commands;
+package fr.ystat.commands;
 
-import commands.server.CommandParsers;
+import fr.ystat.commands.server.CommandParsers;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

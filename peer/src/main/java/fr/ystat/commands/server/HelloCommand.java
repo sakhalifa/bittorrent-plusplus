@@ -1,8 +1,8 @@
-package commands.server;
+package fr.ystat.commands.server;
 
-import commands.CommandAnnotation;
-import commands.ICommand;
-import server.Counter;
+import fr.ystat.commands.CommandAnnotation;
+import fr.ystat.commands.ICommand;
+import fr.ystat.server.Counter;
 
 
 @CommandAnnotation("hello")
