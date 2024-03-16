@@ -31,9 +31,11 @@ public class ReadWriteHandler implements
 			buffer.flip();
 			if(buffer.get(result - 1) == '\n'){
 				// Finished reading a protocol message
+				String wholeMessage = messageBuilder.toString();
+				System.out.println("Read the message :'" + wholeMessage.trim() + "'");
 				actionInfo.put("action", "write");
 
-				clientChannel.write(StandardCharsets.ISO_8859_1.encode(messageBuilder.toString()), actionInfo, this);
+				clientChannel.write(StandardCharsets.ISO_8859_1.encode(wholeMessage), actionInfo, this);
 				buffer.clear();
 			}else{
 				// Still reading that message...
