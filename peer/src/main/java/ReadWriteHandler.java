@@ -18,6 +18,8 @@ public class ReadWriteHandler implements
 	@Override
 	public void completed(
 			Integer result, Map<String, Object> attachment) {
+		if(result == -1)
+			return;
 		Map<String, Object> actionInfo = attachment;
 		String action = (String) actionInfo.get("action");
 
@@ -35,7 +37,7 @@ public class ReadWriteHandler implements
 				System.out.println("Read the message :'" + wholeMessage.trim() + "'");
 				actionInfo.put("action", "write");
 
-				clientChannel.write(StandardCharsets.ISO_8859_1.encode(wholeMessage), actionInfo, this);
+				clientChannel.write(StandardCharsets.ISO_8859_1.encode("> " + wholeMessage), actionInfo, this);
 				buffer.clear();
 			}else{
 				// Still reading that message...
