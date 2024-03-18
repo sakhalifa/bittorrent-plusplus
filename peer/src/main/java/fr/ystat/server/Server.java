@@ -1,36 +1,34 @@
 package fr.ystat.server;
 
-import fr.ystat.commands.server.CommandParsers;
+import fr.ystat.server.handler.ConnectionHandler;
+import lombok.Getter;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.concurrent.Executor;
 
+@Getter
 public class Server {
-	private final ServerSocket serverSocket;
-	private final Executor threadExecutor;
+	private final AsynchronousServerSocketChannel serverChannel;
+	private final CompletionHandler<AsynchronousSocketChannel, Void> connectionHandler;
 	private final Counter counter;
+	private final Executor executor;
 
 	public Server(Executor threadExecutor, int port) throws IOException {
-		this.serverSocket = new ServerSocket(port);
-		this.threadExecutor = threadExecutor;
+		this.serverChannel = AsynchronousServerSocketChannel.open();
+		this.serverChannel.bind(new InetSocketAddress(port));
 		this.counter = new Counter();
+		this.executor = threadExecutor;
+		this.connectionHandler = new ConnectionHandler(this);
 	}
 
-	public void serve() {
-		while(true){
-			try {
-				System.out.println("Waiting for connection");
-				Socket clientSocket = serverSocket.accept();
-				threadExecutor.execute(
-						new ClientHandler(clientSocket, counter, input -> CommandParsers.beginParsing(input.trim()))
-				);
-			} catch (IOException e) {
-				System.err.println("Error listening to a connection");
-				e.printStackTrace();
-				break;
-			}
+	public void serve() throws IOException {
+		while (true) {
+			serverChannel.accept(null, this.connectionHandler);
+			System.in.read();
 		}
 	}
 }

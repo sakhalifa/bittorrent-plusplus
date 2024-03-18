@@ -9,7 +9,7 @@ public class ReadWriteHandler implements
 
 	private final AsynchronousSocketChannel clientChannel;
 
-	private StringBuilder messageBuilder;
+	private final StringBuilder messageBuilder;
 
 	public ReadWriteHandler(AsynchronousSocketChannel clientChannel){
 		this.clientChannel = clientChannel;
@@ -17,21 +17,20 @@ public class ReadWriteHandler implements
 	}
 	@Override
 	public void completed(
-			Integer result, Map<String, Object> attachment) {
-		if(result == -1)
+			Integer bytesRead, Map<String, Object> actionInfo) {
+		if(bytesRead == -1)
 			return;
-		Map<String, Object> actionInfo = attachment;
 		String action = (String) actionInfo.get("action");
 
 
 		if ("read".equals(action)) {
 			System.out.println("Called read handler");
-			System.out.println("Read " + result + " bytes ?");
+			System.out.println("Read " + bytesRead + " bytes!");
 			ByteBuffer buffer = (ByteBuffer) actionInfo.get("buffer");
 			buffer.flip();
 			messageBuilder.append(StandardCharsets.ISO_8859_1.decode(buffer));
 			buffer.flip();
-			if(buffer.get(result - 1) == '\n'){
+			if(buffer.get(bytesRead - 1) == '\n'){
 				// Finished reading a protocol message
 				String wholeMessage = messageBuilder.toString();
 				System.out.println("Read the message :'" + wholeMessage.trim() + "'");
@@ -50,7 +49,7 @@ public class ReadWriteHandler implements
 		} else if ("write".equals(action)) {
 			ByteBuffer buffer = ByteBuffer.allocate(32);
 			System.out.println("Called write handler");
-			System.out.println("Wrote " + result + " bytes ?");
+			System.out.println("Wrote " + bytesRead + " bytes ?");
 
 			actionInfo.put("action", "read");
 			actionInfo.put("buffer", buffer);

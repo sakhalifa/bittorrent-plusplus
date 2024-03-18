@@ -56,7 +56,9 @@ public enum CommandParsers implements ICommandParser {
 	;
 
 	public static ICommand beginParsing(String input) throws ParserException {
+		input = input.trim();
 		String commandName = getCommandName(input);
+		System.out.println("Command name : " + commandName);
 		return getCommandParser(commandName).parse(input);
 	}
 
@@ -71,7 +73,7 @@ public enum CommandParsers implements ICommandParser {
 	private static HashMap<String, Class<ICommand>> initialize() {
 		HashMap<String, Class<ICommand>> namesToCommands = new HashMap<>();
 
-		Reflections reflections = new Reflections("commands", Scanners.TypesAnnotated);
+		Reflections reflections = new Reflections("fr.ystat.commands", Scanners.TypesAnnotated);
 		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
 			try {
 				String commandName = clazz.getAnnotation(CommandAnnotation.class).value();
