@@ -2,6 +2,7 @@ package fr.ystat.commands.server;
 
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
+import fr.ystat.commands.exceptions.IncrementInvalidValue;
 import lombok.Getter;
 import fr.ystat.server.Counter;
 
@@ -14,7 +15,9 @@ public class IncrCounterCommand implements ICommand {
 	}
 
 	@Override
-	public String apply(Counter counter) {
+	public String apply(Counter counter) throws IncrementInvalidValue {
+		if(value < 0)
+			throw new IncrementInvalidValue(value);
 		counter.incrementCounter(value);
 		return "OK";
 	}

@@ -1,9 +1,10 @@
-package fr.ystat.server;
+package fr.ystat.server.handler;
 
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.server.Counter;
 
 import java.io.*;
 import java.net.Socket;
