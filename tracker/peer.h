@@ -1,3 +1,6 @@
+#ifndef PEER_H
+#define PEER_H
+
 /***
  * Linked list of peers.
  */
@@ -12,3 +15,5 @@ struct peer
     char *ip;
     unsigned short port;
 };
+
+#endif
