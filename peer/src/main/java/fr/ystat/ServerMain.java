@@ -1,5 +1,7 @@
 package fr.ystat;
 
+import fr.ystat.config.DummyConfigurationManager;
+import fr.ystat.config.IConfigurationManager;
 import fr.ystat.server.Server;
 
 import java.io.IOException;
@@ -15,7 +17,8 @@ public class ServerMain {
 	public static void main(String[] args) {
 		Executor threadPool = Executors.newFixedThreadPool(2);
 		try {
-			new Server(threadPool, PORT_NUMBER).serve();
+			// TODO Change it to an actual config manager
+			new Server(threadPool, new DummyConfigurationManager()).serve();
 		} catch (IOException e) {
 			System.out.println("Exception caught when trying to listen on port " + PORT_NUMBER);
 			System.out.println(e.getMessage());

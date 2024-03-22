@@ -1,5 +1,7 @@
 package fr.ystat.server;
 
+import fr.ystat.config.DummyConfigurationManager;
+import fr.ystat.config.IConfigurationManager;
 import fr.ystat.server.handler.ConnectionHandler;
 import lombok.Getter;
 
@@ -17,14 +19,17 @@ public class Server {
 	private final Counter counter;
 	private final Executor executor;
 	private final InetSocketAddress address;
+	private final IConfigurationManager configurationManager;
 
-	public Server(Executor threadExecutor, int port) throws IOException {
+	public Server(Executor threadExecutor, IConfigurationManager configurationManager) throws IOException {
 		this.serverChannel = AsynchronousServerSocketChannel.open();
-		this.address = new InetSocketAddress(port);
+		this.address = new InetSocketAddress(configurationManager.getPeerPort());
 		this.serverChannel.bind(this.address);
 		this.counter = new Counter();
 		this.executor = threadExecutor;
 		this.connectionHandler = new ConnectionHandler(this);
+		this.configurationManager = configurationManager;
+
 	}
 
 	public void serve() throws IOException {
