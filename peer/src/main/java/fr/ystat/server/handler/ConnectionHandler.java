@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 
 public class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Void> {
 
-
+	public static int BUFFER_SIZE = 1024;
 	private final Server server;
 
 	public ConnectionHandler(Server server){
@@ -29,7 +29,7 @@ public class ConnectionHandler implements CompletionHandler<AsynchronousSocketCh
 		if ((clientChannel != null) && (clientChannel.isOpen())) {
 			server.getExecutor().execute(() -> {
 				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter());
-				ByteBuffer buffer = ByteBuffer.allocate(32);
+				ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 //				ReadWriteHandler handler = new ReadWriteHandler(clientChannel);
 //
 //				Map<String, Object> readInfo = new HashMap<>();

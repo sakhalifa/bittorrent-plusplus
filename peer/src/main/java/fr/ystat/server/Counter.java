@@ -6,7 +6,7 @@ public class Counter {
 	private final AtomicInteger counter;
 
 	public Counter(){
-		counter = new AtomicInteger();
+		counter = new AtomicInteger(0);
 	}
 
 	public void incrementCounter(int value){

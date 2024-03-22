@@ -31,7 +31,7 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 	@Override
 	public void completed(Integer bytesWritten, Void unused) {
 		System.out.println("Wrote " + bytesWritten + " bytes");
-		ByteBuffer buffer = ByteBuffer.allocate(32);
+		ByteBuffer buffer = ByteBuffer.allocate(ConnectionHandler.BUFFER_SIZE);
 		clientChannel.read(buffer, buffer, readHandler);
 	}
 

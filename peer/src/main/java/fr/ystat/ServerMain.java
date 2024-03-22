@@ -3,6 +3,8 @@ package fr.ystat;
 import fr.ystat.server.Server;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -11,7 +13,7 @@ public class ServerMain {
 	private static final int PORT_NUMBER = 5697;
 
 	public static void main(String[] args) {
-		Executor threadPool = Executors.newCachedThreadPool();
+		Executor threadPool = Executors.newFixedThreadPool(2);
 		try {
 			new Server(threadPool, PORT_NUMBER).serve();
 		} catch (IOException e) {

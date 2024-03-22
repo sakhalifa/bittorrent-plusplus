@@ -2,6 +2,7 @@ package fr.ystat.server.handler;
 
 import fr.ystat.server.Counter;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -31,8 +32,8 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		if(bytesRead == -1)
 			return;
 
-		System.out.println("Called read handler");
-		System.out.println("Read " + bytesRead + " bytes!");
+//		System.out.println("Called read handler");
+//		System.out.println("Read " + bytesRead + " bytes!");
 		buffer.flip();
 		messageBuilder.append(StandardCharsets.ISO_8859_1.decode(buffer));
 		buffer.flip();
