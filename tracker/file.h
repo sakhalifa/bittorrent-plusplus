@@ -9,7 +9,7 @@ struct file {
     int filesize;
     int piecesize;
     char * key;
-    struct peer_list;
+    struct peer_list peers;
 };
 
 
