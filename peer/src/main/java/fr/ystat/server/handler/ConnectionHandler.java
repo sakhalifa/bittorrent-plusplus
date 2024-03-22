@@ -28,16 +28,8 @@ public class ConnectionHandler implements CompletionHandler<AsynchronousSocketCh
 
 		if ((clientChannel != null) && (clientChannel.isOpen())) {
 			server.getExecutor().execute(() -> {
-				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter());
-				ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-//				ReadWriteHandler handler = new ReadWriteHandler(clientChannel);
-//
-//				Map<String, Object> readInfo = new HashMap<>();
-//				readInfo.put("action", "read");
-//				readInfo.put("buffer", buffer);
-//
-				clientChannel.read(buffer, buffer, handler);
-
+				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter(), server.getConfigurationManager());
+				handler.startReading();
 			});
 		}
 	}
