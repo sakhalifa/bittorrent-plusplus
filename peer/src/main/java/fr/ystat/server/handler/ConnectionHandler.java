@@ -2,13 +2,8 @@ package fr.ystat.server.handler;
 
 import fr.ystat.server.Server;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class ConnectionHandler implements CompletionHandler<AsynchronousSocketChannel, Void> {
 
@@ -28,7 +23,7 @@ public class ConnectionHandler implements CompletionHandler<AsynchronousSocketCh
 
 		if ((clientChannel != null) && (clientChannel.isOpen())) {
 			server.getExecutor().execute(() -> {
-				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter(), server.getConfigurationManager());
+				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter());
 				handler.startReading();
 			});
 		}

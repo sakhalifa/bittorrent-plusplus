@@ -43,6 +43,39 @@ void string_to_list_file(
 	}
 }
 
+enum comparator convert_char_comparator(char c) {
+	switch (c) {
+	case ('<'): return LT;
+	case ('='): return EQ;
+	case ('>'): return GT;
+	default: error_command("Comparator unknown");
+	}
+}
+
+void string_to_list_criteria(
+    char *string, struct criteria *crit[], int *size, const char *separator) {
+	char *save_p;
+	char *criteria = strtok_r(string, separator, &save_p);
+	char *quote    = "\"";
+	while (criteria != NULL) {
+		*size += 1;
+		crit               = realloc(crit, *size * sizeof(struct criteria *));
+		struct criteria *c = malloc(sizeof(struct criteria));
+		char *elmt         = strtok(criteria, quote);
+		int elmt_len       = strlen(elmt);
+		c->comp =
+		    convert_char_comparator(elmt[elmt_len - 1]); // copy comparator
+		elmt[elmt_len - 1] = '\0';
+		c->element         = strdup(elmt); // copy element
+		char *value        = strtok(NULL, quote);
+		c->value           = strdup(value); // copy value
+		crit[*size - 1]    = c;
+		criteria           = strtok_r(NULL, separator,
+		              &save_p); // set criteria to next elmt (since strtok was used, need
+		              // to reset to string)
+	}
+}
+
 void parsing(char *command) {
 	const char *separator         = " "; // Separator in command is blank " "
 	char *right_bracket_separator = "]";
@@ -96,11 +129,27 @@ void parsing(char *command) {
 
 		// announce_listen(port, files, size_file, keys, size_key);
 
+		// announce_listen(port, files, size_file, keys, size_key);
 	}
 
 	// LOOK command (search files according to specific criteria)
 	else if (strcmp(command_name, "look") == 0) {
-		printf("look\n");
+
+		char *criterias = strtok(NULL, right_bracket_separator);
+
+		// Check left Bracket for seed
+		if (criterias[0] != '[') {
+			error_command("Missing bracket");
+		}
+
+		criterias = strtok(criterias, left_bracket_separator);
+
+		// Get criteria list
+		struct criteria **crit =
+		    malloc(sizeof(struct criteria *)); // TO BE FREED (and its elements)
+		int size = 0;
+		string_to_list_criteria(criterias, crit, &size, separator);
+
 	}
 
 	// GETFILE command (get peers who own a specific key)
@@ -169,7 +218,6 @@ void parsing(char *command) {
 }
 
 int main() {
-	char f[] = "announce listen 1896 seed [jojo 8 7 ae jojo2 9 10 eeee] leech "
-	           "[aad azd ed]";
+	char f[] = "look [filename=\"pizza\" piecesize>\"6516\"]";
 	parsing(f);
 }

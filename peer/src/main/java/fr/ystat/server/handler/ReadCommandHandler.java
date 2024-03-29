@@ -1,6 +1,6 @@
 package fr.ystat.server.handler;
 
-import fr.ystat.config.IConfigurationManager;
+import fr.ystat.config.GlobalConfiguration;
 import fr.ystat.server.Counter;
 import lombok.SneakyThrows;
 
@@ -15,22 +15,19 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	private final AsynchronousSocketChannel clientChannel;
 	private final StringBuilder messageBuilder;
 	private final ExecuteCommandHandler commandHandler;
-	private final IConfigurationManager configurationManager;
 	private long readBytes;
 
 
-	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Counter counter, IConfigurationManager configurationManager) {
+	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Counter counter) {
 		this.clientChannel = clientChannel;
 		this.messageBuilder = new StringBuilder();
-		this.commandHandler = new ExecuteCommandHandler(clientChannel, this, counter, configurationManager);
-		this.configurationManager = configurationManager;
+		this.commandHandler = new ExecuteCommandHandler(clientChannel, this, counter);
 	}
 
-	ReadCommandHandler(AsynchronousSocketChannel clientChannel, ExecuteCommandHandler commandHandler, IConfigurationManager configurationManager){
+	ReadCommandHandler(AsynchronousSocketChannel clientChannel, ExecuteCommandHandler commandHandler){
 		this.clientChannel = clientChannel;
 		this.commandHandler = commandHandler;
 		this.messageBuilder = new StringBuilder();
-		this.configurationManager = configurationManager;
 	}
 
 	public void startReading(){
@@ -51,7 +48,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		if(bytesRead == -1)
 			return;
 		this.readBytes += bytesRead;
-		if(readBytes >= configurationManager.getMaxMessageSize()){
+		if(readBytes >= GlobalConfiguration.get().getMaxMessageSize()){
 			System.err.println("Message exceeded max message size.");
 			buffer.clear();
 			messageBuilder.setLength(0);
