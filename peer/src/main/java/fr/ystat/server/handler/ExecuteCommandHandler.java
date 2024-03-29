@@ -2,7 +2,7 @@ package fr.ystat.server.handler;
 
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.commands.server.CommandParsers;
+import fr.ystat.commands.server.CommandAnnotationCollector;
 import fr.ystat.config.IConfigurationManager;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
@@ -45,7 +45,7 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 
 	public void execute(String input) {
 		try {
-			ICommand command = CommandParsers.beginParsing(input);
+			ICommand command = CommandAnnotationCollector.beginParsing(input);
 			String response = command.apply(counter);
 			clientChannel.write(StandardCharsets.ISO_8859_1.encode(response + "\n"), null, this);
 		} catch (ParserException e) {

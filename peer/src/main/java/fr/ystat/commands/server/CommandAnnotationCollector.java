@@ -1,0 +1,86 @@
+package fr.ystat.commands.server;
+
+import fr.ystat.commands.CommandAnnotation;
+import fr.ystat.commands.ICommand;
+import fr.ystat.commands.ICommandParser;
+import fr.ystat.parser.exceptions.ParserException;
+import lombok.SneakyThrows;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+
+import static fr.ystat.commands.server.CommandAnnotationCollector.DefaultCommandParser.getCommandName;
+
+public final class CommandAnnotationCollector {
+	private static final HashMap<String, Class<ICommand>> namesToCommands = initialize();
+
+
+	/**
+	 * Ugly one I agree
+	 * Collect all the classes with CommandAnnotation.
+	 *
+	 * @return HashMap of command names to their corresponding class command.
+	 */
+	private static HashMap<String, Class<ICommand>> initialize() {
+		HashMap<String, Class<ICommand>> namesToCommands = new HashMap<>();
+
+		Reflections reflections = new Reflections("fr.ystat.commands", Scanners.TypesAnnotated);
+		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
+			try {
+				String commandName = clazz.getAnnotation(CommandAnnotation.class).value();
+				if (namesToCommands.containsKey(commandName)) {
+					throw new RuntimeException(String.format("Conflicting commands name (%s) in commands %s and %s.",
+							commandName, clazz.getName(), namesToCommands.get(commandName).getName()));
+				}
+				namesToCommands.put(commandName, (Class<ICommand>) clazz);
+			} catch (ClassCastException ignored) {}
+		}
+		return namesToCommands;
+	}
+
+	@SneakyThrows
+	private static ICommandParser getCommandParser(String commandName) throws ParserException {
+		Class<ICommand> commandClass = getCommandClass(commandName);
+		var ctor = commandClass.getAnnotation(CommandAnnotation.class).parser().getDeclaredConstructor();
+		ctor.setAccessible(true);
+		return ctor.newInstance();
+	}
+
+	private static Class<ICommand> getCommandClass(String commandName) throws ParserException {
+		Class<ICommand> commandClass = namesToCommands.get(commandName);
+		if (commandClass == null) throw new ParserException(String.format("Unable to find command %s", commandName));
+		return commandClass;
+	}
+
+	public static ICommand beginParsing(String input) throws ParserException {
+		input = input.trim();
+		String commandName = getCommandName(input);
+		System.out.println("Command name : " + commandName);
+		return getCommandParser(commandName).parse(input);
+	}
+
+	public static class DefaultCommandParser implements ICommandParser {
+		@Override
+		public ICommand parse(String input) throws ParserException {
+			String commandName = getCommandName(input);
+			Class<ICommand> commandClass = getCommandClass(commandName);
+			try {
+				Constructor<ICommand> constructor = commandClass.getConstructor();
+
+				return constructor.newInstance();
+
+			} catch (NoSuchMethodException e) {
+				throw new ParserException(String.format("Could not find constructor for command %s.", commandName));
+			} catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		static String getCommandName(String input){
+			return input.split(" ")[0];
+		}
+	}
+}
