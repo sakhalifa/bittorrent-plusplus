@@ -11,6 +11,6 @@ public interface ICommand extends Serializable {
 
 	@SuppressWarnings("unused")
 	default String serialize(){
-		return getClass().getAnnotation(CommandAnnotation.class).value();
+		return getClass().getAnnotation(CommandAnnotation.class).name();
 	}
 }

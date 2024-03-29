@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface CommandAnnotation {
-    String value();
+    String name();
     Class<? extends ICommandParser> parser() default CommandAnnotationCollector.DefaultCommandParser.class;
 }
 

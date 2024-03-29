@@ -30,7 +30,7 @@ public final class CommandAnnotationCollector {
 		Reflections reflections = new Reflections("fr.ystat.commands", Scanners.TypesAnnotated);
 		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
 			try {
-				String commandName = clazz.getAnnotation(CommandAnnotation.class).value();
+				String commandName = clazz.getAnnotation(CommandAnnotation.class).name();
 				if (namesToCommands.containsKey(commandName)) {
 					throw new RuntimeException(String.format("Conflicting commands name (%s) in commands %s and %s.",
 							commandName, clazz.getName(), namesToCommands.get(commandName).getName()));
