@@ -3,7 +3,6 @@ package fr.ystat.server.handler;
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.commands.server.CommandAnnotationCollector;
-import fr.ystat.config.IConfigurationManager;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
 
@@ -16,20 +15,17 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 	private final AsynchronousSocketChannel clientChannel;
 	private final ReadCommandHandler readHandler;
 	private final Counter counter;
-	private final IConfigurationManager configurationManager;
 
-	public ExecuteCommandHandler(AsynchronousSocketChannel clientChannel, Counter counter, IConfigurationManager configurationManager){
+	public ExecuteCommandHandler(AsynchronousSocketChannel clientChannel, Counter counter){
 		this.clientChannel = clientChannel;
 		this.counter = counter;
-		this.readHandler = new ReadCommandHandler(clientChannel, this, configurationManager);
-		this.configurationManager = configurationManager;
+		this.readHandler = new ReadCommandHandler(clientChannel, this);
 	}
 
-	ExecuteCommandHandler(AsynchronousSocketChannel clientChannel, ReadCommandHandler readHandler, Counter counter, IConfigurationManager configurationManager){
+	ExecuteCommandHandler(AsynchronousSocketChannel clientChannel, ReadCommandHandler readHandler, Counter counter){
 		this.clientChannel = clientChannel;
 		this.readHandler = readHandler;
 		this.counter = counter;
-		this.configurationManager = configurationManager;
 	}
 
 	@Override
