@@ -1,4 +1,3 @@
-CC=gcc
+CC = gcc
 
-clean: 
-	rm client serveur
+clean : rm client serveur

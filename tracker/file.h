@@ -3,14 +3,12 @@
 
 #include "peer.h"
 
-
 struct file {
-    char * name;
-    int filesize;
-    int piecesize;
-    char * key;
-    struct peer_list peers;
+	char *name;
+	int filesize;
+	int piecesize;
+	char *key;
+	struct peer_list peers;
 };
-
 
 #endif
