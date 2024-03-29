@@ -1,6 +1,6 @@
 package fr.ystat.config;
 
-public class DummyConfigurationManager implements IConfigurationManager{
+public class  DummyConfigurationManager implements IConfigurationManager{
 	@Override
 	public int getPeerPort() {
 		return 5697;
@@ -44,5 +44,10 @@ public class DummyConfigurationManager implements IConfigurationManager{
 	@Override
 	public long updateTrackerIntervalMS() {
 		return 1000 * 30;
+	}
+
+	@Override
+	public String downloadFolderPath() {
+		return "downloads/";
 	}
 }

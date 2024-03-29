@@ -10,4 +10,5 @@ public interface IConfigurationManager {
 	long defaultPieceSize();
 	long updatePeersIntervalMS();
 	long updateTrackerIntervalMS();
+	String downloadFolderPath();
 }
