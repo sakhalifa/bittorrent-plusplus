@@ -16,6 +16,7 @@ public abstract class StockedFile {
     protected final String hash;
     protected final long pieceSize;  // Size in bytes
     protected final long totalSize;  // Size in bytes
+    protected final String name;
 
     public StockedFile(String name, long totalByteSize, long pieceByteSize, String hash) throws IllegalArgumentException {
         this.hash = hash;
@@ -28,6 +29,11 @@ public abstract class StockedFile {
         this.pieceSize = pieceByteSize;
         this.totalSize = totalByteSize;
 
+        if (name.contains("/")) {
+            throw new IllegalArgumentException("File name contains invalid characters! {/}");
+        }
+
+        this.name = name;
     }
 
     @SneakyThrows(NoSuchAlgorithmException.class)
@@ -37,7 +43,7 @@ public abstract class StockedFile {
         return new BigInteger(1, hash).toString(16);  // Checksum
     }
 
-    abstract public String getPartition(int partitionIndex) throws PartitionException;
+    abstract public byte[] getPartition(int partitionIndex) throws PartitionException, IOException;
 
 
 }

@@ -19,11 +19,13 @@ public class ListParser<T> implements IParser<List<T>> {
 
 	@Override
 	public List<T> parse(String input) throws ParserException {
+		var splitted = input.split(" ");
 		List<T> toReturn = new ArrayList<>();
-		while(!input.isEmpty()){
-			var result = consumerFunction.apply(input);
+		int idx = 0;
+		while(idx < splitted.length){
+			Pair<T, Integer> result = this.consumerFunction.apply(splitted, idx);
 			toReturn.add(result.getFirst());
-			input = input.substring(result.getSecond()).trim();
+			idx += result.getSecond();
 		}
 		return toReturn;
 	}

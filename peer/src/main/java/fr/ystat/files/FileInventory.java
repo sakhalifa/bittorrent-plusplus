@@ -3,22 +3,22 @@ package fr.ystat.files;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class Library {
+public class FileInventory {
 
-    private static Library INSTANCE = null;
+    private static FileInventory INSTANCE = null;
     final private static Object mutex = new Object();
 
-    final private ConcurrentMap<String, StockedFile> filesMap = new ConcurrentHashMap<>(); ;
+    final private ConcurrentMap<String, StockedFile> filesMap = new ConcurrentHashMap<>();
 
-    private Library() {}
+    private FileInventory() {}
 
-    public static Library getInstance() {
-		Library result = INSTANCE;
+    public static FileInventory getInstance() {
+		FileInventory result = INSTANCE;
 		if (result == null) {
 			synchronized (mutex) {
 				result = INSTANCE;
 				if (result == null) {
-                    INSTANCE = result = new Library();
+                    INSTANCE = result = new FileInventory();
                 }
 			}
 		}

@@ -1,12 +1,11 @@
 package fr.ystat.server;
 
-import fr.ystat.config.DummyConfigurationManager;
-import fr.ystat.config.IConfigurationManager;
+import fr.ystat.config.GlobalConfiguration;
 import fr.ystat.server.handler.ConnectionHandler;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -19,17 +18,14 @@ public class Server {
 	private final Counter counter;
 	private final Executor executor;
 	private final InetSocketAddress address;
-	private final IConfigurationManager configurationManager;
 
-	public Server(Executor threadExecutor, IConfigurationManager configurationManager) throws IOException {
+	public Server(Executor threadExecutor) throws IOException {
 		this.serverChannel = AsynchronousServerSocketChannel.open();
-		this.address = new InetSocketAddress(configurationManager.getPeerPort());
+		this.address = new InetSocketAddress(GlobalConfiguration.get().getPeerPort());
 		this.serverChannel.bind(this.address);
 		this.counter = new Counter();
 		this.executor = threadExecutor;
 		this.connectionHandler = new ConnectionHandler(this);
-		this.configurationManager = configurationManager;
-
 	}
 
 	public void serve() throws IOException {
