@@ -43,5 +43,8 @@ public class CompletedFile extends StockedFile {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return String.format("%s %d %d %s", this.file.getName(), this.file.length(), this.pieceSize, this.hash);
+    }
 }

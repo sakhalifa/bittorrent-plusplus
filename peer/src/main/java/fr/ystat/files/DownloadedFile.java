@@ -66,4 +66,9 @@ public class DownloadedFile extends StockedFile {
         File partition = partitionedFiles[partitionIndex];
         return Files.readAllBytes(partition.toPath());
     }
+
+    @Override
+    public String toString() {
+        return this.hash;
+    }
 }

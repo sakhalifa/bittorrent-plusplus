@@ -1,4 +1,4 @@
-package fr.ystat.commands.server;
+package fr.ystat.server.commands;
 
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
@@ -10,7 +10,6 @@ import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
 import fr.ystat.util.Pair;
 
-import java.util.Arrays;
 import java.util.List;
 
 class GetPiecesParser implements ICommandParser{
@@ -21,7 +20,6 @@ class GetPiecesParser implements ICommandParser{
 		if (splitted.length < 3) {
 			throw new InvalidInputException(input);
 		}
-		System.out.println(input.matches("getpieces [a-z0-9]{32} \\[[0-9]+( [0-9]+)*]"));
 		if(!input.matches("getpieces [a-z0-9]{32} \\[[0-9]+( [0-9]+)*]")){
 			throw new InvalidInputException(input);
 		}

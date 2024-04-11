@@ -1,7 +1,5 @@
 package fr.ystat.commands;
 
-import fr.ystat.commands.server.CommandAnnotationCollector;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;

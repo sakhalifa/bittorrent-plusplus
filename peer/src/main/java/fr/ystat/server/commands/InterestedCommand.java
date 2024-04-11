@@ -1,4 +1,4 @@
-package fr.ystat.commands.server;
+package fr.ystat.server.commands;
 
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
@@ -7,8 +7,6 @@ import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
-
-import java.util.regex.Pattern;
 
 class InterestedCommandParser implements ICommandParser{
 	@Override

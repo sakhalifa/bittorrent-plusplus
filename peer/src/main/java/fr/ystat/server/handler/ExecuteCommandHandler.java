@@ -2,7 +2,7 @@ package fr.ystat.server.handler;
 
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.commands.server.CommandAnnotationCollector;
+import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
 

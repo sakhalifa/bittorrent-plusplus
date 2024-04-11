@@ -1,8 +1,5 @@
-package fr.ystat.commands.server;
+package fr.ystat.commands;
 
-import fr.ystat.commands.CommandAnnotation;
-import fr.ystat.commands.ICommand;
-import fr.ystat.commands.ICommandParser;
 import fr.ystat.parser.exceptions.ParserException;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
@@ -12,7 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-import static fr.ystat.commands.server.CommandAnnotationCollector.DefaultCommandParser.getCommandName;
+import static fr.ystat.commands.CommandAnnotationCollector.DefaultCommandParser.getCommandName;
 
 public final class CommandAnnotationCollector {
 	private static final HashMap<String, Class<ICommand>> namesToCommands = initialize();
@@ -27,9 +24,10 @@ public final class CommandAnnotationCollector {
 	private static HashMap<String, Class<ICommand>> initialize() {
 		HashMap<String, Class<ICommand>> namesToCommands = new HashMap<>();
 
-		Reflections reflections = new Reflections("fr.ystat.commands", Scanners.TypesAnnotated);
+		Reflections reflections = new Reflections("fr.ystat", Scanners.TypesAnnotated);
 		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
 			try {
+				System.out.println(clazz.getName());
 				String commandName = clazz.getAnnotation(CommandAnnotation.class).name();
 				if (namesToCommands.containsKey(commandName)) {
 					throw new RuntimeException(String.format("Conflicting commands name (%s) in commands %s and %s.",
