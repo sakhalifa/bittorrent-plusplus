@@ -27,7 +27,7 @@ public final class CommandAnnotationCollector {
 		Reflections reflections = new Reflections("fr.ystat", Scanners.TypesAnnotated);
 		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
 			try {
-				System.out.println(clazz.getName());
+//				System.out.println(clazz.getName());
 				String commandName = clazz.getAnnotation(CommandAnnotation.class).name();
 				if (namesToCommands.containsKey(commandName)) {
 					throw new RuntimeException(String.format("Conflicting commands name (%s) in commands %s and %s.",
@@ -56,7 +56,7 @@ public final class CommandAnnotationCollector {
 	public static ICommand beginParsing(String input) throws ParserException {
 		input = input.trim();
 		String commandName = getCommandName(input);
-		System.out.println("Command name : " + commandName);
+//		System.out.println("Command name : " + commandName);
 		return getCommandParser(commandName).parse(input);
 	}
 

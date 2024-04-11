@@ -13,27 +13,9 @@ import java.security.NoSuchAlgorithmException;
 
 public abstract class StockedFile {
     @Getter
-    protected final String hash;
-    protected final long pieceSize;  // Size in bytes
-    protected final long totalSize;  // Size in bytes
-    protected final String name;
-
-    public StockedFile(String name, long totalByteSize, long pieceByteSize, String hash) throws IllegalArgumentException {
-        this.hash = hash;
-        if (pieceByteSize <= 0) {
-            throw new IllegalArgumentException("File piece size must be greater than 1 byte.");
-        }
-        if (totalByteSize <= 0) {
-            throw new IllegalArgumentException("File total size must be greater than 1 byte.");
-        }
-        this.pieceSize = pieceByteSize;
-        this.totalSize = totalByteSize;
-
-        if (name.contains("/")) {
-            throw new IllegalArgumentException("File name contains invalid characters! {/}");
-        }
-
-        this.name = name;
+    private final FileProperties properties;
+    public StockedFile(FileProperties properties) throws IllegalArgumentException {
+        this.properties = properties;
     }
 
     @SneakyThrows(NoSuchAlgorithmException.class)

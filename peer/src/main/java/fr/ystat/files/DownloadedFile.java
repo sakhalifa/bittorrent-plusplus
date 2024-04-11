@@ -22,13 +22,13 @@ public class DownloadedFile extends StockedFile {
     private final File parentFolder;
 
 
-    public DownloadedFile(String name, long totalByteSize, long pieceByteSize, String hash) throws IllegalArgumentException {
-        super(name, totalByteSize, pieceByteSize, hash);
+    public DownloadedFile(FileProperties properties) throws IllegalArgumentException {
+        super(properties);
 
-        int pieceAmount = (int) ((this.totalSize + this.pieceSize - 1) / this.pieceSize);
+        int pieceAmount = (int) ((this.getProperties().getSize() + this.getProperties().getPieceSize() - 1) / this.getProperties().getPieceSize());
         this.bitSet = new BitSet(pieceAmount);
         this.partitionedFiles = new File[pieceAmount];
-        parentFolder = new File(downloadFolder, name);
+        parentFolder = new File(downloadFolder, getProperties().getName());
         parentFolder.mkdir();
     }
 
@@ -69,6 +69,6 @@ public class DownloadedFile extends StockedFile {
 
     @Override
     public String toString() {
-        return this.hash;
+        return this.getProperties().getHash();
     }
 }

@@ -28,7 +28,7 @@ public class FileInventory {
 	}
 
     public void addStockedFile(StockedFile newFile) {
-        filesMap.put(newFile.getHash(), newFile);
+        filesMap.put(newFile.getProperties().getHash(), newFile);
     }
 
     public StockedFile getStockedFile(String hash) {
