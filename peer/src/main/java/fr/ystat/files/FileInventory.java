@@ -1,5 +1,7 @@
 package fr.ystat.files;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -32,4 +34,8 @@ public class FileInventory {
     public StockedFile getStockedFile(String hash) {
         return filesMap.get(hash);
     }
+
+	public Collection<StockedFile> getAllFiles() {
+		return filesMap.values();
+	}
 }
