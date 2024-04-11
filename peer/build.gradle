@@ -3,6 +3,7 @@ plugins {
     id "io.freefair.lombok" version "8.6"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'application'
+    id 'io.github.file5.guidesigner' version '1.0.2'
 }
 group = 'fr.ystat'
 version = '1.0-SNAPSHOT'
@@ -16,13 +17,15 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
-
     // https://mvnrepository.com/artifact/org.reflections/reflections
     implementation 'org.reflections:reflections:0.10.2'
+    implementation "com.jetbrains.intellij.java:java-gui-forms-rt:+"
+    //noinspection GradlePackageUpdate
+    implementation "com.jgoodies:forms:1.1-preview"
 }
 
 application {
-    mainClass = 'fr.ystat.ServerMain'
+    mainClass = 'fr.ystat.gui.GuiMain'
 }
 
 test {
