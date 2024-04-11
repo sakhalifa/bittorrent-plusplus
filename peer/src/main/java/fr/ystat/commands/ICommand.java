@@ -5,11 +5,10 @@ import fr.ystat.server.Counter;
 
 import java.io.Serializable;
 
-public interface ICommand extends Serializable {
+public interface ICommand {
 
 	String apply(Counter counter) throws CommandException;
 
-	@SuppressWarnings("unused")
 	default String serialize(){
 		return getClass().getAnnotation(CommandAnnotation.class).name();
 	}
