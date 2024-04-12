@@ -9,6 +9,6 @@ struct criteria {
 	char *value; // value to compare to
 };
 
-void parsing(char *command);
+int parsing(char *command);
 
 #endif

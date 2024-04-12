@@ -11,7 +11,6 @@ void error_command(char *error) {
 	if (error != NULL) {
 		printf("\t%s\n", error);
 	}
-	exit(1);
 }
 
 void string_to_list_key(
@@ -76,7 +75,7 @@ void string_to_list_criteria(
 	}
 }
 
-void parsing(char *command) {
+int parsing(char *command) {
 	const char *separator         = " "; // Separator in command is blank " "
 	char *right_bracket_separator = "]";
 	char *left_bracket_separator  = "[";
@@ -128,7 +127,8 @@ void parsing(char *command) {
 		string_to_list_key(leech_key, keys, &size_key, separator);
 
 		// announce_listen(port, files, size_file, keys, size_key);
-
+		fprintf(stderr, "%s", "ANNOUNCE\n");
+		return 1;
 	}
 
 	// LOOK command (search files according to specific criteria)
@@ -149,6 +149,8 @@ void parsing(char *command) {
 		int size = 0;
 		string_to_list_criteria(criterias, crit, &size, separator);
 
+		fprintf(stderr, "%s", "LOOK\n");
+		return 1;
 	}
 
 	// GETFILE command (get peers who own a specific key)
@@ -156,6 +158,8 @@ void parsing(char *command) {
 		char *key = strtok(NULL, separator);
 
 		// getfile(key);
+		fprintf(stderr, "%s", "GETFILE\n");
+		return 1;
 	}
 
 	// UPDATE command (update self seeded and leeched files)
@@ -208,15 +212,15 @@ void parsing(char *command) {
 		size += size2;
 
 		// update(list, size);
+		fprintf(stderr, "%s", "UPDATE \n");
+		return 1;
 	}
 
 	// Unknown command
 	else {
 		error_command(NULL);
+		return 0;
 	}
-}
 
-int main() {
-	char f[] = "look [filename=\"pizza\" piecesize>\"6516\"]";
-	parsing(f);
+	return 0;
 }
