@@ -32,6 +32,10 @@ public class DownloadedFile extends StockedFile {
         parentFolder.mkdir();
     }
 
+    public DownloadedFile(String name, long size, long pieceSize, String hash) {
+        this(new FileProperties(name, size, pieceSize, hash));
+    }
+
     public void addPartition(int partitionIndex, byte[] data) throws PartitionException, IOException {
         if (bitSet.get(partitionIndex)) {
             throw new PartitionException(String.format("Partition %d already present.", partitionIndex));
