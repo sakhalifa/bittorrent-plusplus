@@ -129,7 +129,6 @@ void parsing(char *command) {
 
 		// announce_listen(port, files, size_file, keys, size_key);
 
-		// announce_listen(port, files, size_file, keys, size_key);
 	}
 
 	// LOOK command (search files according to specific criteria)
