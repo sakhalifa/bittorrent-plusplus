@@ -11,8 +11,6 @@ struct file {
 	struct peer_list peers;
 };
 
-
-
 struct file * file_list[];
 int size = 0;
 

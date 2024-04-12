@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "parser.h"
+
 void error(char *msg) {
 	perror(msg);
 	exit(1);
@@ -91,9 +93,10 @@ int main(int argc, char const *argv[]) {
 						close(i);
 						FD_CLR(i, &master_fd);
 					} else {
-						if (write(STDERR_FILENO, buffer, n) < 0) {
-							perror("write");
-						}
+						if (parsing(buffer))
+							send(i, "> ok\n", 6, 0);
+						else
+							send(i, "> ko\n", 6, 0);
 					}
 				}
 			}
