@@ -50,6 +50,7 @@ enum comparator convert_char_comparator(char c) {
 	case ('>'): return GT;
 	default: error_command("Comparator unknown");
 	}
+	return 0;
 }
 
 void string_to_list_criteria(
@@ -72,7 +73,7 @@ void string_to_list_criteria(
 		crit[*size - 1]    = c;
 		criteria           = strtok_r(NULL, separator,
 		              &save_p); // set criteria to next elmt (since strtok was used, need
-		              // to reset to string)
+		// to reset to string)
 	}
 }
 
@@ -82,6 +83,9 @@ void parsing(char *command) {
 	char *left_bracket_separator  = "[";
 	char *command_name            = strtok(command, separator);
 
+	if (command_name == NULL) {
+		error_command(NULL);
+	}
 	// ANNOUNCE command (connection command to announce owned and leeched files)
 	if (strcmp(command_name, "announce") == 0) {
 		// Check if next word is "listen", otherwise error
@@ -102,8 +106,9 @@ void parsing(char *command) {
 			error_command("Missing bracket");
 		}
 
+		char * check = strtok(NULL, separator);
 		// Check if next word is "leech", otherwise error
-		if (strcmp(strtok(NULL, separator), "leech") != 0) {
+		if (check == NULL || strcmp(check, "leech") != 0) {
 			error_command(NULL);
 		}
 
@@ -128,7 +133,6 @@ void parsing(char *command) {
 		string_to_list_key(leech_key, keys, &size_key, separator);
 
 		// announce_listen(port, files, size_file, keys, size_key);
-
 	}
 
 	// LOOK command (search files according to specific criteria)
@@ -212,11 +216,12 @@ void parsing(char *command) {
 
 	// Unknown command
 	else {
+
 		error_command(NULL);
 	}
 }
 
 int main() {
-	char f[] = "look [filename=\"pizza\" piecesize>\"6516\"]";
+	char f[] = " ";
 	parsing(f);
 }
