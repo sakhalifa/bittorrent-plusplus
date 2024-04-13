@@ -5,26 +5,33 @@
 
 struct file {
 	char *name;
+	char *key;
 	int filesize;
 	int piecesize;
-	char *key;
-	struct peer_list peers;
+	int nb_peers;
+	struct peer *peers;
 };
 
-struct file * file_list[];
-int size = 0;
+/* Add a file to the list as a seeder (so all informations of
+ * the file is required). If the file is already in the list, the
+ * seeder is added in the list of peers owning the file. Check if
+ * all informations are correct.
+ */
+int add_seed(char *name, int filesize, int piecesize, char *key,
+    struct file files[], int *size, struct peer *peer);
 
+/* Add a file to the list as a leecher (so only the key is required).
+ * Check if the key exists.
+ */
+int add_leech(char *key, struct file files[], int *size, struct peer *peer);
 
-// Add a file in file_list
+// Remove a file in file_list
 // Doesn't check if file already in file_list
-int add_file(struct file file);
+int rm_file(struct file file, struct file files[], int *size);
 
-// Add a file in file_list
-// Doesn't check if file already in file_list
-int rm_file(struct file file);
-
-struct file * seek_filename(char * filename);
-
-
+/* Search a file in the list of files from its key and return a
+ * pointer if its found, else NULL.
+ */
+struct file *seek_filename(char *key, struct file files[], int *size);
 
 #endif
