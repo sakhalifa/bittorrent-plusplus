@@ -3,6 +3,6 @@
 
 #include "command.h"
 
-struct command parsing(char *command);
+struct command *parsing(char *command);
 
 #endif

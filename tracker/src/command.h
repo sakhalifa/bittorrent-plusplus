@@ -12,7 +12,7 @@ struct criteria {
 };
 
 enum command_num {
-	ANNOUNNCE,
+	ANNOUNCE,
 	LOOK,
 	GETFILE,
 	UPDATE,
@@ -32,6 +32,7 @@ struct announce {
 };
 
 struct look {
+	int nb_criteria;
 	struct criteria **criteria;
 };
 

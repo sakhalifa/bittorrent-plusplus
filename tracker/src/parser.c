@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "command.h"
 #include "file.h"
 #include "parser.h"
 
@@ -75,51 +74,53 @@ void string_to_list_criteria(
 		// to reset to string)
 	}
 }
-
-int parsing(char *command) {
+struct command *parsing(char *command) {
 	const char *separator         = " "; // Separator in command is blank " "
 	char *right_bracket_separator = "]";
 	char *left_bracket_separator  = "[";
 	char *command_name            = strtok(command, separator);
 
+	// Check command is not empty
 	if (command_name == NULL) {
 		error_command("Empty command");
 	}
+
 	// ANNOUNCE command (connection command to announce owned and leeched files)
 	if (strcmp(command_name, "announce") == 0) {
-		char * check =strtok(NULL, separator);
+
 		// Check if next word is "listen", otherwise error
+		char *check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "listen") != 0) {
 			error_command(NULL);
 		}
+
 		int port = atoi(strtok(NULL, separator));
 
-		check = strtok(NULL, separator);
 		// Check if next word is "seed", otherwise error
+		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "seed") != 0) {
 			error_command(NULL);
 		}
 
 		char *string_files = strtok(NULL, right_bracket_separator);
-
 		// Check left Bracket for files
 		if (string_files[0] != '[') {
 			error_command("Missing bracket");
 		}
 
-		check = strtok(NULL, separator);
 		// Check if next word is "leech", otherwise error
+		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "leech") != 0) {
 			error_command(NULL);
 		}
 
 		char *leech_key = strtok(NULL, right_bracket_separator);
-
 		// Check left Bracket for leech
 		if (leech_key[0] != '[') {
 			error_command("Missing bracket");
 		}
 
+		// Remove left brackets
 		string_files = strtok(string_files, left_bracket_separator);
 		leech_key    = strtok(leech_key, left_bracket_separator);
 
@@ -128,14 +129,25 @@ int parsing(char *command) {
 		int size_file       = 0;
 		string_to_list_file(string_files, files, &size_file, separator);
 
+
 		// Get leeched keys
-		char **keys  = malloc(sizeof(char *)); // TO BE FREED (and its elements)
+		char **keys  = malloc(sizeof(char *));
 		int size_key = 0;
 		string_to_list_key(leech_key, keys, &size_key, separator);
 
-		// announce_listen(port, files, size_file, keys, size_key);
-		fprintf(stderr, "%s", "ANNOUNCE\n");
-		return 1;
+		struct command *command = malloc(sizeof(struct command));
+
+		struct announce *arg = malloc(sizeof(struct announce));
+
+		arg->port      = port;
+		arg->nb_file   = size_file;
+		arg->file_list = files;
+		arg->nb_key    = size_key;
+		arg->key_list  = keys;
+
+		command->command_name = ANNOUNCE;
+		command->command_arg  = (void *)arg;
+		return command;
 	}
 
 	// LOOK command (search files according to specific criteria)
@@ -156,23 +168,39 @@ int parsing(char *command) {
 		int size = 0;
 		string_to_list_criteria(criterias, crit, &size, separator);
 
-		fprintf(stderr, "%s", "LOOK\n");
-		return 1;
+		struct command *command = malloc(sizeof(struct command));
+
+		struct look *arg = malloc(sizeof(struct look));
+
+		arg->nb_criteria = size;
+		arg->criteria    = crit;
+
+		command->command_name = LOOK;
+		command->command_arg  = (void *)arg;
+
+		return command;
 	}
 
 	// GETFILE command (get peers who own a specific key)
 	else if (strcmp(command_name, "getfile") == 0) {
 		char *key = strtok(NULL, separator);
 
-		// getfile(key);
-		fprintf(stderr, "%s", "GETFILE\n");
-		return 1;
+		struct command *command = malloc(sizeof(struct command));
+
+		struct getfile *arg = malloc(sizeof(struct getfile));
+
+		arg->key = strdup(key);
+
+		command->command_name = GETFILE;
+		command->command_arg  = (void *)arg;
+
+		return command;
 	}
 
 	// UPDATE command (update self seeded and leeched files)
 	else if (strcmp(command_name, "update") == 0) {
 		// Check if next word is "seed", otherwise error
-		char * check = strtok(NULL, separator);
+		char *check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "seed") != 0) {
 			error_command(NULL);
 		}
@@ -220,17 +248,25 @@ int parsing(char *command) {
 		free(list2);
 		size += size2;
 
-		// update(list, size);
-		fprintf(stderr, "%s", "UPDATE \n");
-		return 1;
+		struct command *command = malloc(sizeof(struct command));
+
+		struct update *arg = malloc(sizeof(struct update));
+
+		arg->nb_key   = size;
+		arg->key_list = list;
+
+		command->command_name = UPDATE;
+		command->command_arg  = (void *)arg;
+
+		return command;
 	}
 
 	// Unknown command
 	else {
 
 		error_command(NULL);
-		return 0;
+		return NULL;
 	}
 
-	return 0;
+	return NULL;
 }
