@@ -2,6 +2,7 @@ package fr.ystat.server.handler;
 
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
@@ -35,8 +36,8 @@ public class ClientHandler implements Runnable, Closeable {
 				inputLine = in.readLine();
 				if (inputLine == null)
 					break;
-				ICommand parsedCommand = parser.parse(inputLine);
-				outputLine = parsedCommand.apply(counter);
+				IReceivableCommand parsedCommand = parser.parse(inputLine);
+				outputLine = parsedCommand.apply();
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;

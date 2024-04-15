@@ -1,9 +1,8 @@
 package fr.ystat.tracker.commands.client;
 
-import fr.ystat.commands.CommandAnnotation;
-import fr.ystat.commands.ICommand;
-import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.files.FileInventory;
 import fr.ystat.parser.ListParser;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
@@ -18,7 +17,7 @@ import java.util.List;
 
 class PeersCommandParser implements ICommandParser {
 	@Override
-	public ICommand parse(String input) throws ParserException {
+	public IReceivableCommand parse(String input) throws ParserException {
 		String[] splitted = input.split(" ");
 		if(splitted.length < 3)
 			throw new InvalidInputException(input, "peers.badformat");
@@ -37,8 +36,9 @@ class PeersCommandParser implements ICommandParser {
 	}
 }
 
+@Getter
 @CommandAnnotation(name = "peers", parser = PeersCommandParser.class)
-public class PeersCommand implements ICommand {
+public class PeersCommand implements IReceivableCommand {
 	private final List<InetSocketAddress> peers;
 	private final String hash;
 	public PeersCommand(String hash, List<InetSocketAddress> peers){
@@ -47,13 +47,8 @@ public class PeersCommand implements ICommand {
 	}
 
 	@Override
-	public String apply(Counter counter) throws CommandException {
+	public String apply() throws CommandException {
 		// TODO: use peers ?
 		return null;
-	}
-
-	@Override
-	public String serialize() {
-		return String.format("peers %s %s", hash, SerializationUtils.listToString(peers));
 	}
 }

@@ -3,14 +3,16 @@ package fr.ystat.server.commands;
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.files.FileInventory;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.server.Counter;
 
 class InterestedCommandParser implements ICommandParser{
 	@Override
-	public ICommand parse(String input) throws ParserException {
+	public IReceivableCommand  parse(String input) throws ParserException {
 		String[] splitted = input.split(" ");
 		if (splitted.length < 2) {
 			throw new InvalidInputException(input);
@@ -36,7 +38,7 @@ public class InterestedCommand implements ICommand{
 	}
 
 	@Override
-	public String apply(Counter counter) throws CommandException {
+	public String apply() throws CommandException {
 		return this.key;
 	}
 
