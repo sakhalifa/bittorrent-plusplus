@@ -1,14 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-enum comparator { LT = -1, EQ = 0, GT = 1 };
+#include "command.h"
 
-struct criteria {
-	char *element; // Name of the criteria
-	enum comparator comp; // Comparator
-	char *value; // value to compare to
-};
-
-void parsing(char *command);
+struct command parsing(char *command);
 
 #endif
