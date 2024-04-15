@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void test_parser_getfile() {
 	printf("\t%s", __func__);
@@ -17,6 +18,8 @@ void test_parser_getfile() {
 	struct getfile *arg    = (struct getfile *)parsed->command_arg;
 	assert(strcmp(arg->key, "xq8546qzDA64") == 0);
 
+    free(arg);
+    free(parsed);
 	printf("\tOK\n");
 }
 
@@ -38,6 +41,17 @@ void test_parser_announce(){
     assert(arg->file_list[0]->piecesize == 256);
     assert(strcmp(arg->file_list[0]->key, "ImTheKey") == 0);
     assert(strcmp(arg->file_list[0]->name, "ImTheName") == 0);
+    
+    for (int i = 0; i <arg->nb_file; i++) {
+        free(arg->file_list[i]);
+    }
+    for (int i = 0; i <arg->nb_key; i++) {
+        free(arg->key_list[i]);
+    }
+    free(arg->file_list);
+    free(arg->key_list);
+    free(arg);
+    free(parsed);
 
 	printf("\tOK\n");
 }
@@ -61,6 +75,13 @@ void test_parser_look(){
     assert(strcmp(arg->criteria[1]->element, "piecesize") == 0);
     assert(strcmp(arg->criteria[1]->value, "256") == 0);
 
+    for (int i = 0; i < arg->nb_criteria; i++) {
+        free(arg->criteria[i]);
+    }
+    free(arg->criteria);
+    free(arg);
+    free(parsed);
+
 	printf("\tOK\n"); 
 }
 
@@ -82,5 +103,12 @@ void test_parser_update(){
     assert(strcmp(arg->key_list[2], "MeKey3") == 0);
     assert(strcmp(arg->key_list[3], "MeKey4") == 0);
 
+    for (int i = 0; i < arg->nb_key; i++) {
+        free(arg->key_list[i]);
+    }
+    free(arg->key_list);
+    free(arg);
+    free(parsed);
+    
 	printf("\tOK\n");
 }
