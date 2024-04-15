@@ -1,8 +1,13 @@
 package fr.ystat.util;
 
+import fr.ystat.commands.ICommand;
+import fr.ystat.commands.ISendableCommand;
+
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,5 +52,9 @@ public class SerializationUtils {
 
 	public static String streamToString(Stream<?> stream) {
 		return String.format("[%s]", stream.map(Object::toString).collect(Collectors.joining(" ")));
+	}
+
+	public static ByteBuffer toByteBuffer(ISendableCommand command){
+		return StandardCharsets.ISO_8859_1.encode(command.serialize() + "\n");
 	}
 }

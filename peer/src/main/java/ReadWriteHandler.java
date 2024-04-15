@@ -1,3 +1,5 @@
+import lombok.SneakyThrows;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -15,6 +17,7 @@ public class ReadWriteHandler implements
 		this.clientChannel = clientChannel;
 		this.messageBuilder = new StringBuilder();
 	}
+	@SneakyThrows
 	@Override
 	public void completed(
 			Integer bytesRead, Map<String, Object> actionInfo) {
@@ -24,6 +27,7 @@ public class ReadWriteHandler implements
 
 
 		if ("read".equals(action)) {
+			Thread.sleep(10 * 1000);
 			System.out.println("Called read handler");
 			System.out.println("Read " + bytesRead + " bytes!");
 			ByteBuffer buffer = (ByteBuffer) actionInfo.get("buffer");

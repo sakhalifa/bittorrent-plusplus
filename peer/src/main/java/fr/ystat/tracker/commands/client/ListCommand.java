@@ -1,18 +1,14 @@
 package fr.ystat.tracker.commands.client;
 
 import fr.ystat.commands.CommandAnnotation;
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.files.DownloadedFile;
 import fr.ystat.files.FileProperties;
-import fr.ystat.files.StockedFile;
 import fr.ystat.parser.ListParser;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
-import fr.ystat.server.Counter;
 import fr.ystat.util.Pair;
-import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.util.List;
@@ -20,7 +16,7 @@ import java.util.List;
 class ListCommandParser implements ICommandParser{
 
 	@Override
-	public ICommand parse(String input) throws ParserException {
+	public IReceivableCommand parse(String input) throws ParserException {
 		String[] splitted = input.split(" ");
 		if(splitted.length < 2)
 			throw new InvalidInputException(input, "list.badFormat");
@@ -37,22 +33,17 @@ class ListCommandParser implements ICommandParser{
 	}
 }
 
+@Getter
 @CommandAnnotation(name="list", parser = ListCommandParser.class)
-public class ListCommand implements ICommand {
-	private final List<FileProperties> files;
+public class ListCommand implements IReceivableCommand {
+	private final List<FileProperties> fileProperties;
 
-	public ListCommand(List<FileProperties> files) {
-		this.files = files;
+	public ListCommand(List<FileProperties> fileProperties) {
+		this.fileProperties = fileProperties;
 	}
 
 	@Override
-	public String apply(Counter counter) throws CommandException {
-		// TODO: use apply ?
-		return null;
-	}
-
-	@Override
-	public String serialize() {
-		return String.format("list %s", SerializationUtils.listToString(files));
+	public String apply() throws CommandException {
+		throw new UnsupportedOperationException("Cannot use apply on 'list'");
 	}
 }

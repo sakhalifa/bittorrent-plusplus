@@ -1,10 +1,10 @@
 package fr.ystat.tracker.criterions;
 
 public class FilesizeCriterion implements ICriterion{
-	private final int fileSize;
+	private final long fileSize;
 	private final ComparisonType comparisonType;
 
-	public FilesizeCriterion(int fileSize, ComparisonType comparisonType) {
+	public FilesizeCriterion(long fileSize, ComparisonType comparisonType) {
 		this.fileSize = fileSize;
 		this.comparisonType = comparisonType;
 	}

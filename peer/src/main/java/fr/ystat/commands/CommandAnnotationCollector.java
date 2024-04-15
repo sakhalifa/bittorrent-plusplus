@@ -12,7 +12,7 @@ import java.util.HashMap;
 import static fr.ystat.commands.CommandAnnotationCollector.DefaultCommandParser.getCommandName;
 
 public final class CommandAnnotationCollector {
-	private static final HashMap<String, Class<ICommand>> namesToCommands = initialize();
+	private static final HashMap<String, Class<IReceivableCommand>> namesToCommands = initialize();
 
 
 	/**
@@ -21,8 +21,8 @@ public final class CommandAnnotationCollector {
 	 *
 	 * @return HashMap of command names to their corresponding class command.
 	 */
-	private static HashMap<String, Class<ICommand>> initialize() {
-		HashMap<String, Class<ICommand>> namesToCommands = new HashMap<>();
+	private static HashMap<String, Class<IReceivableCommand>> initialize() {
+		HashMap<String, Class<IReceivableCommand>> namesToCommands = new HashMap<>();
 
 		Reflections reflections = new Reflections("fr.ystat", Scanners.TypesAnnotated);
 		for (var clazz :  reflections.getTypesAnnotatedWith(CommandAnnotation.class)) {
@@ -33,7 +33,7 @@ public final class CommandAnnotationCollector {
 					throw new RuntimeException(String.format("Conflicting commands name (%s) in commands %s and %s.",
 							commandName, clazz.getName(), namesToCommands.get(commandName).getName()));
 				}
-				namesToCommands.put(commandName, (Class<ICommand>) clazz);
+				namesToCommands.put(commandName, (Class<IReceivableCommand>) clazz);
 			} catch (ClassCastException ignored) {}
 		}
 		return namesToCommands;
@@ -41,19 +41,19 @@ public final class CommandAnnotationCollector {
 
 	@SneakyThrows
 	private static ICommandParser getCommandParser(String commandName) throws ParserException {
-		Class<ICommand> commandClass = getCommandClass(commandName);
+		Class<IReceivableCommand> commandClass = getCommandClass(commandName);
 		var ctor = commandClass.getAnnotation(CommandAnnotation.class).parser().getDeclaredConstructor();
 		ctor.setAccessible(true);
 		return ctor.newInstance();
 	}
 
-	private static Class<ICommand> getCommandClass(String commandName) throws ParserException {
-		Class<ICommand> commandClass = namesToCommands.get(commandName);
+	private static Class<IReceivableCommand> getCommandClass(String commandName) throws ParserException {
+		Class<IReceivableCommand> commandClass = namesToCommands.get(commandName);
 		if (commandClass == null) throw new ParserException(String.format("Unable to find command %s", commandName));
 		return commandClass;
 	}
 
-	public static ICommand beginParsing(String input) throws ParserException {
+	public static IReceivableCommand beginParsing(String input) throws ParserException {
 		input = input.trim();
 		String commandName = getCommandName(input);
 //		System.out.println("Command name : " + commandName);
@@ -62,11 +62,11 @@ public final class CommandAnnotationCollector {
 
 	public static class DefaultCommandParser implements ICommandParser {
 		@Override
-		public ICommand parse(String input) throws ParserException {
+		public IReceivableCommand parse(String input) throws ParserException {
 			String commandName = getCommandName(input);
-			Class<ICommand> commandClass = getCommandClass(commandName);
+			Class<IReceivableCommand> commandClass = getCommandClass(commandName);
 			try {
-				Constructor<ICommand> constructor = commandClass.getConstructor();
+				Constructor<IReceivableCommand> constructor = commandClass.getConstructor();
 
 				return constructor.newInstance();
 

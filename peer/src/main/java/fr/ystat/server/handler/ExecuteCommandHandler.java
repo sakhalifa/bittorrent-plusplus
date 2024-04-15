@@ -1,6 +1,7 @@
 package fr.ystat.server.handler;
 
 import fr.ystat.commands.ICommand;
+import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.parser.exceptions.ParserException;
@@ -41,8 +42,8 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 
 	public void execute(String input) {
 		try {
-			ICommand command = CommandAnnotationCollector.beginParsing(input);
-			String response = command.apply(counter);
+			IReceivableCommand command = CommandAnnotationCollector.beginParsing(input);
+			String response = command.apply();
 			clientChannel.write(StandardCharsets.ISO_8859_1.encode(response + "\n"), null, this);
 		} catch (ParserException e) {
 			ByteBuffer toWrite = StandardCharsets.ISO_8859_1.encode("PARSER ERROR: " + e.getMessage() + "\n");

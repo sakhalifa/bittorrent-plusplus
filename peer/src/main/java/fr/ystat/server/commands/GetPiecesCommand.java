@@ -3,7 +3,9 @@ package fr.ystat.server.commands;
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
+import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.files.FileInventory;
 import fr.ystat.parser.ListParser;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
@@ -15,7 +17,7 @@ import java.util.List;
 class GetPiecesParser implements ICommandParser{
 
 	@Override
-	public ICommand parse(String input) throws ParserException {
+	public IReceivableCommand parse(String input) throws ParserException {
 		String[] splitted = input.split(" ");
 		if (splitted.length < 3) {
 			throw new InvalidInputException(input);
@@ -37,7 +39,7 @@ class GetPiecesParser implements ICommandParser{
 }
 
 @CommandAnnotation(name = "getpieces", parser = GetPiecesParser.class)
-public class GetPiecesCommand implements ICommand{
+public class GetPiecesCommand implements ICommand {
 	private final String key;
 	private final List<Integer> indexes;
 
@@ -46,12 +48,7 @@ public class GetPiecesCommand implements ICommand{
 		this.indexes = indexes;
 	}
 	@Override
-	public String apply(Counter counter) throws CommandException {
+	public String apply() throws CommandException {
 		return this.key + " " + this.indexes;
-	}
-
-	@Override
-	public String serialize() {
-		return ICommand.super.serialize();
 	}
 }
