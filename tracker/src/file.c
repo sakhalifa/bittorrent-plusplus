@@ -9,14 +9,14 @@ int add_seed(char *name, int filesize, int piecesize, char *key,
 	struct file *file = seek_filename(key, files, size);
 	if (file == NULL) {
 		*size += 1;
-		files                 = realloc(files, sizeof(struct file) * *size);
-		files[*size - 1].name = strdup(name);
-		files[*size - 1].key         = strdup(key);
-		files[*size - 1].nb_peers    = 1;
-		files[*size - 1].piecesize   = piecesize;
-		files[*size - 1].filesize    = filesize;
-		files[*size - 1].peers       = malloc(sizeof(struct peer));
-		files[*size - 1].peers[0]    = *peer;
+		files                     = realloc(files, sizeof(struct file) * *size);
+		files[*size - 1].name     = strdup(name);
+		files[*size - 1].key      = strdup(key);
+		files[*size - 1].nb_peers = 1;
+		files[*size - 1].piecesize = piecesize;
+		files[*size - 1].filesize  = filesize;
+		files[*size - 1].peers     = malloc(sizeof(struct peer));
+		files[*size - 1].peers[0]  = *peer;
 		return 1;
 	}
 

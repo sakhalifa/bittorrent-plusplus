@@ -27,6 +27,8 @@ class ListCommandParser implements ICommandParser{
 			long length = Long.parseLong(lst[idx+1]);
 			long pieceSize = Long.parseLong(lst[idx+2]);
 			String hash = lst[idx+3];
+			if(hash.length() != 32)
+				throw new InvalidInputException(input, "list.badElFormat." + idx + ".badHashLength");
 			return new Pair<>(new FileProperties(filename, length, pieceSize, hash), 4);
 		})).parse(input.substring("list".length() + 1 + 1, input.length()-1));
 		return new ListCommand(files);
