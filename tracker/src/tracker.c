@@ -40,7 +40,7 @@ int main(int argc, char const *argv[]) {
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr =
-	    inet_addr("127.0.0.1"); // TODO: set to config settings instead
+	    inet_addr("0.0.0.0"); // TODO: set to config settings instead
 	serv_addr.sin_port = htons(port);
 
 	if (bind(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
@@ -94,9 +94,9 @@ int main(int argc, char const *argv[]) {
 						FD_CLR(i, &master_fd);
 					} else {
 						if (parsing(buffer))
-							send(i, "> ok\n", 6, 0);
+							send(i, "ok\n", 4, 0);
 						else
-							send(i, "> ko\n", 6, 0);
+							send(i, "ko\n", 4, 0);
 					}
 				}
 			}
