@@ -26,7 +26,7 @@ struct command {
 struct announce {
 	int port;
 	int nb_file;
-	struct file **file_list;
+	struct file *file_list;
 	int nb_key;
 	char **key_list;
 };
