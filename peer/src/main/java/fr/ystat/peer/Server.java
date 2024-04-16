@@ -1,7 +1,8 @@
-package fr.ystat.server;
+package fr.ystat.peer;
 
 import fr.ystat.config.GlobalConfiguration;
-import fr.ystat.server.handler.ConnectionHandler;
+import fr.ystat.handlers.ConnectionHandler;
+import fr.ystat.peer.Counter;
 import lombok.Getter;
 
 import java.io.IOException;

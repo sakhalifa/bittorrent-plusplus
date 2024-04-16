@@ -1,7 +1,7 @@
-package fr.ystat.server.handler;
+package fr.ystat.peer.seeder.handlers;
 
 import fr.ystat.config.GlobalConfiguration;
-import fr.ystat.server.Counter;
+import fr.ystat.peer.Counter;
 import lombok.SneakyThrows;
 
 import java.nio.ByteBuffer;
@@ -9,7 +9,7 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.StandardCharsets;
 
-import static fr.ystat.server.handler.ConnectionHandler.BUFFER_SIZE;
+import static fr.ystat.handlers.ConnectionHandler.BUFFER_SIZE;
 
 public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer> {
 	private final AsynchronousSocketChannel clientChannel;

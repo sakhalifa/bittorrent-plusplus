@@ -1,10 +1,8 @@
-package fr.ystat.tracker.handlers;
+package fr.ystat.handlers;
 
 import fr.ystat.commands.CommandAnnotationCollector;
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.config.GlobalConfiguration;
-import fr.ystat.server.Counter;
 import lombok.SneakyThrows;
 
 import java.nio.ByteBuffer;
@@ -13,7 +11,7 @@ import java.nio.channels.CompletionHandler;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-import static fr.ystat.server.handler.ConnectionHandler.BUFFER_SIZE;
+import static fr.ystat.handlers.ConnectionHandler.BUFFER_SIZE;
 
 public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer> {
 	private final AsynchronousSocketChannel clientChannel;
