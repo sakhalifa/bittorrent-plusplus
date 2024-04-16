@@ -1,9 +1,6 @@
 package fr.ystat.peer.commands;
 
-import fr.ystat.commands.CommandAnnotation;
-import fr.ystat.commands.ICommand;
-import fr.ystat.commands.ICommandParser;
-import fr.ystat.commands.IReceivableCommand;
+import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.ListParser;
 import fr.ystat.parser.exceptions.InvalidInputException;
@@ -20,19 +17,11 @@ class GetPiecesParser implements ICommandParser{
 		if (splitted.length < 3) {
 			throw new InvalidInputException(input);
 		}
-		if(!input.matches("getpieces [a-z0-9]{32} \\[[0-9]+( [0-9]+)*]")){
-			throw new InvalidInputException(input);
-		}
-		ListParser<Integer> indexListParser = new ListParser<>((integerList, idx) -> {
-			try{
-				int n = Integer.parseInt(integerList[idx]);
-				return new Pair<>(n, 1);
-			}catch(NumberFormatException ex){
-				throw new InvalidInputException(String.join(" ", integerList));
-			}
-		});
-		List<Integer> indexList = indexListParser.parse(input.substring("getpieces".length() + 32 + 2 + 1, input.length() - 1));
-		return new GetPiecesCommand(splitted[1], indexList);
+
+		String fileHash = ParserUtils.parseKeyCheck(splitted[1]);
+		List<Integer> indexList = ParserUtils.parseBufferMap(splitted[2]);
+
+		return new GetPiecesCommand(fileHash, indexList);
 	}
 }
 
