@@ -20,4 +20,4 @@ test: tst_main.o tst_parser.o parser.o
 	./test
 
 clean:
-	rm *.o test
+	rm -f *.o test
