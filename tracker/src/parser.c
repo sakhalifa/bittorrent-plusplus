@@ -25,17 +25,15 @@ void string_to_list_key(
 }
 
 void string_to_list_file(
-    char *string, struct file *files[], int *size, const char *separator) {
+    char *string, struct file files[], int *size, const char *separator) {
 	char *file = strtok(string, separator); // Filename
 	while (file != NULL) {
 		*size += 1;
-		files             = realloc(files, *size * sizeof(struct file *));
-		struct file *elmt = malloc(sizeof(struct file));
-		elmt->name        = strdup(file); // Copy name
-		elmt->filesize    = atoi(strtok(NULL, separator)); // Copy filesize
-		elmt->piecesize   = atoi(strtok(NULL, separator)); // Copy piecesize
-		elmt->key         = strdup(strtok(NULL, separator)); // Copy key
-		files[*size - 1]  = elmt; // store the file inside the list
+		files             = realloc(files, *size * sizeof(struct file));
+		files[*size-1].name        = strdup(file); // Copy name
+		files[*size-1].filesize    = atoi(strtok(NULL, separator)); // Copy filesize
+		files[*size-1].piecesize   = atoi(strtok(NULL, separator)); // Copy piecesize
+		files[*size-1].key         = strdup(strtok(NULL, separator)); // Copy key		files[*size - 1]  = *elmt; // store the file inside the list
 
 		file = strtok(NULL, separator);
 	}
@@ -125,7 +123,7 @@ struct command *parsing(char *command) {
 		leech_key    = strtok(leech_key, left_bracket_separator);
 
 		// Get owned files
-		struct file **files = malloc(sizeof(struct file *));
+		struct file *files = malloc(sizeof(struct file ));
 		int size_file       = 0;
 		string_to_list_file(string_files, files, &size_file, separator);
 

@@ -37,14 +37,11 @@ void test_parser_announce(){
     assert(arg->nb_key == 2);
     assert(strcmp(arg->key_list[0], "Key2") == 0);
     assert(strcmp(arg->key_list[1], "key3") == 0);
-    assert(arg->file_list[0]->filesize == 1024);
-    assert(arg->file_list[0]->piecesize == 256);
-    assert(strcmp(arg->file_list[0]->key, "ImTheKey") == 0);
-    assert(strcmp(arg->file_list[0]->name, "ImTheName") == 0);
+    assert(arg->file_list[0].filesize == 1024);
+    assert(arg->file_list[0].piecesize == 256);
+    assert(strcmp(arg->file_list[0].key, "ImTheKey") == 0);
+    assert(strcmp(arg->file_list[0].name, "ImTheName") == 0);
     
-    for (int i = 0; i <arg->nb_file; i++) {
-        free(arg->file_list[i]);
-    }
     for (int i = 0; i <arg->nb_key; i++) {
         free(arg->key_list[i]);
     }

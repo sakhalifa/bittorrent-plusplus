@@ -43,7 +43,7 @@ void test_command_announce() {
 	f2.peers     = peers;
 
 	struct file *files2 = malloc(sizeof(struct file));
-	files2           = &f2;
+	files2              = &f2;
 
 	char **keys2 = malloc(sizeof(char *));
 	keys2[0]     = "Key3";
@@ -57,7 +57,14 @@ void test_command_announce() {
 
 	char *res = announce(arg, files, &size, &peers[0]);
 
-    assert(strcmp(res, "ok") == 0);
+	assert(strcmp(res, "ok") == 0);
+
+	free(f.key);
+	free(f.name);
+	free(f2.key);
+	free(f2.name);
+	free(files);
+	free(keys);
 
 	printf("\tOK\n");
 }
