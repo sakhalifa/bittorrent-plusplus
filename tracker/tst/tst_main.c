@@ -12,5 +12,10 @@ int main() {
 	test_parser_look();
 	test_parser_update();
 
+	// Test command.c
+    printf("TEST COMMAND\n");
+	test_command_announce();
+	test_command_getfile();
+
 	return 0;
 }
