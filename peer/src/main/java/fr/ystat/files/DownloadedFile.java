@@ -17,7 +17,7 @@ public class DownloadedFile extends StockedFile {
 
     private static final String PARTITION_BASE_NAME = "partition";
 
-    private final BitSet bitSet;
+    private final AtomicBitSet bitSet;
     private final File[] partitionedFiles;
     private final File parentFolder;
 
@@ -26,7 +26,7 @@ public class DownloadedFile extends StockedFile {
         super(properties);
 
         int pieceAmount = (int) ((this.getProperties().getSize() + this.getProperties().getPieceSize() - 1) / this.getProperties().getPieceSize());
-        this.bitSet = new BitSet(pieceAmount);
+        this.bitSet = new AtomicBitSet(pieceAmount);
         this.partitionedFiles = new File[pieceAmount];
         parentFolder = new File(downloadFolder, getProperties().getName());
         parentFolder.mkdir();
