@@ -12,14 +12,14 @@ public class ParserUtils {
         if (expectKey.matches("[a-z0-9]{32}")) {
             return expectKey;
         }
-        throw new InvalidInputException(String.format("%s is not a valid key format!", expectKey));
+        throw new InvalidInputException(expectKey, "peer.badKeyFormat");
     }
 
     public static String parseBufferMapCheck(String expectBufferMap) throws InvalidInputException {
         if (expectBufferMap.matches("\\[[0-9]+( [0-9]+)*]")) {
             return expectBufferMap;
         }
-        throw new InvalidInputException(String.format("%s is not a valid buffer map format!", expectBufferMap));
+        throw new InvalidInputException(expectBufferMap, "list.badElFormat");
     }
 
     public static List<Integer> parseBufferMap(String expectedBufferMap) throws ParserException {
