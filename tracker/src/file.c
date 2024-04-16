@@ -10,15 +10,13 @@ int add_seed(char *name, int filesize, int piecesize, char *key,
 	if (file == NULL) {
 		*size += 1;
 		files                 = realloc(files, sizeof(struct file) * *size);
-		struct file *new_file = malloc(sizeof(struct file));
-		new_file->name        = strdup(name);
-		new_file->key         = strdup(key);
-		new_file->nb_peers    = 1;
-		new_file->piecesize   = piecesize;
-		new_file->filesize    = filesize;
-		new_file->peers       = malloc(sizeof(struct peer));
-		new_file->peers[0]    = *peer;
-		files[*size - 1]      = *new_file;
+		files[*size - 1].name = strdup(name);
+		files[*size - 1].key         = strdup(key);
+		files[*size - 1].nb_peers    = 1;
+		files[*size - 1].piecesize   = piecesize;
+		files[*size - 1].filesize    = filesize;
+		files[*size - 1].peers       = malloc(sizeof(struct peer));
+		files[*size - 1].peers[0]    = *peer;
 		return 1;
 	}
 
