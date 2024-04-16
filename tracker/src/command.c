@@ -5,6 +5,7 @@
 
 char *announce(
     struct announce arg, struct file files[], int *nb_file, struct peer *peer) {
+	peer->port = arg.port;
 	for (int i = 0; i < arg.nb_file; i++) {
 		add_seed(arg.file_list[i].name, arg.file_list[i].filesize,
 		    arg.file_list[i].piecesize, arg.file_list[i].key, files, nb_file,
