@@ -1,6 +1,7 @@
-package fr.ystat.server.handler;
+package fr.ystat.handlers;
 
-import fr.ystat.server.Server;
+import fr.ystat.peer.Server;
+import fr.ystat.peer.seeder.handlers.ReadCommandHandler;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;

@@ -1,6 +1,5 @@
-package fr.ystat.tracker.handlers;
+package fr.ystat.handlers;
 
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.ISendableCommand;
 import fr.ystat.util.SerializationUtils;
@@ -8,7 +7,6 @@ import lombok.SneakyThrows;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 public final class GenericCommandHandler {

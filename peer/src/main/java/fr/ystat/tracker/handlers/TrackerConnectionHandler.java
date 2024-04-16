@@ -1,16 +1,14 @@
 package fr.ystat.tracker.handlers;
 
 import fr.ystat.Main;
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.OkCommand;
 import fr.ystat.files.FileInventory;
+import fr.ystat.handlers.GenericCommandHandler;
 import fr.ystat.tracker.commands.server.AnnounceCommand;
 
 import java.io.IOException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 
 public class TrackerConnectionHandler implements CompletionHandler<Void, AsynchronousSocketChannel> {
 
@@ -25,9 +23,7 @@ public class TrackerConnectionHandler implements CompletionHandler<Void, Asynchr
 		AnnounceCommand announce = new AnnounceCommand(Main.getConfigurationManager().getPeerPort(), FileInventory.getInstance().getAllFiles());
 //		channel.write(StandardCharsets.ISO_8859_1.encode(announce.serialize()), channel, new TrackerAnnounceHandler());
 		GenericCommandHandler.sendCommand(channel, announce, OkCommand.class,
-				(ignore) -> {
-					onConnect.run();
-				},
+				(ignore) -> onConnect.run(),
 				() -> {
 					System.err.println("Error while sending command 'announce'! Aborting");
 					try {

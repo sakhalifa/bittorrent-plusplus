@@ -1,14 +1,12 @@
-package fr.ystat.server.commands;
+package fr.ystat.peer.commands;
 
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.files.FileInventory;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
-import fr.ystat.server.Counter;
 
 class InterestedCommandParser implements ICommandParser{
 	@Override
