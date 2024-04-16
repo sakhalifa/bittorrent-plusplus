@@ -8,7 +8,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "command.h"
 #include "parser.h"
+
+#define MAX_PEER 10
 
 void error(char *msg) {
 	perror(msg);
@@ -40,13 +43,13 @@ int main(int argc, char const *argv[]) {
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr =
-	    inet_addr("127.0.0.1"); // TODO: set to config settings instead
+	    inet_addr("0.0.0.0"); // TODO: set to config settings instead
 	serv_addr.sin_port = htons(port);
 
 	if (bind(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 		error("ERROR binding");
 
-	if (listen(socketfd, 10) == -1) {
+	if (listen(socketfd, MAX_PEER) == -1) {
 		perror("listen");
 		exit(3);
 	}
@@ -57,6 +60,9 @@ int main(int argc, char const *argv[]) {
 
 	int n;
 	char buffer[256];
+	struct file* files = malloc(sizeof(struct file));
+	struct peer* peers[MAX_PEER+3];
+	int nb_file = 0;
 
 	// main loop
 	for (;;) {
@@ -70,8 +76,8 @@ int main(int argc, char const *argv[]) {
 				if (i == socketfd) {
 					// handle new connections
 					int addrlen = sizeof cli_addr;
-					int newfd   = accept(
-                        socketfd, (struct sockaddr *)&cli_addr, &addrlen);
+					int newfd   = accept(socketfd, (struct sockaddr *)&cli_addr,
+					      (socklen_t *)&addrlen);
 					if (newfd == -1) {
 						perror("accept");
 					} else {
@@ -80,6 +86,9 @@ int main(int argc, char const *argv[]) {
 							fdmax = newfd;
 							fprintf(stderr, "tracker: socket %d connected\n",
 							    newfd);
+							struct peer* p;
+							p->ip = inet_ntoa(cli_addr.sin_addr);
+							peers[i] = p;
 						}
 					}
 				} else {
@@ -93,9 +102,25 @@ int main(int argc, char const *argv[]) {
 						close(i);
 						FD_CLR(i, &master_fd);
 					} else {
-						if (parsing(buffer))
-							send(i, "> ok\n", 6, 0);
-						else
+						struct command *c;
+						if ((c = parsing(buffer)) != NULL) {
+							switch (c->command_name) {
+							case ANNOUNCE:
+								char* response = announce(*(struct announce*)c->command_arg, files, &nb_file, peers[i]);
+								send(i, response, strlen(response), 0);
+								break;
+							case LOOK:
+								/* code */
+								break;
+							case GETFILE:
+								/* code */
+								break;
+							case UPDATE:
+								/* code */
+								break;
+							default: break;
+							}
+						} else
 							send(i, "> ko\n", 6, 0);
 					}
 				}

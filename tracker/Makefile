@@ -12,8 +12,8 @@ all: tracker
 %.o: $(TST_DIR)/%.c 
 	$(CC) $(CFLAGS) $< -c
 
-tracker: tracker.o parser.o
-	${CC} tracker.o parser.o -o $@
+tracker: tracker.o parser.o command.o file.o
+	${CC} $^ -o $@
 
 test: tst_main.o tst_parser.o parser.o
 	$(CC) $(CFLAGS) $^ -o $@
