@@ -27,4 +27,4 @@ tst_parser.o: ${TST_DIR}/tst_parser.c ${TST_DIR}/tst.h parser.o
 
 
 clean:
-	rm *.o test
+	rm -f *.o test
