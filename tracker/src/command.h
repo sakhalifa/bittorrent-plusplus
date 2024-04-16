@@ -45,12 +45,16 @@ struct update {
 	char **key_list;
 };
 
-void announce(struct command command, struct file files[], struct peer peer);
+char *announce(
+    struct announce arg, struct file files[], int *nb_file, struct peer *peer);
 
-void look(struct command command, struct file files[], struct peer peer);
+char *look(
+    struct look arg, struct file files[], int *nb_file, struct peer *peer);
 
-void getfile(struct command command, struct file files[], struct peer peer);
+char *getfile(
+    struct getfile arg, struct file files[], int *nb_file, struct peer *peer);
 
-void update(struct command command, struct file files[], struct peer peer);
+char *update(
+    struct update arg, struct file files[], int *nb_file, struct peer *peer);
 
 #endif
