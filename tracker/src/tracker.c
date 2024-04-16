@@ -60,24 +60,20 @@ int main(int argc, char const *argv[]) {
 
 	int n;
 	char buffer[256];
-	struct file* files = malloc(sizeof(struct file));	
-	struct peer* p = malloc(sizeof(struct peer));
-	p->ip   = "10.10.10.10";
-	p->port = 6969;
 
-	// struct peer tst_peers[1] = {p};
+	struct peer *peers[MAX_PEER + 3];
+	int* nb_file = malloc(sizeof(int));
+	*nb_file = 1;
 
-	struct file* f = malloc(sizeof(struct file));
-	f->filesize  = 1024;
-	f->piecesize = 256;
-	f->key       = strdup("ImKey");
-	f->name      = strdup("ImName");
-	f->nb_peers  = 1;
-	f->peers     = p;
-	
-	files[0] = *f;
-	struct peer* peers[MAX_PEER+3];
-	int nb_file = 1;
+	struct file *f2 = malloc(sizeof(struct file));
+	f2->filesize    = 1024;
+	f2->piecesize   = 256;
+	f2->key         = strdup("MeKey");
+	f2->name        = strdup("heheheha");
+	f2->nb_peers    = 1;
+	f2->peers       = malloc(sizeof(struct peer));
+	f2->peers->ip   = strdup("10.10.10.10");
+	f2->peers->port = 5555;
 
 	// main loop
 	for (;;) {
@@ -98,11 +94,12 @@ int main(int argc, char const *argv[]) {
 					} else {
 						FD_SET(newfd, &master_fd);
 						if (newfd > fdmax) {
-							fdmax = newfd;
-							struct peer* p = malloc(sizeof(struct peer));
-							p->ip = inet_ntoa(cli_addr.sin_addr);
-							peers[newfd] = p;
-							fprintf(stderr, "tracker: socket %d connected from ip %s\n",
+							fdmax          = newfd;
+							struct peer *p = malloc(sizeof(struct peer));
+							p->ip          = inet_ntoa(cli_addr.sin_addr);
+							peers[newfd]   = p;
+							fprintf(stderr,
+							    "tracker: socket %d connected from ip %s\n",
 							    newfd, p->ip);
 						}
 					}
@@ -118,19 +115,24 @@ int main(int argc, char const *argv[]) {
 						FD_CLR(i, &master_fd);
 					} else {
 						struct command *c;
-						char* response;
+						char *response;
+						buffer[n - 2] = '\0';
 						if ((c = parsing(buffer)) != NULL) {
 							fprintf(stderr, "%d", c->command_name);
 							switch (c->command_name) {
 							case ANNOUNCE:
-								response = announce(*(struct announce*)c->command_arg, files, &nb_file, peers[i]);
-								send(i, response, strlen(response), 0);
+								// response = announce(*(struct
+								// announce*)c->command_arg, files, &nb_file,
+								// peers[i]);
+								send(i, "slt", strlen("slt"), 0);
 								break;
 							case LOOK:
 								/* code */
 								break;
 							case GETFILE:
-								response = getfile(*(struct getfile*)c->command_arg, files, &nb_file, peers[i]);
+								struct getfile arg = *(struct getfile *)c->command_arg;
+								response =
+								    getfile(arg, f2, nb_file, f2[0].peers);
 								send(i, response, strlen(response), 0);
 								break;
 							case UPDATE:
