@@ -1,11 +1,10 @@
-package fr.ystat.server.handler;
+package fr.ystat.peer.seeder.handlers;
 
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ICommandParser;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.exceptions.ParserException;
-import fr.ystat.server.Counter;
+import fr.ystat.peer.Counter;
 
 import java.io.*;
 import java.net.Socket;
