@@ -50,6 +50,20 @@ char *getfile(
 	return res;
 }
 
+
+char *update(
+    struct update arg, struct file **files, int *nb_file, struct peer *peer) {
+	int i, j;
+	for (i = 0; i < arg.nb_key; i++) {
+		for (j = 0; i < *nb_file; i++) {
+			if (!strcmp(files[j]->name, arg.key_list[i])) {
+				add_leech(arg.key_list[i], files, nb_file, peer);
+			}
+		}
+	}
+	return "ok\n";
+}
+
 void free_criteria(struct criteria *crit) {
 	free(crit->element);
 	free(crit->value);

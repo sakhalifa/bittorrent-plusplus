@@ -5,11 +5,12 @@
 #include "file.h"
 #include "parser.h"
 
-void error_command(char *error) {
+void* error_command(char *error) {
 	printf("Error: unknown command\n");
 	if (error != NULL) {
 		printf("\t%s\n", error);
 	}
+	return NULL;
 }
 
 char **string_to_list_key(
@@ -88,7 +89,7 @@ struct command *parsing(char *command) {
 
 	// Check command is not empty
 	if (command_name == NULL) {
-		error_command("Empty command");
+		return error_command("Empty command");
 	}
 
 	// ANNOUNCE command (connection command to announce owned and leeched files)
@@ -97,7 +98,7 @@ struct command *parsing(char *command) {
 		// Check if next word is "listen", otherwise error
 		char *check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "listen") != 0) {
-			error_command(NULL);
+			return error_command(NULL);
 		}
 
 		int port = atoi(strtok(NULL, separator));
@@ -105,25 +106,25 @@ struct command *parsing(char *command) {
 		// Check if next word is "seed", otherwise error
 		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "seed") != 0) {
-			error_command(NULL);
+			return error_command(NULL);
 		}
 
 		char *string_files = strtok(NULL, right_bracket_separator);
 		// Check left Bracket for files
 		if (string_files[0] != '[') {
-			error_command("Missing bracket");
+			return error_command("Missing bracket");
 		}
 
 		// Check if next word is "leech", otherwise error
 		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "leech") != 0) {
-			error_command(NULL);
+			return error_command(NULL);
 		}
 
 		char *leech_key = strtok(NULL, right_bracket_separator);
 		// Check left Bracket for leech
 		if (leech_key[0] != '[') {
-			error_command("Missing bracket");
+			return error_command("Missing bracket");
 		}
 
 		// Remove left brackets
@@ -162,7 +163,7 @@ struct command *parsing(char *command) {
 
 		// Check left Bracket for seed
 		if (criterias[0] != '[') {
-			error_command("Missing bracket");
+			return error_command("Missing bracket");
 		}
 
 		criterias = strtok(criterias, left_bracket_separator);
@@ -207,27 +208,27 @@ struct command *parsing(char *command) {
 		// Check if next word is "seed", otherwise error
 		char *check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "seed") != 0) {
-			error_command(NULL);
+			return error_command(NULL);
 		}
 
 		char *seed_key = strtok(NULL, right_bracket_separator);
 
 		// Check left Bracket for seed
 		if (seed_key[0] != '[') {
-			error_command("Missing bracket");
+			return error_command("Missing bracket");
 		}
 
 		// Check if next word is "leech", otherwise error
 		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "leech") != 0) {
-			error_command(NULL);
+			return error_command(NULL);
 		}
 
 		char *leech_key = strtok(NULL, right_bracket_separator);
 
 		// Check left Bracket for leech
 		if (leech_key[0] != '[') {
-			error_command("Missing bracket");
+			return error_command("Missing bracket");
 		}
 
 		seed_key  = strtok(seed_key, left_bracket_separator);
@@ -261,9 +262,7 @@ struct command *parsing(char *command) {
 
 	// Unknown command
 	else {
-
-		error_command(NULL);
-		return NULL;
+		return error_command(NULL);
 	}
 
 	return NULL;

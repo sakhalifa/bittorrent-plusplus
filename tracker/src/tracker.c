@@ -74,9 +74,11 @@ int main(int argc, char const *argv[]) {
 	f2->key         = strdup("MeKey");
 	f2->name        = strdup("heheheha");
 	f2->nb_peers    = 1;
-	f2->peers       = malloc(sizeof(struct peer));
-	f2->peers->ip   = strdup("10.10.10.10");
-	f2->peers->port = 5555;
+
+	struct peer* p2 = malloc(sizeof(struct peer)); 
+	p2->ip = strdup("127.0.0.1");
+	p2->port = 3000;
+	f2->peers = &p2;
 
 	files[0] = f2;
 
@@ -129,7 +131,7 @@ int main(int argc, char const *argv[]) {
 							case ANNOUNCE:
 								response =
 								    announce(*(struct announce *)c->command_arg,
-								        files, &nb_file, peers[i]);
+								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
 								break;
 							case LOOK:
