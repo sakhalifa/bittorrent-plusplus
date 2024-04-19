@@ -2,6 +2,7 @@ package fr.ystat.peer.commands;
 
 import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 
