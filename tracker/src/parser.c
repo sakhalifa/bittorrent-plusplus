@@ -12,31 +12,34 @@ void error_command(char *error) {
 	}
 }
 
-void string_to_list_key(
+char **string_to_list_key(
     char *string, char **list, int *size, const char *separator) {
 	char *key = strtok(string, separator);
 	while (key != NULL) {
+		list        = realloc(list, sizeof(char *) * (*size + 1));
+		list[*size] = malloc(sizeof(char) * (strlen(key) + 1));
+		list[*size] = strcpy(list[*size], key);
 		*size += 1;
-		list            = realloc(list, *size * sizeof(char *));
-		list[*size - 1] = malloc(strlen(key) + 1);
-		strcpy(list[*size - 1], key);
 		key = strtok(NULL, separator);
 	}
+	return list;
 }
 
-void string_to_list_file(
-    char *string, struct file files[], int *size, const char *separator) {
+struct file ** string_to_list_file(
+    char *string, struct file **files, int *size, const char *separator) {
 	char *file = strtok(string, separator); // Filename
 	while (file != NULL) {
 		*size += 1;
-		files             = realloc(files, *size * sizeof(struct file));
-		files[*size-1].name        = strdup(file); // Copy name
-		files[*size-1].filesize    = atoi(strtok(NULL, separator)); // Copy filesize
-		files[*size-1].piecesize   = atoi(strtok(NULL, separator)); // Copy piecesize
-		files[*size-1].key         = strdup(strtok(NULL, separator)); // Copy key		files[*size - 1]  = *elmt; // store the file inside the list
+		files            = realloc(files, *size * sizeof(struct file *));
+		int filesize     = atoi(strtok(NULL, separator));
+		int piecesize    = atoi(strtok(NULL, separator));
+		char *key        = strtok(NULL, separator);
+		files[*size - 1] = create_file(file, filesize, piecesize, key);
 
+		// store the file inside the list
 		file = strtok(NULL, separator);
 	}
+	return files;
 }
 
 enum comparator convert_char_comparator(char c) {
@@ -49,7 +52,7 @@ enum comparator convert_char_comparator(char c) {
 	return 0;
 }
 
-void string_to_list_criteria(
+struct criteria ** string_to_list_criteria(
     char *string, struct criteria *crit[], int *size, const char *separator) {
 	char *save_p;
 	char *criteria = strtok_r(string, separator, &save_p);
@@ -63,15 +66,20 @@ void string_to_list_criteria(
 		c->comp =
 		    convert_char_comparator(elmt[elmt_len - 1]); // copy comparator
 		elmt[elmt_len - 1] = '\0';
-		c->element         = strdup(elmt); // copy element
-		char *value        = strtok(NULL, quote);
-		c->value           = strdup(value); // copy value
-		crit[*size - 1]    = c;
-		criteria           = strtok_r(NULL, separator,
-		              &save_p); // set criteria to next elmt (since strtok was used, need
+		c->element         = malloc(sizeof(char) * (strlen(elmt) + 1));
+		strcpy(c->element, elmt);
+		char *value = strtok(NULL, quote);
+		c->value    = malloc(sizeof(char) * (strlen(value) + 1));
+		strcpy(c->value, value);
+		crit[*size - 1] = c;
+		criteria        = strtok_r(NULL, separator,
+		           &save_p); // set criteria to next elmt (since strtok was used, need
 		// to reset to string)
 	}
+	return  crit;
 }
+
+
 struct command *parsing(char *command) {
 	const char *separator         = " "; // Separator in command is blank " "
 	char *right_bracket_separator = "]";
@@ -123,15 +131,14 @@ struct command *parsing(char *command) {
 		leech_key    = strtok(leech_key, left_bracket_separator);
 
 		// Get owned files
-		struct file *files = malloc(sizeof(struct file ));
+		struct file **files = malloc(sizeof(struct file *));
 		int size_file       = 0;
-		string_to_list_file(string_files, files, &size_file, separator);
-
+		files = string_to_list_file(string_files, files, &size_file, separator);
 
 		// Get leeched keys
 		char **keys  = malloc(sizeof(char *));
 		int size_key = 0;
-		string_to_list_key(leech_key, keys, &size_key, separator);
+		keys = string_to_list_key(leech_key, keys, &size_key, separator);
 
 		struct command *command = malloc(sizeof(struct command));
 
@@ -164,7 +171,7 @@ struct command *parsing(char *command) {
 		struct criteria **crit =
 		    malloc(sizeof(struct criteria *)); // TO BE FREED (and its elements)
 		int size = 0;
-		string_to_list_criteria(criterias, crit, &size, separator);
+		crit = string_to_list_criteria(criterias, crit, &size, separator);
 
 		struct command *command = malloc(sizeof(struct command));
 
@@ -226,25 +233,18 @@ struct command *parsing(char *command) {
 		seed_key  = strtok(seed_key, left_bracket_separator);
 		leech_key = strtok(leech_key, left_bracket_separator);
 
-		// Get owned keys
+		char *all_key =
+		    malloc(sizeof(char) * (strlen(seed_key) + strlen(leech_key) + 2));
+		strcpy(all_key, seed_key);
+		strcat(all_key, " ");
+		strcat(all_key, leech_key);
+
+		// Get all keys
 		char **list = malloc(sizeof(char *)); // TO BE FREED (and its elements)
 		int size    = 0;
-		string_to_list_key(seed_key, list, &size, separator);
+		list        = string_to_list_key(all_key, list, &size, separator);
 
-		// Get leeched keys
-		char **list2 = malloc(sizeof(char *)); // TO BE FREED (and its elements)
-		int size2    = 0;
-		string_to_list_key(leech_key, list2, &size2, separator);
-
-		// Append list2 to list
-		list = realloc(list, (size + size2) * sizeof(char *));
-		for (int i = 0; i < size2; i++) {
-			list[size + i] = malloc(strlen(list2[i]) + 1);
-			strcpy(list[size + i], list2[i]);
-			free(list2[i]);
-		}
-		free(list2);
-		size += size2;
+		free(all_key);
 
 		struct command *command = malloc(sizeof(struct command));
 
