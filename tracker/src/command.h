@@ -26,7 +26,7 @@ struct command {
 struct announce {
 	int port;
 	int nb_file;
-	struct file *file_list;
+	struct file **file_list;
 	int nb_key;
 	char **key_list;
 };
@@ -51,27 +51,31 @@ struct update {
  * pieces of informations (seeded and leeched files by the peer).
  */
 char *announce(
-    struct announce arg, struct file files[], int *nb_file, struct peer *peer);
+    struct announce arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* LOOK COMMAND :
  * used by the peer to retrieve files with specifics criterias.
  */
 char *look(
-    struct look arg, struct file files[], int *nb_file, struct peer *peer);
+    struct look arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* GETFILE COMMAND :
  * used by the peer to get all peers that own (fully or partially) a file
  * specified with a key.
  */
 char *getfile(
-    struct getfile arg, struct file files[], int *nb_file, struct peer *peer);
+    struct getfile arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* UPDATE COMMAND :
- * allow the peer to inform the tracker which new files he currently owns 
+ * allow the peer to inform the tracker which new files he currently owns
  * and leeches.
  * the tracker update its database accordingly.
-*/
+ */
 char *update(
-    struct update arg, struct file files[], int *nb_file, struct peer *peer);
+    struct update arg, struct file **files, int *nb_file, struct peer *peer);
+
+
+
+void free_criteria(struct criteria * crit);
 
 #endif

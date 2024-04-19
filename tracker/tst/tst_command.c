@@ -30,10 +30,6 @@ void test_command_announce() {
 	struct file *files = malloc(sizeof(struct file));
 	files[0]           = f;
 
-	char **keys = malloc(sizeof(char *) * 2);
-	keys[0]     = "Key1";
-	keys[1]     = "key2";
-
 	struct file f2;
 	f2.filesize  = 1024;
 	f2.piecesize = 256;
@@ -46,7 +42,7 @@ void test_command_announce() {
 	files2              = &f2;
 
 	char **keys2 = malloc(sizeof(char *));
-	keys2[0]     = "Key3";
+	keys2[0]     = "ImKey";
 
 	struct announce arg;
 	arg.port      = 6969;
@@ -64,7 +60,6 @@ void test_command_announce() {
 	free(f2.key);
 	free(f2.name);
 	free(files);
-	free(keys);
 
 	printf("\tOK\n");
 }

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Isrc/
+CFLAGS = -Wall -Isrc/ -g
 SRC_DIR = src
 TST_DIR = tst
 
@@ -16,8 +16,8 @@ tracker: tracker.o parser.o command.o file.o
 	${CC} $^ -o $@
 
 test: tst_main.o tst_parser.o tst_command.o parser.o file.o command.o
-	$(CC) $(CFLAGS) $^ -o $@
-	./test
+	$(CC) $(CFLAGS) $^ -o tst_main
+	./tst_main
 
 clean:
-	rm -f *.o test
+	rm -f *.o tst_main
