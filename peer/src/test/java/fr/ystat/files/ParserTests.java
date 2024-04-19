@@ -2,8 +2,10 @@ package fr.ystat.files;
 
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
+import fr.ystat.commands.OkCommand;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.peer.commands.DataCommand;
 import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
 import fr.ystat.peer.commands.InterestedCommand;
@@ -26,7 +28,11 @@ public class ParserTests {
         void test(Expected e, Actual a) throws Exception;
     }
 
-    private static <Expected, Actual> Stream<DynamicTest> genericTests(Map<Expected, Actual> cases, TestFunction<Expected, Actual> testExec, BiFunction<Expected, Actual, String> getTestName) {
+    private static <Expected, Actual> Stream<DynamicTest> genericTests(
+            Map<Expected, Actual> cases,
+            TestFunction<Expected, Actual> testExec,
+            BiFunction<Expected, Actual, String> getTestName
+    ) {
         return cases.entrySet()
                 .stream()
                 .map((entry) -> DynamicTest.dynamicTest(
@@ -56,7 +62,9 @@ public class ParserTests {
                 "have 012345678901234567890123456789ab [0 1 12 20]", HaveCommand.class,
 
                 "list [name 64512 1024 012345678901234567890123456789ab name 64512 1024 012345678901234567890123456789ab]", ListCommand.class,
-                "peers 012345678901234567890123456789ab [127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]", PeersCommand.class
+                "peers 012345678901234567890123456789ab [127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]", PeersCommand.class,
+                "ok", OkCommand.class,
+                "data 012345678901234567890123456789ab [TODO :D]", DataCommand.class
         );
         // Stream
         return generateParsingTests(testCases);
