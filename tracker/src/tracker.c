@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,11 +60,13 @@ int main(int argc, char const *argv[]) {
 	fdmax = socketfd;
 
 	int n;
+	int count_error[MAX_PEER];
 	char buffer[256];
+	int *nb_file = malloc(sizeof(int));
+	*nb_file     = 1;
 
+	struct file **files = malloc(sizeof(struct file *) * (*nb_file));
 	struct peer *peers[MAX_PEER + 3];
-	int* nb_file = malloc(sizeof(int));
-	*nb_file = 1;
 
 	struct file *f2 = malloc(sizeof(struct file));
 	f2->filesize    = 1024;
@@ -74,6 +77,8 @@ int main(int argc, char const *argv[]) {
 	f2->peers       = malloc(sizeof(struct peer));
 	f2->peers->ip   = strdup("10.10.10.10");
 	f2->peers->port = 5555;
+
+	files[0] = f2;
 
 	// main loop
 	for (;;) {
@@ -113,35 +118,53 @@ int main(int argc, char const *argv[]) {
 						}
 						close(i);
 						FD_CLR(i, &master_fd);
+						count_error[i] = 0;
 					} else {
 						struct command *c;
 						char *response;
 						buffer[n - 2] = '\0';
 						if ((c = parsing(buffer)) != NULL) {
-							fprintf(stderr, "%d", c->command_name);
+							count_error[i] = 0;
 							switch (c->command_name) {
 							case ANNOUNCE:
-								// response = announce(*(struct
-								// announce*)c->command_arg, files, &nb_file,
-								// peers[i]);
-								send(i, "slt", strlen("slt"), 0);
+								response =
+								    announce(*(struct announce *)c->command_arg,
+								        files, &nb_file, peers[i]);
+								send(i, response, strlen(response), 0);
 								break;
 							case LOOK:
 								/* code */
 								break;
 							case GETFILE:
-								struct getfile arg = *(struct getfile *)c->command_arg;
 								response =
-								    getfile(arg, f2, nb_file, f2[0].peers);
+								    getfile(*(struct getfile *)c->command_arg,
+								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
 								break;
 							case UPDATE:
-								/* code */
+								response =
+								    update(*(struct update *)c->command_arg,
+								        files, nb_file, peers[i]);
+								send(i, response, strlen(response), 0);
 								break;
 							default: break;
 							}
-						} else
-							send(i, "> ko\n", 6, 0);
+						} else {
+							count_error[i]++;
+							char *error_message = "Unknown command\n";
+							char *close_message = "Too many errors, connection "
+							                      "closed by the tracker\n";
+							send(i, error_message, strlen(error_message), 0);
+
+							// close connection after 3 failed attempts
+							if (count_error[i] > 2) {
+								send(
+								    i, close_message, strlen(close_message), 0);
+								FD_CLR(i, &master_fd);
+								close(i);
+								count_error[i] = 0;
+							}
+						}
 					}
 				}
 			}
