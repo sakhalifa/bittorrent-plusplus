@@ -4,6 +4,7 @@ import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.OkCommand;
 import fr.ystat.parser.exceptions.InvalidInputException;
+import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.peer.commands.DataCommand;
 import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
@@ -77,6 +78,7 @@ public class ParserTests {
             HASH(
                     "012345678901234567890123456789ab",
                     List.of(
+                            new Pair<>("", new InvalidInputException("")),  // empty hash
                             new Pair<>("012345678901234567890123456789", new InvalidInputException("")), // Bad length 30 < 32
                             new Pair<>("012345678901234567890123456789aed", new InvalidInputException("")), // Bad length 33 > 32
                             new Pair<>("012345678901234567890123456789$£", new InvalidInputException(""))  // Invalid characters '$£'
@@ -85,6 +87,7 @@ public class ParserTests {
             BUFFER_LIST(
                     "[1 2 3]",
                     List.of(
+                            new Pair<>("", new InvalidInputException("")),  // no list
                             new Pair<>("[]", new InvalidInputException("")),  // Empty list
                             new Pair<>("[", new InvalidInputException("")), // Unclosed list
                             new Pair<>("[ 1 2 3 ]", new InvalidInputException("")),  // poorly formated
@@ -94,6 +97,7 @@ public class ParserTests {
             FILE_LIST(
                     "[name 64512 1024 012345678901234567890123456789ab]",
                     List.of(
+                            new Pair<>("", new InvalidInputException("")),  // no list
                             new Pair<>("[]", new InvalidInputException("")),
                             new Pair<>("[64512 1024 012345678901234567890123456789ab]", new InvalidInputException("")),
                             new Pair<>("[name -64512 1024 012345678901234567890123456789ab]", new IllegalArgumentException()),
@@ -107,6 +111,7 @@ public class ParserTests {
             IP_LIST(
                     "[127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]",
                     List.of(
+                            new Pair<>("", new InvalidInputException("")),  // no list
                             new Pair<>("[]", new InvalidInputException("[]")),
                             new Pair<>("[127.0.0.1: 127.0.0.1:0001 127.0.0.1:0001]", new InvalidInputException("")),
                             new Pair<>("[300.0000.0.0:1000]", new InvalidInputException(""))
@@ -156,6 +161,12 @@ public class ParserTests {
                 testCases.putAll(cmdsWithError);
             }
         }
+
+        // gibberish cases
+        testCases.put("sqfdojf sdksdlfj", new ParserException(""));
+        testCases.put("", new ParserException(""));
+        testCases.put("intrested 012345678901234567890123456789ab", new ParserException(""));
+
         // Stream
         return generateParsingExceptionTests(testCases);
     }
