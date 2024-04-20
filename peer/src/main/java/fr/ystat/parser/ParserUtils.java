@@ -28,15 +28,15 @@ public class ParserUtils {
         return parseKeyCheck(expectKey, "");
     }
 
-    public static String parseBufferMapCheck(String expectBufferMap) throws InvalidInputException {
+    public static String parseBufferMapCheck(String expectBufferMap, String source) throws InvalidInputException {
         if (expectBufferMap.matches("\\[[0-9]+( [0-9]+)*]")) {
             return expectBufferMap;
         }
-        throw new InvalidInputException(expectBufferMap, "list.badElFormat");
+        throw new InvalidInputException(expectBufferMap, formatSource(source, "badElFormat"));
     }
 
-    public static List<Integer> parseBufferMap(String expectedBufferMap) throws ParserException {
-        String bufferMap = parseBufferMapCheck(expectedBufferMap);
+    public static List<Integer> parseBufferMap(String expectedBufferMap, String source) throws ParserException {
+        String bufferMap = parseBufferMapCheck(expectedBufferMap, source);
 
         ListParser<Integer> indexListParser = new ListParser<>((integerList, idx) -> {
             try{
