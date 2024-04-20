@@ -123,7 +123,7 @@ public class ParserTests {
                             new Pair<>("", new InvalidInputException("")),  // no list
                             new Pair<>("[]", new InvalidInputException("[]")),  // no entry
                             new Pair<>("[1: 2:blablabla 3:blablabla]", new InvalidInputException("")),  // invalid entry
-                            new Pair<>("[1:blablabla 1:blablabla 3:blablabla]", new IllegalArgumentException("")) // Duplicate entries
+                            new Pair<>("[1:blablabla 1:blablabla 3:blablabla]", new IllegalStateException("")) // Duplicate entries
                     )
             )
             ;
