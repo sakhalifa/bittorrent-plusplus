@@ -20,12 +20,13 @@ dependencies {
     // https://mvnrepository.com/artifact/org.reflections/reflections
     implementation 'org.reflections:reflections:0.10.2'
     implementation "com.jetbrains.intellij.java:java-gui-forms-rt:+"
-    //noinspection GradlePackageUpdate
-    implementation "com.jgoodies:forms:1.1-preview"
+    implementation 'com.google.code.gson:gson:2.10.1'
+//    //noinspection GradlePackageUpdate
+//    implementation "com.jgoodies:forms:1.1-preview"
 }
 
 application {
-    mainClass = 'fr.ystat.gui.GuiMain'
+    mainClass = 'fr.ystat.Main'
 }
 
 test {

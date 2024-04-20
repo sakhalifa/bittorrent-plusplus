@@ -3,8 +3,10 @@ package fr.ystat.handlers;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.config.GlobalConfiguration;
+import fr.ystat.parser.exceptions.ParserException;
 import lombok.SneakyThrows;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -17,12 +19,14 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	private final AsynchronousSocketChannel clientChannel;
 	private final StringBuilder messageBuilder;
 	private final Consumer<IReceivableCommand> commandConsumer;
+	private final Runnable onFailure;
 	private long readBytes;
 
 
-	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Consumer<IReceivableCommand> commandConsumer) {
+	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Consumer<IReceivableCommand> commandConsumer, Runnable onFailure) {
 		this.clientChannel = clientChannel;
 		this.commandConsumer = commandConsumer;
+		this.onFailure = onFailure;
 		this.messageBuilder = new StringBuilder();
 
 	}
@@ -34,7 +38,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	}
 
 
-	@SneakyThrows
+	@SneakyThrows(IOException.class)
 	@Override
 	public void completed(Integer bytesRead, ByteBuffer buffer) {
 		if(bytesRead == -1)
@@ -56,8 +60,12 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 			String wholeMessage = messageBuilder.toString();
 			messageBuilder.setLength(0);
 			System.out.println("Read the message :'" + wholeMessage.trim() + "'");
-			this.commandConsumer.accept(CommandAnnotationCollector.beginParsing(wholeMessage));
-			buffer.clear();
+			try {
+				this.commandConsumer.accept(CommandAnnotationCollector.beginParsing(wholeMessage));
+				buffer.clear();
+			} catch (ParserException e) {
+				this.onFailure.run();
+			}
 		}else{
 			// Still reading that message...
 			clientChannel.read(buffer, buffer, this);

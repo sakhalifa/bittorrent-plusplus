@@ -30,7 +30,7 @@ public final class GenericCommandHandler {
 						return;
 					}
 					onFinished.accept(expectedReturnCommandClass.cast(cmd));
-				});
+				}, onFailed);
 				v.startReading();
 			}
 
