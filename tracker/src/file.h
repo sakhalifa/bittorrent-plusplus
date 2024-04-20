@@ -17,12 +17,12 @@ struct file {
  * seeder is added in the list of peers owning the file. Check if
  * all informations are correct.
  */
-int add_seed(struct file *f, struct file **files, int *size, struct peer *peer);
+struct file ** add_seed(struct file *f, struct file **files, int *size, struct peer *peer);
 
 /* Add a file to the list as a leecher (so only the key is required).
  * Check if the key exists.
  */
-int add_leech(char *key, struct file **files, int *size, struct peer *peer);
+struct file ** add_leech(char *key, struct file **files, int *size, struct peer *peer);
 
 /* Search a file in the list of files from its key and return a
  * pointer if its found, else NULL.

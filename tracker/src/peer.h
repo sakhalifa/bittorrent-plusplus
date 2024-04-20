@@ -14,4 +14,9 @@ struct peer {
 	unsigned short port;
 };
 
+
+struct peer * create_peer(char * ip, int port);
+
+void free_peer(struct peer * p);
+
 #endif

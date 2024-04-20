@@ -7,12 +7,11 @@ char *announce(
     struct announce arg, struct file **files, int *nb_file, struct peer *peer) {
 	peer->port = arg.port;
 	for (int i = 0; i < arg.nb_file; i++) {
-		add_seed(arg.file_list[i], files, nb_file, peer);
+		files = add_seed(arg.file_list[i], files, nb_file, peer);
 	}
 	for (int i = 0; i < arg.nb_key; i++) {
-		add_leech(arg.key_list[i], files, nb_file, peer);
+		files = add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-
 	return "ok";
 }
 
@@ -49,7 +48,6 @@ char *getfile(
 
 	return res;
 }
-
 
 char *update(
     struct update arg, struct file **files, int *nb_file, struct peer *peer) {

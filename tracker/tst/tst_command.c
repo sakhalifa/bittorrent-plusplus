@@ -8,57 +8,59 @@
 void test_command_announce() {
 	printf("\t%s", __func__);
 
-	struct peer p;
-	p.ip   = "10.10.10.10";
-	p.port = 6969;
+	int nb_files        = 2;
+	struct file **files = malloc(sizeof(struct file *) * nb_files);
+	files[0]            = create_file("Name1", 1024, 256, "Key1");
+	files[0]->nb_peers  = 2;
+	files[0]->peers     = malloc(sizeof(struct peer *) * files[0]->nb_peers);
+	files[0]->peers[0]  = create_peer("5.5.5.5", 5555);
+	files[0]->peers[1]  = create_peer("0.0.0.0", 6969);
+	files[1]            = create_file("Name2", 2048, 32, "Key2");
+	files[1]->nb_peers  = 1;
+	files[1]->peers     = malloc(sizeof(struct peer *) * files[1]->nb_peers);
+	files[1]->peers[0]  = create_peer("0.0.0.0", 6969);
 
-	struct peer p2;
-	p2.ip   = "Heheheha";
-	p2.port = 727;
+	struct peer *p3 = create_peer("je suis une ip", 1234);
 
-	struct peer peers[2] = {p, p2};
+	struct announce *arg = malloc(sizeof(struct announce));
+	arg->port            = 1234;
+	arg->nb_file         = 2;
+	arg->file_list       = malloc(sizeof(struct file *) * arg->nb_file);
+	arg->file_list[0]    = create_file("Name1", 1024, 256, "Key1");
+	arg->file_list[1]    = create_file("Name3", 4096, 64, "Key3");
+	arg->nb_key          = 1;
+	arg->key_list        = malloc(sizeof(char *) * arg->nb_key);
+	arg->key_list[0]     = malloc(sizeof(char) * (strlen("Key2") + 1));
+	arg->key_list[0]     = strcpy(arg->key_list[0], "Key2");
 
-	struct file f;
-	f.filesize  = 1024;
-	f.piecesize = 256;
-	f.key       = strdup("ImKey");
-	f.name      = strdup("ImName");
-	f.nb_peers  = 2;
-	f.peers     = peers;
-
-	int size           = 1;
-	struct file *files = malloc(sizeof(struct file));
-	files[0]           = f;
-
-	struct file f2;
-	f2.filesize  = 1024;
-	f2.piecesize = 256;
-	f2.key       = strdup("ImKey2");
-	f2.name      = strdup("ImName2");
-	f2.nb_peers  = 2;
-	f2.peers     = peers;
-
-	struct file *files2 = malloc(sizeof(struct file));
-	files2              = &f2;
-
-	char **keys2 = malloc(sizeof(char *));
-	keys2[0]     = "ImKey";
-
-	struct announce arg;
-	arg.port      = 6969;
-	arg.nb_file   = 1;
-	arg.file_list = files2;
-	arg.key_list  = keys2;
-	arg.nb_key    = 1;
-
-	char *res = announce(arg, files, &size, &peers[0]);
+	char *res = announce(*arg, files, &nb_files, p3);
 
 	assert(strcmp(res, "ok") == 0);
+	assert(p3->port == 1234);
+	assert(nb_files == 3);
+	assert(files[0]->nb_peers == 3);
+	assert(files[0]->peers[2]->port == 1234);
+	assert(strcmp(files[0]->peers[2]->ip, "je suis une ip") == 0);
+	assert(files[2]->filesize == 4096);
+	assert(files[2]->nb_peers == 1);
+	assert(files[2]->peers[0]->port == 1234);
+	assert(strcmp(files[2]->peers[0]->ip, "je suis une ip") == 0);
+	assert(files[1]->nb_peers == 2);
 
-	free(f.key);
-	free(f.name);
-	free(f2.key);
-	free(f2.name);
+
+	free_peer(p3);
+	for (int i = 0; i < arg->nb_file; i++) {
+		free_file(arg->file_list[i]);
+	}
+	free(arg->file_list);
+	for (int i = 0; i < arg->nb_key; i++) {
+		free(arg->key_list[i]);
+	}
+	free(arg->key_list);
+	free(arg);
+	for (int i = 0; i < nb_files; i++) {
+		free_file(files[i]);
+	}
 	free(files);
 
 	printf("\tOK\n");
@@ -67,38 +69,36 @@ void test_command_announce() {
 void test_command_getfile() {
 	printf("\t%s", __func__);
 
-	char *key = "ImTheKey";
-	struct getfile arg;
-	arg.key = strdup(key);
+	int nb_files        = 2;
+	struct file **files = malloc(sizeof(struct file *) * nb_files);
+	files[0]            = create_file("Name1", 1024, 256, "Key1");
+	files[0]->nb_peers  = 2;
+	files[0]->peers     = malloc(sizeof(struct peer *) * files[0]->nb_peers);
+	files[0]->peers[0]  = create_peer("5.5.5.5", 5555);
+	files[0]->peers[1]  = create_peer("0.0.0.0", 6969);
+	files[1]            = create_file("Name2", 2048, 32, "Key2");
+	files[1]->nb_peers  = 1;
+	files[1]->peers     = malloc(sizeof(struct peer *) * files[1]->nb_peers);
+	files[1]->peers[0]  = create_peer("0.0.0.0", 6969);
 
-	struct peer p;
-	p.ip   = "10.10.10.10";
-	p.port = 6969;
+	struct getfile *arg = malloc(sizeof(struct getfile));
+	arg->key            = malloc(sizeof(char) * (strlen("Key1") + 1));
+	arg->key            = strcpy(arg->key, "Key1");
 
-	struct peer p2;
-	p2.ip   = "Heheheha";
-	p2.port = 727;
+	struct peer *p3 = create_peer("0.0.0.0", 1234);
 
-	struct peer peers[2] = {p, p2};
+	char *res = getfile(*arg, files, &nb_files, p3);
 
-	struct file f;
-	f.filesize  = 1024;
-	f.piecesize = 256;
-	f.key       = strdup(key);
-	f.name      = "ImName";
-	f.nb_peers  = 2;
-	f.peers     = peers;
-
-	int size           = 1;
-	struct file *files = malloc(sizeof(struct file));
-	files[0]           = f;
-
-	char *res = getfile(arg, files, &size, &p);
-	assert(strcmp(res, "peers ImTheKey [10.10.10.10:6969 Heheheha:727]") == 0);
+	assert(strcmp(res, "peers Key1 [5.5.5.5:5555 0.0.0.0:6969]") == 0);
 
 	free(res);
-	free(arg.key);
-	free(f.key);
+	free_peer(p3);
+	free(arg->key);
+	free(arg);
+	for (int i = 0; i < nb_files; i++) {
+		free_file(files[i]);
+	}
 	free(files);
+
 	printf("\tOK\n");
 }

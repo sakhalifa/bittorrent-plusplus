@@ -4,41 +4,43 @@
 
 #include "file.h"
 
-int add_seed(
+struct file **add_seed(
     struct file *f, struct file **files, int *size, struct peer *peer) {
 	struct file *file = seek_filename(f->key, files, size);
 	if (file == NULL) {
 		*size += 1;
-		files                 = realloc(files, sizeof(struct file *) * (*size));
-		files[*size - 1] = f;
-		f->peers = malloc(sizeof(struct peer *));
-		f->peers[0] = peer;
-		return 1;
+		files = realloc(files, sizeof(struct file *) * (*size));
+		files[*size - 1] =
+		    create_file(f->name, f->filesize, f->piecesize, f->key);
+		files[*size - 1]->peers    = malloc(sizeof(struct peer *));
+		files[*size - 1]->peers[0] = create_peer(peer->ip, peer->port);
+		files[*size - 1]->nb_peers = 1;
+		return files;
 	}
 
 	// check if file already existing has same information
-	if (strcmp(file->name, f->name) == 0 || file->filesize != f->filesize ||
+	if (strcmp(file->name, f->name) != 0 || file->filesize != f->filesize ||
 	    file->piecesize != f->piecesize) {
-		return -1;
+		return NULL;
 	}
 
 	file->nb_peers++;
 	file->peers = realloc(file->peers, sizeof(struct peer *) * file->nb_peers);
-	file->peers[file->nb_peers - 1] = peer;
-	free(f);
-	return 1;
+	file->peers[file->nb_peers - 1] = create_peer(peer->ip, peer->port);
+	return files;
 }
 
-int add_leech(char *key, struct file **files, int *size, struct peer *peer) {
+struct file **add_leech(
+    char *key, struct file **files, int *size, struct peer *peer) {
 	struct file *file = seek_filename(key, files, size);
 	if (file == NULL) {
-		return -1; // File not found
+		return NULL; // File not found
 	}
 
 	file->nb_peers++;
 	file->peers = realloc(file->peers, sizeof(struct peer *) * file->nb_peers);
-	file->peers[file->nb_peers - 1] = peer;
-	return 1;
+	file->peers[file->nb_peers - 1] = create_peer(peer->ip, peer->port);
+	return files;
 }
 
 struct file *seek_filename(char *key, struct file **files, int *size) {
@@ -72,7 +74,7 @@ void free_file(struct file *file) {
 
 	if (file->nb_peers > 0) {
 		for (int i = 0; i < file->nb_peers; i++) {
-			free(file->peers[i]);
+			free_peer(file->peers[i]);
 		}
 		free(file->peers);
 	}
