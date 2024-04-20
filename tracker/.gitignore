@@ -1,4 +1,4 @@
 *.o
 test
 tracker
-alltest
+tst_main

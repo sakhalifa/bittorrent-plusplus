@@ -29,8 +29,14 @@ application {
     mainClass = 'fr.ystat.Main'
 }
 
+apply plugin: 'java'
+
 test {
     useJUnitPlatform()
+    testLogging {
+        outputs.upToDateWhen {false}
+        showStandardStreams = true
+    }
 }
 
 jar {

@@ -3,6 +3,7 @@ package fr.ystat.tracker.commands.client;
 import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.ListParser;
+import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.Pair;
@@ -16,12 +17,9 @@ import java.util.List;
 class PeersCommandParser implements ICommandParser {
 	@Override
 	public IReceivableCommand parse(String input) throws ParserException {
-		String[] splitted = input.split(" ");
-		if(splitted.length < 3)
-			throw new InvalidInputException(input, "peers.badformat");
-		String hash = splitted[1];
-		if(hash.length() != 32)
-			throw new InvalidInputException(input, "peers.badkeylength");
+		String[] splitted = ParserUtils.expectArgs(input, 3, "peers");
+		String hash = ParserUtils.parseKeyCheck(splitted[1], "peers");
+
 		List<InetSocketAddress> peers = new ListParser<>(((lst, idx) -> {
 			String cur = lst[idx];
 			try {
@@ -30,6 +28,7 @@ class PeersCommandParser implements ICommandParser {
 				throw new InvalidInputException(input, "peers.badHost." + idx);
 			}
 		})).parse(input.substring("peers".length() + hash.length() + 2 + 1, input.length()-1));
+
 		return new PeersCommand(hash, peers);
 	}
 }

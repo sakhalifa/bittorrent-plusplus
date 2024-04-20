@@ -1,10 +1,8 @@
 package fr.ystat.peer.commands;
 
-import fr.ystat.commands.CommandAnnotation;
-import fr.ystat.commands.ICommand;
-import fr.ystat.commands.ICommandParser;
-import fr.ystat.commands.IReceivableCommand;
+import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
+import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 
@@ -15,15 +13,9 @@ class InterestedCommandParser implements ICommandParser{
 		if (splitted.length < 2) {
 			throw new InvalidInputException(input);
 		}
-		if(splitted[1].length() != 32){
-			throw new InvalidInputException(input);
-		}
-		System.out.println(splitted[1]);
-		System.out.println(splitted[1].matches("[a-z0-9]*"));
-		if(!splitted[1].matches("[a-z0-9]*")){
-			throw new InvalidInputException(input);
-		}
-		return new InterestedCommand(splitted[1]);
+		String fileHash = ParserUtils.parseKeyCheck(splitted[1]);
+
+		return new InterestedCommand(fileHash);
 	}
 }
 

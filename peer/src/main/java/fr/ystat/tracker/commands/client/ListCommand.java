@@ -3,6 +3,7 @@ package fr.ystat.tracker.commands.client;
 import fr.ystat.commands.CommandAnnotation;
 import fr.ystat.commands.ICommandParser;
 import fr.ystat.commands.IReceivableCommand;
+import fr.ystat.parser.ParserUtils;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.files.FileProperties;
 import fr.ystat.parser.ListParser;
@@ -17,10 +18,9 @@ class ListCommandParser implements ICommandParser{
 
 	@Override
 	public IReceivableCommand parse(String input) throws ParserException {
-		String[] splitted = input.split(" ");
-		if(splitted.length < 2)
-			throw new InvalidInputException(input, "list.badFormat");
-		List<FileProperties> files = new ListParser<>(((lst, idx) -> {
+		ParserUtils.expectArgs(input, 2, "list");
+
+		List<FileProperties> files = new ListParser<>((lst, idx) -> {
 			if(lst.length - idx < 4)
 				throw new InvalidInputException(input, "list.badElFormat." + idx);
 			String filename = lst[idx];
@@ -30,7 +30,7 @@ class ListCommandParser implements ICommandParser{
 			if(hash.length() != 32)
 				throw new InvalidInputException(input, "list.badElFormat." + idx + ".badHashLength");
 			return new Pair<>(new FileProperties(filename, length, pieceSize, hash), 4);
-		})).parse(input.substring("list".length() + 1 + 1, input.length()-1));
+		}).parse(input.substring("list".length() + 1 + 1, input.length()-1));
 		return new ListCommand(files);
 	}
 }
