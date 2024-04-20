@@ -65,7 +65,7 @@ public class ParserTests {
                 "list [name 64512 1024 012345678901234567890123456789ab name 64512 1024 012345678901234567890123456789ab]", ListCommand.class,
                 "peers 012345678901234567890123456789ab [127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]", PeersCommand.class,
                 "ok", OkCommand.class,
-                "data 012345678901234567890123456789ab [TODO :D]", DataCommand.class
+                "data 012345678901234567890123456789ab [1:blabla 2:blabla 3:blabla]", DataCommand.class
         );
         // Stream
         return generateParsingTests(testCases);
@@ -116,6 +116,14 @@ public class ParserTests {
                             new Pair<>("[127.0.0.1: 127.0.0.1:0001 127.0.0.1:0001]", new InvalidInputException("")),
                             new Pair<>("[300.0000.0.0:1000]", new InvalidInputException(""))
                     )
+            ),
+            DATA_LIST(
+                    "[1:blablabla 2:blablabla 3:blablabla]",
+                    List.of(
+                            new Pair<>("", new InvalidInputException("")),  // no list
+                            new Pair<>("[]", new InvalidInputException("[]")),
+                            new Pair<>("[1: 2:blablabla 3:blablabla]", new InvalidInputException(""))
+                    )
             )
             ;
             final String valid;
@@ -132,7 +140,8 @@ public class ParserTests {
                 new Pair<>("interested", List.of(ARG_TYPE.HASH)),
                 new Pair<>("have", List.of(ARG_TYPE.HASH, ARG_TYPE.BUFFER_LIST)),
                 new Pair<>("list", List.of(ARG_TYPE.FILE_LIST)),
-                new Pair<>("peers", List.of(ARG_TYPE.HASH, ARG_TYPE.IP_LIST))
+                new Pair<>("peers", List.of(ARG_TYPE.HASH, ARG_TYPE.IP_LIST)),
+                new Pair<>("data", List.of(ARG_TYPE.HASH, ARG_TYPE.DATA_LIST))
         );
 
         // Creation Map
