@@ -15,7 +15,8 @@ class GetPiecesParser implements ICommandParser{
 
 		String fileHash = ParserUtils.parseKeyCheck(splitted[1]);
 		List<Integer> indexList = ParserUtils.parseBufferMap(
-				input.substring(splitted[0].length() + splitted[1].length() + 2)
+				input.substring(splitted[0].length() + splitted[1].length() + 2),
+				"get"
 		);
 
 		return new GetPiecesCommand(fileHash, indexList);

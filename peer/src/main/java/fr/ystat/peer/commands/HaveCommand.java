@@ -16,7 +16,8 @@ class HaveParser implements ICommandParser {
 
         String fileHash = ParserUtils.parseKeyCheck(splitted[1]);
         List<Integer> indexList = ParserUtils.parseBufferMap(
-                input.substring(splitted[0].length() + splitted[1].length() + 2)
+                input.substring(splitted[0].length() + splitted[1].length() + 2),
+                "have"
         );
 
         return new HaveCommand(fileHash, indexList);

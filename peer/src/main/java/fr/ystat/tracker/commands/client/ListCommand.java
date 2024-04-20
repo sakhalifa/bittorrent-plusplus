@@ -20,7 +20,7 @@ class ListCommandParser implements ICommandParser{
 	public IReceivableCommand parse(String input) throws ParserException {
 		ParserUtils.expectArgs(input, 2, "list");
 
-		List<FileProperties> files = new ListParser<>(((lst, idx) -> {
+		List<FileProperties> files = new ListParser<>((lst, idx) -> {
 			if(lst.length - idx < 4)
 				throw new InvalidInputException(input, "list.badElFormat." + idx);
 			String filename = lst[idx];
@@ -30,7 +30,7 @@ class ListCommandParser implements ICommandParser{
 			if(hash.length() != 32)
 				throw new InvalidInputException(input, "list.badElFormat." + idx + ".badHashLength");
 			return new Pair<>(new FileProperties(filename, length, pieceSize, hash), 4);
-		})).parse(input.substring("list".length() + 1 + 1, input.length()-1));
+		}).parse(input.substring("list".length() + 1 + 1, input.length()-1));
 		return new ListCommand(files);
 	}
 }
