@@ -2,6 +2,7 @@ package fr.ystat.peer.seeder.handlers;
 
 import fr.ystat.config.GlobalConfiguration;
 import fr.ystat.peer.Counter;
+import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
 
 import java.nio.ByteBuffer;
@@ -47,6 +48,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	public void completed(Integer bytesRead, ByteBuffer buffer) {
 		if(bytesRead == -1)
 			return;
+		System.out.printf("[%s] ReadCommandHandler on Thread %d%n", clientChannel.getRemoteAddress(), Thread.currentThread().getId());
 		this.readBytes += bytesRead;
 		if(readBytes >= GlobalConfiguration.get().getMaxMessageSize()){
 			System.err.println("Message exceeded max message size.");
@@ -57,7 +59,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		}
 
 		buffer.flip();
-		messageBuilder.append(StandardCharsets.ISO_8859_1.decode(buffer));
+		messageBuilder.append(SerializationUtils.CHARSET.decode(buffer));
 		buffer.flip();
 		if(buffer.get(bytesRead - 1) == '\n'){
 			// Finished reading a protocol message

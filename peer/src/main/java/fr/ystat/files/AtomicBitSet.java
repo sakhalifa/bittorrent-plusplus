@@ -1,5 +1,6 @@
 package fr.ystat.files;
 
+import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -58,6 +59,6 @@ public class AtomicBitSet {
 
 	@Override
 	public String toString() {
-		return StandardCharsets.ISO_8859_1.decode(toByteBuffer()).toString();
+		return SerializationUtils.CHARSET.decode(toByteBuffer()).toString();
 	}
 }

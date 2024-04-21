@@ -5,6 +5,7 @@ import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.peer.Counter;
+import fr.ystat.util.SerializationUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -43,13 +44,13 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 		try {
 			IReceivableCommand command = CommandAnnotationCollector.beginParsing(input);
 			String response = command.apply();
-			clientChannel.write(StandardCharsets.ISO_8859_1.encode(response + "\n"), null, this);
+			clientChannel.write(SerializationUtils.CHARSET.encode(response + "\n"), null, this);
 		} catch (ParserException e) {
-			ByteBuffer toWrite = StandardCharsets.ISO_8859_1.encode("PARSER ERROR: " + e.getMessage() + "\n");
+			ByteBuffer toWrite = SerializationUtils.CHARSET.encode("PARSER ERROR: " + e.getMessage() + "\n");
 			System.out.println("Writing " + toWrite.capacity() + " bytes");
 			clientChannel.write(toWrite, null, this);
 		} catch (CommandException e) {
-			clientChannel.write(StandardCharsets.ISO_8859_1.encode("COMMAND ERROR: " + e.getMessage() + "\n"), null, this);
+			clientChannel.write(SerializationUtils.CHARSET.encode("COMMAND ERROR: " + e.getMessage() + "\n"), null, this);
 
 		}
 	}

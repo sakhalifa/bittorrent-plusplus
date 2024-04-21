@@ -4,6 +4,7 @@ import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.config.GlobalConfiguration;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		}
 
 		buffer.flip();
-		messageBuilder.append(StandardCharsets.ISO_8859_1.decode(buffer));
+		messageBuilder.append(SerializationUtils.CHARSET.decode(buffer));
 		buffer.flip();
 		if(buffer.get(bytesRead - 1) == '\n'){
 			// Finished reading a protocol message

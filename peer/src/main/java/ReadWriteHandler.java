@@ -1,3 +1,4 @@
+import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
 
 import java.nio.ByteBuffer;
@@ -32,7 +33,7 @@ public class ReadWriteHandler implements
 			System.out.println("Read " + bytesRead + " bytes!");
 			ByteBuffer buffer = (ByteBuffer) actionInfo.get("buffer");
 			buffer.flip();
-			messageBuilder.append(StandardCharsets.ISO_8859_1.decode(buffer));
+			messageBuilder.append(SerializationUtils.CHARSET.decode(buffer));
 			buffer.flip();
 			if(buffer.get(bytesRead - 1) == '\n'){
 				// Finished reading a protocol message
@@ -40,7 +41,7 @@ public class ReadWriteHandler implements
 				System.out.println("Read the message :'" + wholeMessage.trim() + "'");
 				actionInfo.put("action", "write");
 
-				clientChannel.write(StandardCharsets.ISO_8859_1.encode("> " + wholeMessage), actionInfo, this);
+				clientChannel.write(SerializationUtils.CHARSET.encode("> " + wholeMessage), actionInfo, this);
 				buffer.clear();
 			}else{
 				// Still reading that message...

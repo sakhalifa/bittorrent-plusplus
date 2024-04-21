@@ -1,18 +1,20 @@
 package fr.ystat.util;
 
-import fr.ystat.commands.ICommand;
 import fr.ystat.commands.ISendableCommand;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SerializationUtils {
+	public static final Charset CHARSET = StandardCharsets.ISO_8859_1;
+
 	public static <T> Stream<T> filterByType(Stream<? super T> stream, Class<T> clazz) {
 		return stream
 				.filter(clazz::isInstance)
@@ -55,6 +57,6 @@ public class SerializationUtils {
 	}
 
 	public static ByteBuffer toByteBuffer(ISendableCommand command){
-		return StandardCharsets.ISO_8859_1.encode(command.serialize() + "\n");
+		return SerializationUtils.CHARSET.encode(command.serialize() + "\n");
 	}
 }

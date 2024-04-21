@@ -11,6 +11,7 @@ import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.Pair;
+import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -52,7 +53,7 @@ class DataParser implements ICommandParser {
 					throw new InvalidInputException("[data.badFormat.pieceNumNotANum] bad format");
 				}
 				String data = toRead.substring(firstSepIdx+1, (int) (firstSepIdx+1+dataLen));
-				dataList.add(Map.entry(pieceNum, StandardCharsets.ISO_8859_1.encode(data)));
+				dataList.add(Map.entry(pieceNum, SerializationUtils.CHARSET.encode(data)));
 				toRead = toRead.substring((int) (firstSepIdx+1+dataLen+1));
 			}
 		}catch (StringIndexOutOfBoundsException e){
@@ -87,7 +88,7 @@ class DataParser implements ICommandParser {
 //			}
 //			while(reading.length() != file.getProperties().getPieceSize())
 //				reading.append(' '); // EDGE CASE I LOVE IT YAY
-//			return new Pair<>(Map.entry(pieceNum, StandardCharsets.ISO_8859_1.encode(reading.toString())), off);
+//			return new Pair<>(Map.entry(pieceNum, SerializationUtils.CHARSET.encode(reading.toString())), off);
 //		}).parse(input.substring(splitted[0].length() + 1 + splitted[1].length() + 1 + 1, input.length() - 1));
 		return new DataCommand(dataList);
 	}

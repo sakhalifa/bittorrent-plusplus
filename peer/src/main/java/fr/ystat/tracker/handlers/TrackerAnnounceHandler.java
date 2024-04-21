@@ -1,6 +1,7 @@
 package fr.ystat.tracker.handlers;
 
 import fr.ystat.util.Pair;
+import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
 
 import java.nio.ByteBuffer;
@@ -23,7 +24,7 @@ public class TrackerAnnounceHandler implements CompletionHandler<Integer, Asynch
 			@Override
 			public void completed(Integer bytesRead, Pair<AsynchronousSocketChannel, ByteBuffer> pair) {
 				pair.getSecond().flip();
-				if(!StandardCharsets.ISO_8859_1.decode(pair.getSecond()).toString().trim().equals("ok")){
+				if(!SerializationUtils.CHARSET.decode(pair.getSecond()).toString().trim().equals("ok")){
 					System.err.println("Announce failed. Exiting");
 					pair.getFirst().close();
 					System.exit(1);

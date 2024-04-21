@@ -3,6 +3,7 @@ package fr.ystat.handlers;
 import fr.ystat.peer.Server;
 import fr.ystat.peer.seeder.handlers.ReadCommandHandler;
 
+import java.io.IOException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
@@ -24,6 +25,11 @@ public class ConnectionHandler implements CompletionHandler<AsynchronousSocketCh
 
 		if ((clientChannel != null) && (clientChannel.isOpen())) {
 			server.getExecutor().execute(() -> {
+				try {
+					System.out.printf("[%s] ConnectionHandler on Thread %d%n", clientChannel.getRemoteAddress(), Thread.currentThread().getId());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 				ReadCommandHandler handler = new ReadCommandHandler(clientChannel, server.getCounter());
 				handler.startReading();
 			});

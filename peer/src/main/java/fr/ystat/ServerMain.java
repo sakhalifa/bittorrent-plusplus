@@ -13,6 +13,7 @@ public class ServerMain {
 	public static void main(String[] args) {
 
 		Executor threadPool = Executors.newFixedThreadPool(2);
+		System.out.printf("Main thread id %d%n", Thread.currentThread().getId());
 		try {
 			new Server(threadPool).serve();
 		} catch (IOException e) {
