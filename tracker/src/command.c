@@ -62,33 +62,44 @@ char *update(
 	return "ok\n";
 }
 
-
-
 char *look(
     struct look arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct file **res = NULL;
 	int size_res      = 0;
 
-	for (int i = 0; i < arg.nb_criteria; i++) {
-		res = look_criteria(arg.criteria[i], files, nb_file, res, &size_res);
+	for (int i = 0; i < *nb_file; i++) {
+		int passed = 0;
+		for (int j = 0; j < arg.nb_criteria; j++) {
+			passed += check_criteria(arg.criteria[j], files[i]);
+		}
+		if (passed == arg.nb_criteria) {
+			if (size_res == 0) {
+				res = malloc(sizeof(struct file *));
+			} else {
+				res = realloc(res, sizeof(struct file *) * (size_res + 1));
+			}
+			res[size_res] = create_file(files[i]->name, files[i]->filesize,
+			    files[i]->piecesize, files[i]->key);
+			size_res++;
+		}
 	}
 
-	char * str;
-	char str_length = 0;
+	char str_length = 7;
+	char *str       = malloc(sizeof(char) * str_length);
+	strcpy(str, "list [");
 	for (int i = 0; i < size_res; i++) {
-		char * f = file_to_string(res[i]);
-		if (str_length == 0) {
-			str_length += strlen(f);
-			str = malloc(sizeof(char) * (str_length + 1));
-		}
-		else {
-			str_length += strlen(f);
-			str = realloc(str, sizeof(char) * (str_length + 1));
-		}
+		char *f = file_to_string(res[i]);
+		str_length += strlen(f) + 1;
+		str = realloc(str, sizeof(char) * (str_length + 1));
 		strcat(str, f);
+		if (i + 1 < size_res) {
+			strcat(str, " ");
+		}
+
 		free(f);
 		free_file(res[i]);
 	}
+	strcat(str, "]");
 	free(res);
 	return str;
 }

@@ -53,9 +53,14 @@ void free_file(struct file *file);
 struct file **look_criteria(struct criteria *crit, struct file **files,
     int *size, struct file **res, int *size_res);
 
+/* Return a file as a string of Name Filesize Piecesize Key
+ */
 char *file_to_string(struct file *f);
 
-
+/* Return a boolean corresponding to if the condition of the criteria is
+ * verified (or -1 in case of error, unknown cases)
+ */
+int check_criteria(struct criteria *crit, struct file *f);
 
 void free_criteria(struct criteria * crit);
 

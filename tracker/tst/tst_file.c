@@ -76,6 +76,8 @@ void test_look_criteria() {
     assert(strcmp(res2[0]->key, "Key7") == 0);
     assert(strcmp(res2[0]->name, "Name4") == 0);
 
+    free_criteria(crit2);
+
 	for (int i = 0; i < size_res2; i++) {
 		free_file(res2[i]);
 	}

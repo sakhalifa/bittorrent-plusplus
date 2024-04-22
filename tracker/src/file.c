@@ -82,9 +82,7 @@ void free_file(struct file *file) {
 	free(file);
 }
 
-/* Return a boolean corresponding to if the condition of the criteria is
- * verified (or -1 in case of error, unknown cases)
- */
+
 int check_criteria(struct criteria *crit, struct file *f) {
 	// Check filename
 	if (strcmp(crit->element, "filename") == 0 && crit->comp == EQ) {
@@ -110,8 +108,8 @@ int check_criteria(struct criteria *crit, struct file *f) {
 	if (strcmp(crit->element, "piecesize") == 0) {
 		switch (crit->comp) {
 		case EQ: return (atoi(crit->value) == f->piecesize); break;
-		case LT: return (atoi(crit->value) < f->piecesize); break;
-		case GT: return (atoi(crit->value) > f->piecesize); break;
+		case LT: return (atoi(crit->value) > f->piecesize); break;
+		case GT: return (atoi(crit->value) < f->piecesize); break;
 		default: return -1; break;
 		}
 	}
@@ -163,4 +161,13 @@ void free_criteria(struct criteria *crit) {
 	free(crit->element);
 	free(crit->value);
 	free(crit);
+}
+
+struct file **deep_copy(struct file **files, int *size) {
+	struct file **new = malloc(sizeof(struct file *) * (*size));
+	for (int i = 0; i < *size; i++) {
+		new[i] = create_file(files[i]->name, files[i]->filesize,
+		    files[0]->piecesize, files[0]->key);
+	}
+	return new;
 }
