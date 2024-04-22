@@ -20,7 +20,7 @@ public class TrackerConnectionHandler implements CompletionHandler<Void, Asynchr
 
 	@Override
 	public void completed(Void unused, AsynchronousSocketChannel channel) {
-		AnnounceCommand announce = new AnnounceCommand(Main.getConfigurationManager().getPeerPort(), FileInventory.getInstance().getAllFiles());
+		AnnounceCommand announce = new AnnounceCommand(Main.getConfigurationManager().peerPort(), FileInventory.getInstance().getAllFiles());
 //		channel.write(SerializationUtils.CHARSET.encode(announce.serialize()), channel, new TrackerAnnounceHandler());
 		GenericCommandHandler.sendCommand(channel, announce, OkCommand.class,
 				(ignore) -> onConnect.run(),

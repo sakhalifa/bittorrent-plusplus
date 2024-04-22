@@ -2,32 +2,32 @@ package fr.ystat.config;
 
 public class  DummyConfigurationManager implements IConfigurationManager{
 	@Override
-	public int getPeerPort() {
+	public int peerPort() {
 		return 5697;
 	}
 
 	@Override
-	public int getTrackerPort() {
+	public int trackerPort() {
 		return 6666;
 	}
 
 	@Override
-	public String getTrackerIP() {
+	public String trackerIP() {
 		return "127.0.0.1";
 	}
 
 	@Override
-	public int getMaxLeechers() {
+	public int maxLeechers() {
 		return 20;
 	}
 
 	@Override
-	public int getMaxSeeders() {
+	public int maxSeeders() {
 		return 5;
 	}
 
 	@Override
-	public long getMaxMessageSize() {
+	public long maxMessageSize() {
 		return 4 * 1024 * 1024;
 	}
 

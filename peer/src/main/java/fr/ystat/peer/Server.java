@@ -1,8 +1,7 @@
 package fr.ystat.peer;
 
-import fr.ystat.config.GlobalConfiguration;
+import fr.ystat.Main;
 import fr.ystat.handlers.ConnectionHandler;
-import fr.ystat.peer.Counter;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ public class Server {
 
 	public Server(Executor threadExecutor) throws IOException {
 		this.serverChannel = AsynchronousServerSocketChannel.open();
-		this.address = new InetSocketAddress(GlobalConfiguration.get().getPeerPort());
+		this.address = new InetSocketAddress(Main.getConfigurationManager().peerPort());
 		this.serverChannel.bind(this.address);
 		this.counter = new Counter();
 		this.executor = threadExecutor;

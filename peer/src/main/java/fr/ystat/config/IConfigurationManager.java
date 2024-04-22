@@ -1,12 +1,12 @@
 package fr.ystat.config;
 
 public interface IConfigurationManager {
-	int getPeerPort();
-	int getTrackerPort();
-	String getTrackerIP();
-	int getMaxLeechers();
-	int getMaxSeeders();
-	long getMaxMessageSize();
+	int peerPort();
+	int trackerPort();
+	String trackerIP();
+	int maxLeechers();
+	int maxSeeders();
+	long maxMessageSize();
 	long defaultPieceSize();
 	long updatePeersIntervalMS();
 	long updateTrackerIntervalMS();

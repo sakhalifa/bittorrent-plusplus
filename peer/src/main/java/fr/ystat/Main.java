@@ -1,9 +1,9 @@
 package fr.ystat;
 
-import fr.ystat.config.DummyConfigurationManager;
 import fr.ystat.config.IConfigurationManager;
+import fr.ystat.config.JsonConfigurationManager;
+import fr.ystat.config.exceptions.ConfigException;
 import fr.ystat.files.FileProperties;
-import fr.ystat.gui.MainFrame;
 import fr.ystat.tracker.TrackerConnection;
 import fr.ystat.tracker.commands.client.ListCommand;
 import fr.ystat.tracker.commands.client.PeersCommand;
@@ -13,10 +13,11 @@ import fr.ystat.tracker.criterions.FilenameCriterion;
 import fr.ystat.tracker.criterions.FilesizeCriterion;
 import lombok.Getter;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Scanner;
 
 public class Main {
 	@Getter
@@ -47,8 +48,51 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		configurationManager = new DummyConfigurationManager(); // TODO: better config xd
-		tc = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
-		new MainFrame(); // TODO: Actually have the GUI. Right now it's just to hang
+		configurationManager = new JsonConfigurationManager();
+		validateConfiguration(configurationManager);
+//		tc = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
+//		new MainFrame(); // TODO: Actually have the GUI. Right now it's just to hang
+	}
+
+	private static void validateConfiguration(IConfigurationManager config) {
+		// peer port validation
+		if(config.peerPort() <= 0)
+			throw new ConfigException("peerport must be greater than 0");
+		if(config.peerPort() >= 65536) // unsigned short max val
+			throw new ConfigException("peerport must be less than 65535");
+		// tracker port validation
+		if(config.trackerPort() <= 0)
+			throw new ConfigException("trackerport must be greater than 0");
+		if(config.trackerPort() >= 65536)
+			throw new ConfigException("trackerport must be less than 65535");
+		// tracker ip validation
+		try{
+			//noinspection ResultOfMethodCallIgnored
+			InetAddress.getByName(config.trackerIP());
+		} catch (UnknownHostException e) {
+			throw new ConfigException("Invalid tracker IP");
+		}
+		// max leechers validation
+		if(config.maxLeechers() <= 0)
+			throw new ConfigException("maxLeechers must be greater than 0");
+		// max seeders validation
+		if(config.maxSeeders() <= 0)
+			throw new ConfigException("maxSeeders must be greater than 0");
+		// max message size validation
+		if(config.maxMessageSize() <= 0)
+			throw new ConfigException("maxMessageSize must be greater than 0");
+		// default piece size validation
+		if(config.defaultPieceSize() <= 0)
+			throw new ConfigException("defaultPieceSize must be greater than 0");
+		// update peers interval validation
+		if(config.updatePeersIntervalMS() <= 0)
+			throw new ConfigException("updatePeersIntervalMS must be greater than 0");
+		// update tracker interval validation
+		if(config.updateTrackerIntervalMS() <= 0)
+			throw new ConfigException("updateTrackerIntervalMS must be greater than 0");
+		// download path validation (and creation)
+		File f = new File(config.downloadFolderPath());
+		if(!f.exists() && !f.mkdirs())
+			throw new ConfigException("could not create download folder");
 	}
 }

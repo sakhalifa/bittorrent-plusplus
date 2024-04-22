@@ -1,8 +1,8 @@
 package fr.ystat.handlers;
 
+import fr.ystat.Main;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
-import fr.ystat.config.GlobalConfiguration;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 import static fr.ystat.handlers.ConnectionHandler.BUFFER_SIZE;
@@ -45,7 +44,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		if(bytesRead == -1)
 			return;
 		this.readBytes += bytesRead;
-		if(readBytes >= GlobalConfiguration.get().getMaxMessageSize()){
+		if(readBytes >= Main.getConfigurationManager().maxMessageSize()){
 			System.err.println("Message exceeded max message size.");
 			buffer.clear();
 			messageBuilder.setLength(0);

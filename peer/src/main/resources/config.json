@@ -1,0 +1,12 @@
+{
+  "peerPort": 5697,
+  "trackerPort": 6666,
+  "trackerIP": "127.0.0.1",
+  "maxLeechers": 100,
+  "maxSeeders": 10,
+  "maxMessageSize": 4194304,
+  "defaultPieceSize": 2048,
+  "updatePeersIntervalMS": 30000,
+  "updateTrackerIntervalMS": 30000,
+  "downloadFolderPath": "./downloads"
+}

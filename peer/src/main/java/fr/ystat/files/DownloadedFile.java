@@ -1,6 +1,6 @@
 package fr.ystat.files;
 
-import fr.ystat.config.GlobalConfiguration;
+import fr.ystat.Main;
 import fr.ystat.files.exceptions.PartitionException;
 
 import java.io.*;
@@ -11,8 +11,7 @@ public class DownloadedFile extends StockedFile {
 
     private static final File downloadFolder;
     static {
-        downloadFolder = new File(GlobalConfiguration.get().downloadFolderPath());
-        downloadFolder.mkdirs();
+        downloadFolder = new File(Main.getConfigurationManager().downloadFolderPath());
     }
 
     private static final String PARTITION_BASE_NAME = "partition";
