@@ -62,8 +62,33 @@ char *update(
 	return "ok\n";
 }
 
-void free_criteria(struct criteria *crit) {
-	free(crit->element);
-	free(crit->value);
-	free(crit);
+
+
+char *look(
+    struct look arg, struct file **files, int *nb_file, struct peer *peer) {
+	struct file **res = NULL;
+	int size_res      = 0;
+
+	for (int i = 0; i < arg.nb_criteria; i++) {
+		res = look_criteria(arg.criteria[i], files, nb_file, res, &size_res);
+	}
+
+	char * str;
+	char str_length = 0;
+	for (int i = 0; i < size_res; i++) {
+		char * f = file_to_string(res[i]);
+		if (str_length == 0) {
+			str_length += strlen(f);
+			str = malloc(sizeof(char) * (str_length + 1));
+		}
+		else {
+			str_length += strlen(f);
+			str = realloc(str, sizeof(char) * (str_length + 1));
+		}
+		strcat(str, f);
+		free(f);
+		free_file(res[i]);
+	}
+	free(res);
+	return str;
 }

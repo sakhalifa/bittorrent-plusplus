@@ -3,13 +3,7 @@
 
 #include "file.h"
 
-enum comparator { LT = -1, EQ = 0, GT = 1 };
 
-struct criteria {
-	char *element; // Name of the criteria
-	enum comparator comp; // Comparator
-	char *value; // value to compare to
-};
 
 enum command_num {
 	ANNOUNCE,
@@ -76,6 +70,5 @@ char *update(
 
 
 
-void free_criteria(struct criteria * crit);
 
 #endif

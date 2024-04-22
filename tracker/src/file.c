@@ -81,3 +81,86 @@ void free_file(struct file *file) {
 
 	free(file);
 }
+
+/* Return a boolean corresponding to if the condition of the criteria is
+ * verified (or -1 in case of error, unknown cases)
+ */
+int check_criteria(struct criteria *crit, struct file *f) {
+	// Check filename
+	if (strcmp(crit->element, "filename") == 0 && crit->comp == EQ) {
+		return strcmp(crit->value, f->name);
+	}
+
+	// Check key
+	if (strcmp(crit->element, "key") == 0 && crit->comp == EQ) {
+		return strcmp(crit->value, f->key);
+	}
+
+	// Check filesize
+	if (strcmp(crit->element, "filesize") == 0) {
+		switch (crit->comp) {
+		case EQ: return (atoi(crit->value) == f->filesize); break;
+		case LT: return (atoi(crit->value) > f->filesize); break;
+		case GT: return (atoi(crit->value) < f->filesize); break;
+		default: return -1; break;
+		}
+	}
+
+	// Check piecesize
+	if (strcmp(crit->element, "piecesize") == 0) {
+		switch (crit->comp) {
+		case EQ: return (atoi(crit->value) == f->piecesize); break;
+		case LT: return (atoi(crit->value) < f->piecesize); break;
+		case GT: return (atoi(crit->value) > f->piecesize); break;
+		default: return -1; break;
+		}
+	}
+
+	return -1;
+}
+
+char *file_to_string(struct file *f) {
+	int size = strlen(f->key) + strlen(f->name) +
+	    snprintf(NULL, 0, "%d", f->filesize) +
+	    snprintf(NULL, 0, "%d", f->piecesize) + 4;
+	char *string = malloc(sizeof(char) * size);
+	strcpy(string, f->name);
+	strcat(string, " ");
+	char filesize_length = snprintf(NULL, 0, "%d", f->filesize) + 1;
+	char *filesize       = malloc(sizeof(char) * filesize_length);
+	snprintf(filesize, filesize_length, "%d", f->filesize);
+	strcat(string, filesize);
+	free(filesize);
+	strcat(string, " ");
+	char piecesize_length = snprintf(NULL, 0, "%d", f->piecesize) + 1;
+	char *piecesize       = malloc(sizeof(char) * piecesize_length);
+	snprintf(piecesize, piecesize_length, "%d", f->piecesize);
+	strcat(string, piecesize);
+	free(piecesize);
+	strcat(string, " ");
+	strcat(string, f->key);
+	return string;
+}
+
+struct file **look_criteria(struct criteria *crit, struct file **files,
+    int *size, struct file **res, int *size_res) {
+	for (int i = 0; i < *size; i++) {
+		if (check_criteria(crit, files[i]) == 1) {
+			if (*size_res == 0) {
+				res = malloc(sizeof(struct file *));
+			} else {
+				res = realloc(res, sizeof(struct file *) * (*size + 1));
+			}
+			res[*size_res] = create_file(files[i]->name, files[i]->filesize,
+			    files[i]->piecesize, files[i]->key);
+			*size_res += 1;
+		}
+	}
+	return res;
+}
+
+void free_criteria(struct criteria *crit) {
+	free(crit->element);
+	free(crit->value);
+	free(crit);
+}
