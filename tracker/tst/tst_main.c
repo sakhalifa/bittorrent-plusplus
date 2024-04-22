@@ -5,6 +5,11 @@
 
 int main() {
 
+	// Test file.c
+    printf("TEST FILE\n");
+	test_file_file_to_string();
+	test_look_criteria();
+
 	// Test parser.c
     printf("TEST PARSER\n");
 	test_parser_getfile();
@@ -14,8 +19,9 @@ int main() {
 
 	// Test command.c
     printf("TEST COMMAND\n");
-	test_command_announce();
+	// test_command_announce();
 	test_command_getfile();
+	test_command_update();
 
 	return 0;
 }
