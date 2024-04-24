@@ -40,11 +40,15 @@ test {
 }
 
 jar {
-    processResources.exclude("/tinylog-dev.properties")
+    exclude("tinylog-dev.properties")
     manifest {
         attributes(
                 'Main-Class': 'fr.ystat.ServerMain'
         )
     }
+}
+
+shadowJar {
+    exclude("tinylog-dev.properties")
 }
 
