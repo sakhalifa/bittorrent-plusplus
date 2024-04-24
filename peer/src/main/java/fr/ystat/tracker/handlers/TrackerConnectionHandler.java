@@ -31,7 +31,7 @@ public class TrackerConnectionHandler implements CompletionHandler<Void, Asynchr
 					Logger.debug("Announce succeeded. Executing connection callback");
 					onConnect.run();
 				},
-				() -> {
+				(throwable) -> {
 					Logger.error("Error while sending command '{}'! Aborting", announce.serialize());
 					try {
 						channel.close();

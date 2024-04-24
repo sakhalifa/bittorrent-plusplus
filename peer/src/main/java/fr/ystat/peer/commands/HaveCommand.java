@@ -56,4 +56,9 @@ public class HaveCommand implements ICommand {
     public String apply() throws CommandException {
         return "";
     }
+
+    @Override
+    public String serialize() {
+        return String.format("%s %s %s", ICommand.super.serialize(), key, bitSet.toString());
+    }
 }

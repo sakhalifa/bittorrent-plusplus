@@ -30,11 +30,11 @@ public class TrackerConnection {
 		this.channel.connect(new InetSocketAddress(trackerAddress, port), this.channel, new TrackerConnectionHandler(onConnect));
 	}
 
-	public void sendLook(LookCommand lc, Consumer<ListCommand> onSuccess, Runnable onFailure) {
+	public void sendLook(LookCommand lc, Consumer<ListCommand> onSuccess, Consumer<Throwable> onFailure) {
 		GenericCommandHandler.sendCommand(this.channel, lc, ListCommand.class, onSuccess, onFailure);
 	}
 
-	public void sendGetFile(GetFileCommand gfc, Consumer<PeersCommand> onSuccess, Runnable onFailure) {
+	public void sendGetFile(GetFileCommand gfc, Consumer<PeersCommand> onSuccess, Consumer<Throwable> onFailure) {
 		GenericCommandHandler.sendCommand(this.channel, gfc, PeersCommand.class, onSuccess, onFailure);
 	}
 
@@ -48,7 +48,7 @@ public class TrackerConnection {
 						tc.scheduleUpdates(); // avoid using this as it's ambiguous
 					} catch (InterruptedException ignored) {}
 				},
-				() -> {
+				(throwable) -> {
 					Logger.warn("There was a problem with the update command.");
 					try {
 						Thread.sleep(30000);

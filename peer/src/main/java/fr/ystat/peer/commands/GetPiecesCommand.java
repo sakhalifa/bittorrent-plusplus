@@ -4,6 +4,7 @@ import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.util.SerializationUtils;
 
 import java.util.List;
 
@@ -35,5 +36,10 @@ public class GetPiecesCommand implements ICommand {
 	@Override
 	public String apply() throws CommandException {
 		return this.key + " " + this.indexes;
+	}
+
+	@Override
+	public String serialize() {
+		return String.format("%s %s %s", ICommand.super.serialize(), key, SerializationUtils.listToString(indexes));
 	}
 }

@@ -5,6 +5,7 @@ import fr.ystat.config.JsonConfigurationManager;
 import fr.ystat.config.exceptions.ConfigException;
 import fr.ystat.gui.LoadingForm;
 import fr.ystat.gui.MainForm;
+import fr.ystat.peer.seeder.Seeder;
 import fr.ystat.tracker.TrackerConnection;
 import lombok.Getter;
 
@@ -24,6 +25,8 @@ public class Main {
 	private static IConfigurationManager configurationManager;
 	@Getter
 	private static TrackerConnection trackerConnection;
+	@Getter
+	private static Seeder seeder;
 
 	public static void handleTrackerConnection() {
 		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
@@ -99,6 +102,7 @@ public class Main {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		configurationManager = new JsonConfigurationManager();
 		validateConfiguration(configurationManager);
+		seeder = new Seeder();
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
 
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
