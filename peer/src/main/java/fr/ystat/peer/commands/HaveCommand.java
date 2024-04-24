@@ -13,8 +13,6 @@ import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 class HaveParser implements ICommandParser {
 
@@ -27,7 +25,7 @@ class HaveParser implements ICommandParser {
 
         StockedFile file = FileInventory.getInstance().getStockedFile(fileHash);
         if(file == null)
-            throw new InvalidInputException("[have.noSuchFile] no such file");
+            throw new InvalidInputException(input, "have.noSuchFile");
 
         FileProperties fp = file.getProperties();
         long numPieces = (fp.getSize() + fp.getPieceSize() - 1) / fp.getPieceSize();

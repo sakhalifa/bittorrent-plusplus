@@ -12,6 +12,7 @@ import fr.ystat.peer.commands.InterestedCommand;
 import fr.ystat.tracker.commands.client.ListCommand;
 import fr.ystat.tracker.commands.client.PeersCommand;
 import fr.ystat.util.Pair;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -54,24 +55,37 @@ public class ParserTests {
                 (unused, commandClass) -> String.format("%sParsingTest", commandClass.getName()));
     }
 
-//    TODO @TestFactory
+    @BeforeAll
+    public static void addDummyFile(){
+        // add 012345678901234567890123456789ab hash to avoid noSuchFile exceptions
+        FileInventory.getInstance().addStockedFile(new StockedFile(new FileProperties("dummy.file", 11, 4, "012345678901234567890123456789ab")) {
+            @Override
+            public byte[] getPartition(int partitionIndex) {
+                return new byte[0];
+            }
+        });
+    }
+
+    @TestFactory
     public Stream<DynamicTest> parserDynamicTests() {
         // Creation Map
-        Map<String, Class<? extends IReceivableCommand>> testCases = Map.of(
-                "getpieces 012345678901234567890123456789ab [1 1 52 3]", GetPiecesCommand.class,
-                "interested 012345678901234567890123456789ab", InterestedCommand.class,
-                "have 012345678901234567890123456789ab [0 1 12 20]", HaveCommand.class,
 
-                "list [name 64512 1024 012345678901234567890123456789ab name 64512 1024 012345678901234567890123456789ab]", ListCommand.class,
-                "peers 012345678901234567890123456789ab [127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]", PeersCommand.class,
-                "ok", OkCommand.class,
-                "data 012345678901234567890123456789ab [1:blabla 2:blabla 3:blabla]", DataCommand.class
+        AtomicBitSet bitSet = new AtomicBitSet(3);
+
+        Map<String, Class<? extends IReceivableCommand>> testCases = Map.of(
+                "getpieces 012345678901234567890123456789ab [1 1 52 3]\n", GetPiecesCommand.class,
+                "interested 012345678901234567890123456789ab\n", InterestedCommand.class,
+                "have 012345678901234567890123456789ab " + bitSet + "\n", HaveCommand.class,
+                "list [name 64512 1024 012345678901234567890123456789ab name 64512 1024 012345678901234567890123456789ab]\n", ListCommand.class,
+                "peers 012345678901234567890123456789ab [127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]\n", PeersCommand.class,
+                "ok\n", OkCommand.class,
+                "data 012345678901234567890123456789ab [1:abcd 2:abcd 3:abcd]\n", DataCommand.class
         );
         // Stream
         return generateParsingTests(testCases);
     }
 
-//    TODO @TestFactory
+    @TestFactory
     public Stream<DynamicTest> parserExceptionsDynamicTests() {
 
         enum ARG_TYPE {
@@ -92,6 +106,11 @@ public class ParserTests {
                             new Pair<>("[", new InvalidInputException("")), // Unclosed list
                             new Pair<>("[ 1 2 3 ]", new InvalidInputException("")),  // poorly formated
                             new Pair<>("[1 a]", new InvalidInputException(""))  // invalid int
+                    )
+            ),
+            BITSET(
+                    "000",
+                    List.of(
                     )
             ),
             FILE_LIST(
@@ -118,12 +137,13 @@ public class ParserTests {
                     )
             ),
             DATA_LIST(
-                    "[1:blablabla 2:blablabla 3:blablabla]",
+                    "[1:abcd 2:abcd 3:abcd]",
                     List.of(
                             new Pair<>("", new InvalidInputException("")),  // no list
                             new Pair<>("[]", new InvalidInputException("[]")),  // no entry
-                            new Pair<>("[1: 2:blablabla 3:blablabla]", new InvalidInputException("")),  // invalid entry
-                            new Pair<>("[1:blablabla 1:blablabla 3:blablabla]", new IllegalStateException("")) // Duplicate entries
+                            new Pair<>("[1: 2:abcd 3:abcd]", new InvalidInputException("")),  // invalid entry
+                            new Pair<>("[1:abcdef]", new InvalidInputException("")),  // wrong data size
+                            new Pair<>("[1:abcd 1:abcd 3:abcd]", new IllegalStateException("")) // Duplicate entries
                     )
             )
             ;
@@ -139,7 +159,7 @@ public class ParserTests {
         List<Pair<String, List<ARG_TYPE>>> commandsToTest = List.of(
                 new Pair<>("getpieces", List.of(ARG_TYPE.HASH, ARG_TYPE.BUFFER_LIST)),
                 new Pair<>("interested", List.of(ARG_TYPE.HASH)),
-                new Pair<>("have", List.of(ARG_TYPE.HASH, ARG_TYPE.BUFFER_LIST)),
+                new Pair<>("have", List.of(ARG_TYPE.HASH, ARG_TYPE.BITSET)),
                 new Pair<>("list", List.of(ARG_TYPE.FILE_LIST)),
                 new Pair<>("peers", List.of(ARG_TYPE.HASH, ARG_TYPE.IP_LIST)),
                 new Pair<>("data", List.of(ARG_TYPE.HASH, ARG_TYPE.DATA_LIST))
@@ -165,7 +185,7 @@ public class ParserTests {
                  Map<String, ? extends Exception> cmdsWithError = arg.invalids.stream().map((a) -> {
                     ArrayList<String> newCmd = new ArrayList<>(cmd);
                     newCmd.set(i + 1, a.getFirst());
-                    return new Pair<>(String.join(" ", newCmd), a.getSecond());
+                    return new Pair<>(String.join(" ", newCmd) + "\n", a.getSecond());
                  }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
                 testCases.putAll(cmdsWithError);
@@ -173,9 +193,9 @@ public class ParserTests {
         }
 
         // gibberish cases
-        testCases.put("sqfdojf sdksdlfj", new ParserException(""));
-        testCases.put("", new ParserException(""));
-        testCases.put("intrested 012345678901234567890123456789ab", new ParserException(""));
+        testCases.put("sqfdojf sdksdlfj\n", new ParserException(""));
+        testCases.put("\n", new ParserException(""));
+        testCases.put("intrested 012345678901234567890123456789ab\n", new ParserException(""));
 
         // Stream
         return generateParsingExceptionTests(testCases);

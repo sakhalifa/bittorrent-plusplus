@@ -6,18 +6,14 @@ import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.files.FileInventory;
 import fr.ystat.files.StockedFile;
-import fr.ystat.parser.ListParser;
 import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
-import fr.ystat.util.Pair;
 import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +30,7 @@ class DataParser implements ICommandParser {
 
 		StockedFile file = FileInventory.getInstance().getStockedFile(fileHash);
 		if (file == null)
-			throw new InvalidInputException("[data.noSuchFile] File not found");
+			throw new InvalidInputException(input, "data.noSuchFile");
 
 		long dataLen = file.getProperties().getPieceSize();
 		List<Map.Entry<Integer, ByteBuffer>> dataList = new ArrayList<>();
@@ -44,20 +40,20 @@ class DataParser implements ICommandParser {
 			while (!toRead.isEmpty()) {
 				int firstSepIdx = toRead.indexOf(':');
 				if(firstSepIdx == -1)
-					throw new InvalidInputException("[data.badFormat.noDataSep] bad format");
+					throw new InvalidInputException(input, "data.badFormat.noDataSep");
 				String pieceNumStr = toRead.substring(0, firstSepIdx);
 				int pieceNum;
 				try{
 					pieceNum = Integer.parseInt(pieceNumStr);
 				}catch(NumberFormatException e){
-					throw new InvalidInputException("[data.badFormat.pieceNumNotANum] bad format");
+					throw new InvalidInputException(input, "data.badFormat.pieceNumNotANum");
 				}
 				String data = toRead.substring(firstSepIdx+1, (int) (firstSepIdx+1+dataLen));
 				dataList.add(Map.entry(pieceNum, SerializationUtils.CHARSET.encode(data)));
 				toRead = toRead.substring((int) (firstSepIdx+1+dataLen+1));
 			}
 		}catch (StringIndexOutOfBoundsException e){
-			throw new InvalidInputException("[data.badFormat] bad format");
+			throw new InvalidInputException(input, "data.badFormat");
 		}
 
 //		List<Map.Entry<Integer, ByteBuffer>> dataList = new ListParser<>((lst, idx) -> {
