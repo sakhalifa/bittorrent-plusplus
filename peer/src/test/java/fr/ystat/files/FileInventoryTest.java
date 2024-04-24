@@ -14,12 +14,12 @@ public class FileInventoryTest {
     }
 
     // Default test
-//    TODO @Test
+    @Test
     public void instantiationTest() {
         FileInventory fileInventory =  FileInventory.getInstance();
     }
 
-//    TODO @Test
+    @Test
     public void fileAdditionTest() {
         FileInventory fileInventory =  FileInventory.getInstance();
         fileInventory.addStockedFile(new DownloadedFile("File1", 10000, 2000, "fakeHash1"));
@@ -28,7 +28,7 @@ public class FileInventoryTest {
         fileInventory.addStockedFile(new DownloadedFile("File4", 20000, 2000, "fakeHash4"));
     }
 
-//  TODO  @Test
+  @Test
     public void fileRequestTest() {
         FileInventory fileInventory =  FileInventory.getInstance();
         StockedFile f1 = new DownloadedFile("File1", 10000, 2000, "fakeHash1");
