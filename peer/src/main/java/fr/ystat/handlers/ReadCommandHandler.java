@@ -6,6 +6,7 @@ import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,7 +46,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 			return;
 		this.readBytes += bytesRead;
 		if(readBytes >= Main.getConfigurationManager().maxMessageSize()){
-			System.err.println("Message exceeded max message size.");
+			Logger.error("Message exceeded max message size!");
 			buffer.clear();
 			messageBuilder.setLength(0);
 			clientChannel.close();
@@ -59,7 +60,6 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 			// Finished reading a protocol message
 			String wholeMessage = messageBuilder.toString();
 			messageBuilder.setLength(0);
-			System.out.println("Read the message :'" + wholeMessage.trim() + "'");
 			try {
 				this.commandConsumer.accept(CommandAnnotationCollector.beginParsing(wholeMessage));
 				buffer.clear();
@@ -74,6 +74,6 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 
 	@Override
 	public void failed(Throwable throwable, ByteBuffer byteBuffer) {
-
+		this.onFailure.run();
 	}
 }
