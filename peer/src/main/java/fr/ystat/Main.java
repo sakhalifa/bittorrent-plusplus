@@ -3,16 +3,9 @@ package fr.ystat;
 import fr.ystat.config.IConfigurationManager;
 import fr.ystat.config.JsonConfigurationManager;
 import fr.ystat.config.exceptions.ConfigException;
-import fr.ystat.files.FileProperties;
 import fr.ystat.gui.LoadingForm;
 import fr.ystat.gui.MainForm;
 import fr.ystat.tracker.TrackerConnection;
-import fr.ystat.tracker.commands.client.ListCommand;
-import fr.ystat.tracker.commands.client.PeersCommand;
-import fr.ystat.tracker.commands.server.GetFileCommand;
-import fr.ystat.tracker.commands.server.LookCommand;
-import fr.ystat.tracker.criterions.FilenameCriterion;
-import fr.ystat.tracker.criterions.FilesizeCriterion;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -21,21 +14,33 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 
 public class Main {
-	@Getter
-	private static IConfigurationManager configurationManager;
 
+	private static JFrame frame;
 	private static JPanel cards;
 
 	@Getter
-	private static TrackerConnection tc;
+	private static IConfigurationManager configurationManager;
+	@Getter
+	private static TrackerConnection trackerConnection;
 
 	public static void handleTrackerConnection() {
+		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
+		frame.pack();
 		CardLayout cl = (CardLayout) cards.getLayout();
-		SwingUtilities.invokeLater(() -> cl.show(cards, "MAIN_FORM"));
+		SwingUtilities.invokeLater(() -> {
+			cl.show(cards, "MAIN_FORM");
+		});
+		new Thread(() -> {
+			try {
+				Thread.sleep(30000);
+			} catch (InterruptedException ignored) {}
+			trackerConnection.scheduleUpdates();
+		}).start();
+
 	}
+
 	private static void validateConfiguration(IConfigurationManager config) {
 		// peer port validation
 		if (config.peerPort() <= 0)
@@ -79,12 +84,11 @@ public class Main {
 	}
 
 	private static void createAndShowGUI() {
-		JFrame frame = new JFrame("Bittorrent plus plus ultra dingue");
+		frame = new JFrame("Bittorrent plus plus ultra dingue");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		frame.add(new LoadingForm().getContentPanel());
 		cards = new JPanel(new CardLayout());
-		cards.add(new LoadingForm().getContentPanel(), "LOADING_FORM");
-		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
+		cards.add(new LoadingForm().getContentPane(), "LOADING_FORM");
 		frame.getContentPane().add(cards, BorderLayout.CENTER);
 		//Display the window.
 		frame.setLocationRelativeTo(null); // center on the screen
@@ -95,9 +99,8 @@ public class Main {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		configurationManager = new JsonConfigurationManager();
 		validateConfiguration(configurationManager);
-		tc = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
+		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
 
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
-
 	}
 }

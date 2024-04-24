@@ -15,10 +15,16 @@ public class AnnounceCommand implements ISendableCommand {
 
 	private final Collection<StockedFile> seedingFiles;
 	private final int port;
+	private final boolean isUpdate;
 
 	public AnnounceCommand(int port, Collection<StockedFile> seedingFiles) {
+		this(port, seedingFiles, false);
+	}
+
+	public AnnounceCommand(int port, Collection<StockedFile> seedingFiles, boolean isUpdate) {
 		this.port = port;
 		this.seedingFiles = seedingFiles;
+		this.isUpdate = isUpdate;
 	}
 
 	@Override
@@ -26,7 +32,8 @@ public class AnnounceCommand implements ISendableCommand {
 		Stream<DownloadedFile> partialFiles = SerializationUtils.filterByType(seedingFiles.stream(), DownloadedFile.class);
 		Stream<CompletedFile> completeFiles = SerializationUtils.filterByType(seedingFiles.stream(), CompletedFile.class);
 		return String.format(
-				"announce listen %d seed %s leech %s",
+				"%s listen %d seed %s leech %s",
+				isUpdate ? "update" : "announce",
 				port,
 				SerializationUtils.streamToString(completeFiles),
 				SerializationUtils.streamToString(partialFiles));

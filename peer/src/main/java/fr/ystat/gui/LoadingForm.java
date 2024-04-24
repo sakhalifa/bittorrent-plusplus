@@ -8,11 +8,11 @@ import java.util.Objects;
 
 public class LoadingForm {
 	public LoadingForm(){
-		contentPanel.setSize(300, 300);
+		contentPane.setSize(300, 300);
 	}
 
 	@Getter
-	private JPanel contentPanel;
+	private JPanel contentPane;
 	private JLabel loadingImgLabel;
 	private JLabel loadingTxtLabel;
 
