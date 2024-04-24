@@ -6,6 +6,7 @@ import fr.ystat.tracker.commands.server.GetFileCommand;
 import fr.ystat.tracker.commands.server.LookCommand;
 import fr.ystat.handlers.GenericCommandHandler;
 import fr.ystat.tracker.handlers.TrackerConnectionHandler;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,6 +22,7 @@ public class TrackerConnection {
 	public TrackerConnection(InetAddress trackerAddress, int port, Runnable onConnect) throws IOException {
 		this.channel = AsynchronousSocketChannel.open();
 		this.channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+		Logger.trace("Connecting to " + trackerAddress + ":" + port);
 		this.channel.connect(new InetSocketAddress(trackerAddress, port), this.channel, new TrackerConnectionHandler(onConnect));
 	}
 

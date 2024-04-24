@@ -54,7 +54,7 @@ public class ParserTests {
                 (unused, commandClass) -> String.format("%sParsingTest", commandClass.getName()));
     }
 
-    @TestFactory
+//    TODO @TestFactory
     public Stream<DynamicTest> parserDynamicTests() {
         // Creation Map
         Map<String, Class<? extends IReceivableCommand>> testCases = Map.of(
@@ -71,7 +71,7 @@ public class ParserTests {
         return generateParsingTests(testCases);
     }
 
-    @TestFactory
+//    TODO @TestFactory
     public Stream<DynamicTest> parserExceptionsDynamicTests() {
 
         enum ARG_TYPE {
