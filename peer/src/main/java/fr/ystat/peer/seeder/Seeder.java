@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Seeder {
 	private final AsynchronousServerSocketChannel serverChannel;
-	private final CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> connectionHandler;
 	private AtomicInteger numberOfConnections;
 
 	public Seeder() throws IOException {
@@ -23,12 +22,11 @@ public class Seeder {
 		this.serverChannel = AsynchronousServerSocketChannel.open();
 		InetSocketAddress address = new InetSocketAddress("0.0.0.0", Main.getConfigurationManager().peerPort());
 		this.serverChannel.bind(address);
-		this.connectionHandler = new ClientHandler(numberOfConnections);
 		Logger.info("Server started on port {}", Main.getConfigurationManager().peerPort());
 	}
 
 	public void serve() {
 		Logger.debug("Waiting for connections");
-		serverChannel.accept(this.serverChannel, this.connectionHandler);
+		serverChannel.accept(this.serverChannel, new ClientHandler(numberOfConnections));
 	}
 }

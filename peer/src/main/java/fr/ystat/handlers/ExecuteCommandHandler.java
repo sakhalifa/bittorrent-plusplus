@@ -1,12 +1,10 @@
 package fr.ystat.handlers;
 
-import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
 
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
@@ -26,6 +24,10 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 
 	@Override
 	public void completed(Integer bytesWritten, Void unused) {
+		if(bytesWritten == -1){
+			onFailure.accept(new ConnectionClosedByRemoteException());
+			return;
+		}
 		if(failureThrowable != null)
 			onFailure.accept(failureThrowable);
 		else

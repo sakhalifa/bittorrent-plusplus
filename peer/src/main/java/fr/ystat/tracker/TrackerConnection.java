@@ -3,7 +3,7 @@ package fr.ystat.tracker;
 import fr.ystat.Main;
 import fr.ystat.commands.OkCommand;
 import fr.ystat.files.FileInventory;
-import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
+import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.tracker.commands.client.ListCommand;
 import fr.ystat.tracker.commands.client.PeersCommand;
 import fr.ystat.tracker.commands.server.AnnounceCommand;
@@ -51,7 +51,7 @@ public class TrackerConnection {
 					}
 				},
 				(throwable) -> {
-					if (throwable instanceof ChannelClosedByRemoteException) {
+					if (throwable instanceof ConnectionClosedByRemoteException) {
 						Logger.error("Tracker has gone down. Exiting...");
 						try {
 							channel.close();

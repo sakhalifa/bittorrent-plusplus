@@ -29,7 +29,7 @@ public class CompletedFile extends StockedFile {
             throw new FileCreationException(e.getMessage());
         }
 
-        return new CompletedFile(new FileProperties(localFile.getName(), localFile.getTotalSpace(), pieceByteSize, hashcode), localFile);
+        return new CompletedFile(new FileProperties(localFile.getName(), localFile.length(), pieceByteSize, hashcode), localFile);
     }
 
     @SneakyThrows

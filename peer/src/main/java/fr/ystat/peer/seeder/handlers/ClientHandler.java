@@ -3,15 +3,13 @@ package fr.ystat.peer.seeder.handlers;
 import fr.ystat.Main;
 import fr.ystat.handlers.ExecuteCommandHandler;
 import fr.ystat.handlers.ReadCommandHandler;
-import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
+import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,19 +36,37 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 			this.handleExchange();
 	}
 
+	private boolean checkClientDisconnected(Throwable throwable) {
+		if (throwable instanceof ConnectionClosedByRemoteException) {
+			try {
+				Logger.debug("Client {} disconnected", clientChannel.getRemoteAddress());
+				clientChannel.close();
+				clientChannel = null; // force gc?
+				readCommandHandler = null;
+				executeCommandHandler = null;
+				numberOfConnections.decrementAndGet();
+				return true;
+			} catch (IOException e) {
+				Logger.error(e);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void completed(AsynchronousSocketChannel clientChannel, AsynchronousServerSocketChannel serverChannel) {
 		serverChannel.accept(serverChannel, new ClientHandler(numberOfConnections));
 		Logger.debug(numberOfConnections.get());
 		Logger.debug(Main.getConfigurationManager().maxLeechers());
-		if(numberOfConnections.getAndIncrement() >= Main.getConfigurationManager().maxLeechers()) {
+		if (numberOfConnections.getAndIncrement() >= Main.getConfigurationManager().maxLeechers()) {
 			Logger.trace("Max leechers reached. Closing...");
 			numberOfConnections.decrementAndGet();
 			try {
 				clientChannel.close();
 				return;
-			} catch (IOException ignored) {
-				Logger.error(ignored);
+			} catch (IOException e) {
+				Logger.error(e, "Tried to close remote connection, got exception instead >:(");
 				return;
 			}
 		}
@@ -64,7 +80,10 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 					this.handleExchange();
 					failures = 1;
 				},
-				throwable -> retryOrDie()
+				throwable -> {
+					if (checkClientDisconnected(throwable)) return;
+					retryOrDie();
+				}
 
 		);
 		readCommandHandler = new ReadCommandHandler(clientChannel,
@@ -73,17 +92,7 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 					executeCommandHandler.execute(command);
 				},
 				throwable -> {
-					if(throwable instanceof ChannelClosedByRemoteException) {
-						try {
-							Logger.debug("Client {} disconnected", clientChannel.getRemoteAddress());
-							clientChannel.close();
-							numberOfConnections.decrementAndGet();
-							return;
-						} catch (IOException e) {
-							Logger.error(e);
-							return;
-						}
-					}
+					if (checkClientDisconnected(throwable)) return;
 					clientChannel.write(SerializationUtils.CHARSET.encode("ko " + throwable.getClass().getName() + "\n"));
 					retryOrDie();
 				});

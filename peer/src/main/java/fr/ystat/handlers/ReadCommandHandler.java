@@ -4,7 +4,7 @@ import fr.ystat.Main;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.handlers.exceptions.MaxMessageSizeReachedException;
-import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
+import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
@@ -13,7 +13,6 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
@@ -45,7 +44,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	@Override
 	public void completed(Integer bytesRead, ByteBuffer buffer) {
 		if (bytesRead == -1) {
-			this.onFailure.accept(new ChannelClosedByRemoteException());
+			this.onFailure.accept(new ConnectionClosedByRemoteException());
 			return;
 		}
 		this.readBytes += bytesRead;
