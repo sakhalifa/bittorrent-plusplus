@@ -3,6 +3,7 @@ package fr.ystat.tracker;
 import fr.ystat.Main;
 import fr.ystat.commands.OkCommand;
 import fr.ystat.files.FileInventory;
+import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
 import fr.ystat.tracker.commands.client.ListCommand;
 import fr.ystat.tracker.commands.client.PeersCommand;
 import fr.ystat.tracker.commands.server.AnnounceCommand;
@@ -46,14 +47,25 @@ public class TrackerConnection {
 					try {
 						Thread.sleep(30000);
 						tc.scheduleUpdates(); // avoid using this as it's ambiguous
-					} catch (InterruptedException ignored) {}
+					} catch (InterruptedException ignored) {
+					}
 				},
 				(throwable) -> {
+					if (throwable instanceof ChannelClosedByRemoteException) {
+						Logger.error("Tracker has gone down. Exiting...");
+						try {
+							channel.close();
+						} catch (IOException ignored) {
+							System.exit(1);
+						}
+						System.exit(1);
+					}
 					Logger.warn("There was a problem with the update command.");
 					try {
 						Thread.sleep(30000);
-						tc.scheduleUpdates(); // avoid using this as it's ambiguous
-					} catch (InterruptedException ignored) {}
+						tc.scheduleUpdates(); // avoid using the 'this' keyword as it's ambiguous
+					} catch (InterruptedException ignored) {
+					}
 				});
 	}
 }

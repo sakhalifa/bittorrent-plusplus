@@ -2,12 +2,15 @@ package fr.ystat.peer.seeder.handlers;
 
 import fr.ystat.handlers.ExecuteCommandHandler;
 import fr.ystat.handlers.ReadCommandHandler;
+import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 
 public class ClientHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
@@ -49,6 +52,16 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 					executeCommandHandler.execute(command);
 				},
 				throwable -> {
+					if(throwable instanceof ChannelClosedByRemoteException) {
+						try {
+							Logger.debug("Client {} disconnected", clientChannel.getRemoteAddress());
+							clientChannel.close();
+							return;
+						} catch (IOException e) {
+							Logger.error(e);
+							return;
+						}
+					}
 					clientChannel.write(SerializationUtils.CHARSET.encode("ko " + throwable.getClass().getName() + "\n"));
 					retryOrDie();
 				});
@@ -64,5 +77,6 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 	@Override
 	public void failed(Throwable throwable, AsynchronousServerSocketChannel serverChannel) {
 		// TODO handle failure (idk)
+		Logger.debug("Failure???");
 	}
 }

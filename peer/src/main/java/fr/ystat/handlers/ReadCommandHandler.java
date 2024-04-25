@@ -4,6 +4,7 @@ import fr.ystat.Main;
 import fr.ystat.commands.CommandAnnotationCollector;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.handlers.exceptions.MaxMessageSizeReachedException;
+import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
@@ -12,6 +13,7 @@ import org.tinylog.Logger;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
@@ -32,7 +34,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 
 	}
 
-	public void startReading(){
+	public void startReading() {
 		readBytes = 0;
 		ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 		clientChannel.read(buffer, buffer, this);
@@ -42,10 +44,12 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	@SneakyThrows(IOException.class)
 	@Override
 	public void completed(Integer bytesRead, ByteBuffer buffer) {
-		if(bytesRead == -1)
+		if (bytesRead == -1) {
+			this.onFailure.accept(new ChannelClosedByRemoteException());
 			return;
+		}
 		this.readBytes += bytesRead;
-		if(readBytes >= Main.getConfigurationManager().maxMessageSize()){
+		if (readBytes >= Main.getConfigurationManager().maxMessageSize()) {
 			Logger.error("Message exceeded max message size!");
 			buffer.clear();
 			messageBuilder.setLength(0);
@@ -57,7 +61,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		buffer.flip();
 		messageBuilder.append(SerializationUtils.CHARSET.decode(buffer));
 		buffer.flip();
-		if(buffer.get(bytesRead - 1) == '\n'){
+		if (buffer.get(bytesRead - 1) == '\n') {
 			// Finished reading a protocol message
 			String wholeMessage = messageBuilder.toString();
 			messageBuilder.setLength(0);
@@ -67,7 +71,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 			} catch (ParserException e) {
 				this.onFailure.accept(e);
 			}
-		}else{
+		} else {
 			// Still reading that message...
 			clientChannel.read(buffer, buffer, this);
 		}

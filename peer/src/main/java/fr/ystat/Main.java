@@ -109,6 +109,9 @@ public class Main {
 		FileInventory.getInstance().addStockedFile(
 				CompletedFile.fromLocalFile(new File("./file_a.dat"), 2048L)
 		);
+		FileInventory.getInstance().addStockedFile(
+				CompletedFile.fromLocalFile(new File("./bee_movie.txt"), 2048L)
+		);
 		seeder = new Seeder();
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
 		SwingUtilities.invokeLater(Main::createAndShowGUI);

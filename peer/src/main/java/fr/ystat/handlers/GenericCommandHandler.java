@@ -3,6 +3,7 @@ package fr.ystat.handlers;
 import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.ISendableCommand;
 import fr.ystat.commands.exceptions.UnexpectedCommandException;
+import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
 
@@ -23,7 +24,7 @@ public final class GenericCommandHandler {
 			@Override
 			public void completed(Integer bytesWritten, AsynchronousSocketChannel channel) {
 				if(bytesWritten == -1){
-					onFailed.accept(new IOException());
+					onFailed.accept(new ChannelClosedByRemoteException());
 					return;
 				}
 				var v = new ReadCommandHandler(channel, (cmd) -> {
