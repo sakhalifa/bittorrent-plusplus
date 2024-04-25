@@ -9,6 +9,7 @@ import fr.ystat.files.StockedFile;
 import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.peer.commands.exceptions.NoSuchFileException;
 import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
@@ -54,7 +55,11 @@ public class HaveCommand implements ICommand {
 
     @Override
     public String apply() throws CommandException {
-        return "";
+        StockedFile file = FileInventory.getInstance().getStockedFile(key);
+        if(file == null)
+            throw new NoSuchFileException(key); // TODO maybe have an empty buffermap instead...
+        AtomicBitSet myBitset = file.getBitSet();
+        return new HaveCommand(key, myBitset).serialize();
     }
 
     @Override

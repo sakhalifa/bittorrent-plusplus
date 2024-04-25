@@ -28,5 +28,6 @@ public abstract class StockedFile {
 
 	abstract public byte[] getPartition(int partitionIndex) throws PartitionException, IOException;
 
+	abstract public AtomicBitSet getBitSet();
 
 }

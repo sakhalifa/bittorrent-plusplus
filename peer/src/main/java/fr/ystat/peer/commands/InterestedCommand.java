@@ -35,15 +35,7 @@ public class InterestedCommand implements ICommand {
 		if (file == null) {
 			throw new NoSuchFileException(key);
 		}
-		AtomicBitSet bitset;
-		if (file instanceof CompletedFile) {
-			bitset = new AtomicBitSet(file.getProperties());
-		} else if (file instanceof DownloadedFile) {
-			DownloadedFile df = (DownloadedFile) file;
-			bitset = df.getBitSet(); // Expensive copy ?
-		} else
-			throw new CommandException("Should NEVER happen");
-		return new HaveCommand(key, bitset).serialize();
+		return new HaveCommand(key, file.getBitSet()).serialize();
 	}
 
 	@Override

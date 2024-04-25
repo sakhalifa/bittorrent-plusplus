@@ -38,9 +38,21 @@ public class CompletedFile extends StockedFile {
         try (RandomAccessFile accessFile = new RandomAccessFile(file, "r")) {
             byte[] buffer = new byte[(int) getProperties().getPieceSize()];
             long readBegin = partitionIndex * getProperties().getPieceSize();
-            accessFile.read(buffer, (int) readBegin, (int) getProperties().getPieceSize());
+            if(readBegin > accessFile.length()) {
+                throw new PartitionException(partitionIndex + " partition out of bounds");
+            }
+            accessFile.seek(readBegin);
+            accessFile.read(buffer, 0, (int) getProperties().getPieceSize());
             return buffer;
         }
+    }
+
+    @Override
+    public AtomicBitSet getBitSet() {
+        // TODO it is an expensive copy. But we save memory as a short-lived object will quickly get gc-ed with almost no gc overhead
+        var bitset = new AtomicBitSet(this.getProperties());
+        bitset.fill();
+        return bitset;
     }
 
     @Override

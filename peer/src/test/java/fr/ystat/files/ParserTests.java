@@ -64,6 +64,11 @@ public class ParserTests {
             public byte[] getPartition(int partitionIndex) {
                 return new byte[0];
             }
+
+            @Override
+            public AtomicBitSet getBitSet() {
+                return new AtomicBitSet(0);
+            }
         });
     }
 
