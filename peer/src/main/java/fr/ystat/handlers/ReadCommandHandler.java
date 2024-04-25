@@ -17,7 +17,7 @@ import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
 public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer> {
-	public final static int READ_BUFFER_SIZE = 1024;
+	public final static int READ_BUFFER_SIZE = 2048;
 	private final AsynchronousSocketChannel clientChannel;
 	private final StringBuilder messageBuilder;
 	private final Consumer<IReceivableCommand> commandConsumer;
