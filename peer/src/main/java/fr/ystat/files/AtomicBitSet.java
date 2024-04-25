@@ -8,10 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class AtomicBitSet {
+public class AtomicBitSet implements Cloneable {
 	private final AtomicIntegerArray array;
 	@Getter
 	private final int length;
+
+	public AtomicBitSet(FileProperties properties){
+		this((int) ((properties.getSize() + properties.getPieceSize() - 1) / properties.getPieceSize()));
+	}
 
 	public AtomicBitSet(int length) {
 		this.length = length;
@@ -26,6 +30,22 @@ public class AtomicBitSet {
 		int i = 0;
 		while(bb.position() != bb.limit())
 			array.set(i++, bb.getInt());
+	}
+
+	public AtomicBitSet(AtomicBitSet bitSet) {
+		this(bitSet.getLength());
+		for(int i = 0; i < array.length(); i++)
+			array.set(i, bitSet.array.get(i));
+	}
+
+	public void fill() {
+		for(int i = 0; i < array.length(); i++)
+			array.set(i, -1);
+	}
+
+	public void empty(){
+		for(int i = 0; i < array.length(); i++)
+			array.set(i, 0);
 	}
 
 	public void set(long n) {

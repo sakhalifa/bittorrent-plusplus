@@ -2,6 +2,7 @@ package fr.ystat.files;
 
 import fr.ystat.Main;
 import fr.ystat.files.exceptions.PartitionException;
+import lombok.Getter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,9 +25,8 @@ public class DownloadedFile extends StockedFile {
     public DownloadedFile(FileProperties properties) throws IllegalArgumentException {
         super(properties);
 
-        int pieceAmount = (int) ((this.getProperties().getSize() + this.getProperties().getPieceSize() - 1) / this.getProperties().getPieceSize());
-        this.bitSet = new AtomicBitSet(pieceAmount);
-        this.partitionedFiles = new File[pieceAmount];
+        this.bitSet = new AtomicBitSet(properties);
+        this.partitionedFiles = new File[bitSet.getLength()];
         parentFolder = new File(downloadFolder, getProperties().getName());
         parentFolder.mkdir();
     }
@@ -59,6 +59,14 @@ public class DownloadedFile extends StockedFile {
         try (FileOutputStream stream = new FileOutputStream(file)) {
             stream.write(data);
         }
+    }
+
+    /**
+     * Get a **copy** of the partition bitset.
+     * @return a **copy** of the partition bitset
+     */
+    public AtomicBitSet getBitSet(){
+        return new AtomicBitSet(bitSet);
     }
 
     @Override

@@ -11,21 +11,22 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Getter
 public abstract class StockedFile {
-    @Getter
-    private final FileProperties properties;
-    public StockedFile(FileProperties properties) throws IllegalArgumentException {
-        this.properties = properties;
-    }
+	private final FileProperties properties;
 
-    @SneakyThrows(NoSuchAlgorithmException.class)
-    static String hashFile(File file) throws IOException {
-        byte[] fileData = Files.readAllBytes(file.toPath());
-        byte[] hash = MessageDigest.getInstance("MD5").digest(fileData);
-        return new BigInteger(1, hash).toString(16);  // Checksum
-    }
+	public StockedFile(FileProperties properties) throws IllegalArgumentException {
+		this.properties = properties;
+	}
 
-    abstract public byte[] getPartition(int partitionIndex) throws PartitionException, IOException;
+	@SneakyThrows(NoSuchAlgorithmException.class)
+	static String hashFile(File file) throws IOException {
+		byte[] fileData = Files.readAllBytes(file.toPath());
+		byte[] hash = MessageDigest.getInstance("MD5").digest(fileData);
+		return new BigInteger(1, hash).toString(16);  // Checksum
+	}
+
+	abstract public byte[] getPartition(int partitionIndex) throws PartitionException, IOException;
 
 
 }

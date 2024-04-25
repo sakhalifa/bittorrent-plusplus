@@ -1,6 +1,7 @@
 package fr.ystat.commands;
 
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.parser.exceptions.UnknownCommandException;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -49,7 +50,7 @@ public final class CommandAnnotationCollector {
 
 	private static Class<IReceivableCommand> getCommandClass(String commandName) throws ParserException {
 		Class<IReceivableCommand> commandClass = namesToCommands.get(commandName);
-		if (commandClass == null) throw new ParserException(String.format("Unable to find command %s", commandName));
+		if (commandClass == null) throw new UnknownCommandException(commandName);
 		return commandClass;
 	}
 

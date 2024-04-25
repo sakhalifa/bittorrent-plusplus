@@ -5,6 +5,7 @@ import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.OkCommand;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
+import fr.ystat.parser.exceptions.UnknownCommandException;
 import fr.ystat.peer.commands.DataCommand;
 import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
@@ -193,9 +194,9 @@ public class ParserTests {
         }
 
         // gibberish cases
-        testCases.put("sqfdojf sdksdlfj\n", new ParserException(""));
-        testCases.put("\n", new ParserException(""));
-        testCases.put("intrested 012345678901234567890123456789ab\n", new ParserException(""));
+        testCases.put("sqfdojf sdksdlfj\n", new UnknownCommandException(""));
+        testCases.put("\n", new UnknownCommandException(""));
+        testCases.put("intrested 012345678901234567890123456789ab\n", new UnknownCommandException(""));
 
         // Stream
         return generateParsingExceptionTests(testCases);

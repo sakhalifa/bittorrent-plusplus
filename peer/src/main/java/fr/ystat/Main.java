@@ -3,6 +3,9 @@ package fr.ystat;
 import fr.ystat.config.IConfigurationManager;
 import fr.ystat.config.JsonConfigurationManager;
 import fr.ystat.config.exceptions.ConfigException;
+import fr.ystat.files.CompletedFile;
+import fr.ystat.files.DownloadedFile;
+import fr.ystat.files.FileInventory;
 import fr.ystat.gui.LoadingForm;
 import fr.ystat.gui.MainForm;
 import fr.ystat.peer.seeder.Seeder;
@@ -29,6 +32,7 @@ public class Main {
 	private static Seeder seeder;
 
 	public static void handleTrackerConnection() {
+		seeder.serve();
 		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
 		frame.pack();
 		CardLayout cl = (CardLayout) cards.getLayout();
@@ -99,12 +103,14 @@ public class Main {
 		frame.setVisible(true);
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws Exception {
 		configurationManager = new JsonConfigurationManager();
 		validateConfiguration(configurationManager);
+		FileInventory.getInstance().addStockedFile(
+				CompletedFile.fromLocalFile(new File("./file_a.dat"), 2048L)
+		);
 		seeder = new Seeder();
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
-
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
 	}
 }
