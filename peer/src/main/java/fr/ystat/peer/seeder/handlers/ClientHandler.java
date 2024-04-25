@@ -1,5 +1,6 @@
 package fr.ystat.peer.seeder.handlers;
 
+import fr.ystat.Main;
 import fr.ystat.handlers.ExecuteCommandHandler;
 import fr.ystat.handlers.ReadCommandHandler;
 import fr.ystat.io.exceptions.ChannelClosedByRemoteException;
@@ -12,13 +13,20 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.CompletionHandler;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClientHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
 
+	private final AtomicInteger numberOfConnections;
 	private ReadCommandHandler readCommandHandler;
 	private ExecuteCommandHandler executeCommandHandler;
 	private AsynchronousSocketChannel clientChannel;
 	private int failures = 1;
+
+	public ClientHandler(AtomicInteger numberOfConnections) {
+		this.numberOfConnections = numberOfConnections;
+	}
+
 
 	private void retryOrDie() {
 		if (++failures > 3) {
@@ -32,7 +40,20 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 
 	@Override
 	public void completed(AsynchronousSocketChannel clientChannel, AsynchronousServerSocketChannel serverChannel) {
-		serverChannel.accept(serverChannel, new ClientHandler());
+		serverChannel.accept(serverChannel, new ClientHandler(numberOfConnections));
+		Logger.debug(numberOfConnections.get());
+		Logger.debug(Main.getConfigurationManager().maxLeechers());
+		if(numberOfConnections.getAndIncrement() >= Main.getConfigurationManager().maxLeechers()) {
+			Logger.trace("Max leechers reached. Closing...");
+			numberOfConnections.decrementAndGet();
+			try {
+				clientChannel.close();
+				return;
+			} catch (IOException ignored) {
+				Logger.error(ignored);
+				return;
+			}
+		}
 		this.clientChannel = clientChannel;
 		try {
 			Logger.debug("Client {} connected", clientChannel.getRemoteAddress());
@@ -56,6 +77,7 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 						try {
 							Logger.debug("Client {} disconnected", clientChannel.getRemoteAddress());
 							clientChannel.close();
+							numberOfConnections.decrementAndGet();
 							return;
 						} catch (IOException e) {
 							Logger.error(e);

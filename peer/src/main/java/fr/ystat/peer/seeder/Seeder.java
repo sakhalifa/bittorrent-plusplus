@@ -11,16 +11,19 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Seeder {
 	private final AsynchronousServerSocketChannel serverChannel;
 	private final CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> connectionHandler;
+	private AtomicInteger numberOfConnections;
 
 	public Seeder() throws IOException {
+		this.numberOfConnections = new AtomicInteger(0);
 		this.serverChannel = AsynchronousServerSocketChannel.open();
 		InetSocketAddress address = new InetSocketAddress("0.0.0.0", Main.getConfigurationManager().peerPort());
 		this.serverChannel.bind(address);
-		this.connectionHandler = new ClientHandler();
+		this.connectionHandler = new ClientHandler(numberOfConnections);
 		Logger.info("Server started on port {}", Main.getConfigurationManager().peerPort());
 	}
 
