@@ -1,9 +1,9 @@
 package fr.ystat.tracker.criterions;
 
-public class HashCriterion implements ICriterion{
+public class KeyCriterion implements ICriterion{
 	private final String hash;
 
-	public HashCriterion(String hash) {
+	public KeyCriterion(String hash) {
 		this.hash = hash;
 	}
 

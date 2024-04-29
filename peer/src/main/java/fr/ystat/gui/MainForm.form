@@ -28,15 +28,6 @@
           <vspacer id="f5d17">
             <constraints/>
           </vspacer>
-          <component id="596ba" class="javax.swing.JButton" binding="filesButton">
-            <constraints/>
-            <properties>
-              <text value="Files"/>
-            </properties>
-          </component>
-          <vspacer id="bc15a">
-            <constraints/>
-          </vspacer>
           <component id="d1ffd" class="javax.swing.JButton" binding="settingsButton">
             <constraints/>
             <properties>

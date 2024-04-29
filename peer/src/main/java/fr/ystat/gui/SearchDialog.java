@@ -4,15 +4,17 @@ import fr.ystat.tracker.criterions.ComparisonType;
 import fr.ystat.util.Pair;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
 // TODO Make it so you can append multiple filesize criterions...
 public class SearchDialog extends JDialog {
 	@FunctionalInterface
-	public interface OKCallback{
-		void run(String fileName, String fileKey, List<Pair<ComparisonType, Long>> fileSizes);
+	public interface OKCallback {
+		void run(String fileName, String fileKey, List<Pair<Long, ComparisonType>> fileSizes, List<Pair<Long, ComparisonType>> pieceSizes);
 	}
 
 	private JPanel contentPane;
@@ -20,7 +22,6 @@ public class SearchDialog extends JDialog {
 	private JButton buttonCancel;
 	private JTextField fileNameField;
 	private JTextField fileKeyField;
-	private JComboBox<ComparisonType> fileSizeComparisonList;
 	private JSpinner fileSizeSpinner;
 	private JCheckBox fileKeyEnabled;
 	private JCheckBox fileNameEnabled;
@@ -28,10 +29,19 @@ public class SearchDialog extends JDialog {
 	private JLabel fileKeyLabel;
 	private JLabel fileNameLabel;
 	private JLabel fileSizeLabel;
+	private JCheckBox pieceSizeEnabled;
+	private JPanel fileSizeListPanel;
+	private JPanel pieceSizeListPanel;
+	private JComboBox<ComparisonType> fileSizeComparisonComboBox;
+	private JComboBox<ComparisonType> pieceSizeComparisonComboBox;
+	private JSpinner pieceSizeSpinner;
+	private JLabel pieceSizeLabel;
 	private final OKCallback okCallback;
 
 	public SearchDialog(OKCallback callback) {
 		this.okCallback = callback;
+
+		setTitle("Search file");
 		setContentPane(contentPane);
 		setModal(true);
 		getRootPane().setDefaultButton(buttonOK);
@@ -61,17 +71,29 @@ public class SearchDialog extends JDialog {
 		});
 		fileSizeEnabled.addActionListener(actionEvent -> {
 			fileSizeLabel.setEnabled(fileSizeEnabled.isSelected());
-			fileSizeComparisonList.setEnabled(fileSizeEnabled.isSelected());
+			fileSizeComparisonComboBox.setEnabled(fileSizeEnabled.isSelected());
 			fileSizeSpinner.setEnabled(fileSizeEnabled.isSelected());
+		});
+		pieceSizeEnabled.addActionListener(actionEvent -> {
+			pieceSizeSpinner.setEnabled(pieceSizeEnabled.isSelected());
+			pieceSizeComparisonComboBox.setEnabled(pieceSizeEnabled.isSelected());
+			pieceSizeLabel.setEnabled(pieceSizeEnabled.isSelected());
 		});
 	}
 
 	private void onOK() {
 		String fileName = fileNameEnabled.isSelected() ? fileNameField.getText() : null;
 		String fileKey = fileKeyEnabled.isSelected() ? fileKeyField.getText() : null;
-		ComparisonType fileSizeComparisonType = fileSizeEnabled.isSelected() ? (ComparisonType) fileSizeComparisonList.getSelectedItem() : null;
-		Long fileSize = fileSizeEnabled.isSelected() ? (Long) fileSizeSpinner.getValue() : null;
-		okCallback.run(fileName, fileKey, List.of(Pair.of(fileSizeComparisonType, fileSize)));
+		List<Pair<Long, ComparisonType>> fileSizesCriterions = null;
+		if(fileSizeEnabled.isSelected()) {
+			fileSizesCriterions = List.of(Pair.of((Long)fileSizeSpinner.getValue(), (ComparisonType)fileSizeComparisonComboBox.getSelectedItem()));
+		}
+		List<Pair<Long, ComparisonType>> pieceSizesCriterions = null;
+		if(pieceSizeEnabled.isSelected()) {
+			pieceSizesCriterions = List.of(Pair.of((Long)pieceSizeSpinner.getValue(), (ComparisonType)pieceSizeComparisonComboBox.getSelectedItem()));
+		}
+
+		okCallback.run(fileName, fileKey, fileSizesCriterions, pieceSizesCriterions);
 		dispose();
 	}
 
@@ -80,7 +102,10 @@ public class SearchDialog extends JDialog {
 	}
 
 	private void createUIComponents() {
-		fileSizeComparisonList = new JComboBox<>(ComparisonType.values());
+
+		fileSizeComparisonComboBox = new JComboBox<>(ComparisonType.values());
+		pieceSizeComparisonComboBox = new JComboBox<>(ComparisonType.values());
+
 
 		// Use intermediate variables to coerce the type to Long and not use the "double" constructor. Java is dump.
 		Long val = 1L;
@@ -89,5 +114,30 @@ public class SearchDialog extends JDialog {
 		Long step = 1L;
 
 		fileSizeSpinner = new JSpinner(new SpinnerNumberModel(val, min, max, step));
+		pieceSizeSpinner = new JSpinner(new SpinnerNumberModel(val, min, max, step));
+	}
+
+	private void createInnerLayout(){
+		// TODO actually do it
+		var layout = new GridBagLayout();
+		//noinspection BoundFieldAssignment
+		fileSizeListPanel = new JPanel(layout);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+		gbc.gridx = gbc.gridy = 0;
+		JButton plusButton = new JButton("+");
+		plusButton.addActionListener(actionEvent -> {
+			JButton source = (JButton) actionEvent.getSource();
+			GridBagConstraints gbc2 = new GridBagConstraints();
+			gbc2.anchor = GridBagConstraints.BASELINE_LEADING;
+			gbc2.gridx = 0;
+			gbc2.gridy = 1;
+			layout.setConstraints(source, gbc2);
+
+			gbc2.gridy = 0;
+			fileSizeListPanel.add(new JButton("-"), gbc2);
+			fileSizeListPanel.revalidate();
+		});
+		fileSizeListPanel.add(plusButton, gbc);
 	}
 }
