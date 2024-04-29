@@ -1,8 +1,8 @@
+#include "file.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "file.h"
 
 struct file **add_seed(
     struct file *f, struct file **files, int *size, struct peer *peer) {
@@ -52,7 +52,8 @@ struct file *seek_filename(char *key, struct file **files, int *size) {
 	return NULL;
 }
 
-struct file *create_file(char *name, long long int filesize, int piecesize, char *key) {
+struct file *create_file(
+    char *name, long long int filesize, int piecesize, char *key) {
 	struct file *f = malloc(sizeof(struct file));
 	f->name        = malloc(sizeof(char) * (strlen(name) + 1));
 	f->name        = strcpy(f->name, name);
@@ -82,6 +83,15 @@ void free_file(struct file *file) {
 	free(file);
 }
 
+int isnumber(char *str) {
+	int length = strlen(str);
+	for (int i = 0; i < length; i++) {
+		if (!(isdigit(str[i]))) {
+			return -1;
+		}
+	}
+	return 1;
+}
 
 int check_criteria(struct criteria *crit, struct file *f) {
 	// Check filename
@@ -96,20 +106,26 @@ int check_criteria(struct criteria *crit, struct file *f) {
 
 	// Check filesize
 	if (strcmp(crit->element, "filesize") == 0) {
+		if (!(isnumber(crit->value))) {
+			return -1;
+		}
 		switch (crit->comp) {
-		case EQ: return (atoi(crit->value) == f->filesize); break;
-		case LT: return (atoi(crit->value) > f->filesize); break;
-		case GT: return (atoi(crit->value) < f->filesize); break;
+		case EQ: return (atoll(crit->value) == f->filesize); break;
+		case LT: return (atoll(crit->value) > f->filesize); break;
+		case GT: return (atoll(crit->value) < f->filesize); break;
 		default: return -1; break;
 		}
 	}
 
 	// Check piecesize
 	if (strcmp(crit->element, "piecesize") == 0) {
+		if (!(isnumber(crit->value))) {
+			return -1;
+		}
 		switch (crit->comp) {
-		case EQ: return (atoi(crit->value) == f->piecesize); break;
-		case LT: return (atoi(crit->value) > f->piecesize); break;
-		case GT: return (atoi(crit->value) < f->piecesize); break;
+		case EQ: return (atoll(crit->value) == f->piecesize); break;
+		case LT: return (atoll(crit->value) > f->piecesize); break;
+		case GT: return (atoll(crit->value) < f->piecesize); break;
 		default: return -1; break;
 		}
 	}

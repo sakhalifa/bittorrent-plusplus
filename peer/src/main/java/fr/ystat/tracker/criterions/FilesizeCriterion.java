@@ -1,42 +1,13 @@
 package fr.ystat.tracker.criterions;
 
-public class FilesizeCriterion implements ICriterion{
-	private final long fileSize;
-	private final ComparisonType comparisonType;
+public class FilesizeCriterion extends AbstractSizeCriterion{
 
-	public FilesizeCriterion(long fileSize, ComparisonType comparisonType) {
-		this.fileSize = fileSize;
-		this.comparisonType = comparisonType;
+	public FilesizeCriterion(long size, ComparisonType comparisonType) {
+		super(size, comparisonType);
 	}
 
 	@Override
-	public String toString() {
-		String compStr = "";
-		switch(comparisonType){
-			case EQ:
-				compStr = "=";
-				break;
-			case LT:
-				compStr = "<";
-				break;
-			case GT:
-				compStr = ">";
-				break;
-			case GTE:
-				compStr = ">=";
-				break;
-			case LTE:
-				compStr = "<=";
-		}
-		return String.format("filesize%s\"%d\"", compStr, fileSize);
+	protected String getFieldName() {
+		return "filesize";
 	}
-
-	public enum ComparisonType{
-		EQ,
-		GTE,
-		LTE,
-		GT,
-		LT
-	}
-
 }

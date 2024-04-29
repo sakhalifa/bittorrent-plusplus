@@ -18,35 +18,61 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
 public class TrackerConnection {
 
-	private final AsynchronousSocketChannel channel;
+	private final AsynchronousSocketChannel announceUpdateChannel;
+	private final AsynchronousSocketChannel requestChannel;
 
 	public TrackerConnection(InetAddress trackerAddress, int port, Runnable onConnect) throws IOException {
-		this.channel = AsynchronousSocketChannel.open();
-		this.channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+		var trackerAddr = new InetSocketAddress(trackerAddress, port);
+		this.requestChannel = AsynchronousSocketChannel.open();
+		this.requestChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+
+		this.announceUpdateChannel = AsynchronousSocketChannel.open();
+		this.announceUpdateChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 		Logger.trace("Connecting to {}:{}", trackerAddress, port);
-		this.channel.connect(new InetSocketAddress(trackerAddress, port), this.channel, new TrackerConnectionHandler(onConnect));
+		this.announceUpdateChannel.connect(trackerAddr, this.announceUpdateChannel, new TrackerConnectionHandler(() -> {
+			this.requestChannel.connect(trackerAddr, null, new CompletionHandler<Void, Void>() {
+				@Override
+				public void completed(Void unused, Void unused2) {
+					onConnect.run();
+				}
+
+				@Override
+				public void failed(Throwable throwable, Void unused) {
+					Logger.error(throwable, "Could not connect to tracker!");
+					System.exit(1);
+				}
+			});
+			new Thread(() -> {
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException ignored) {
+				}
+				this.scheduleUpdates();
+			}).start();
+		}));
+
 	}
 
 	public void sendLook(LookCommand lc, Consumer<ListCommand> onSuccess, Consumer<Throwable> onFailure) {
-		GenericCommandHandler.sendCommand(this.channel, lc, ListCommand.class, onSuccess, onFailure);
+		GenericCommandHandler.sendCommand(this.requestChannel, lc, ListCommand.class, onSuccess, onFailure);
 	}
 
 	public void sendGetFile(GetFileCommand gfc, Consumer<PeersCommand> onSuccess, Consumer<Throwable> onFailure) {
-		GenericCommandHandler.sendCommand(this.channel, gfc, PeersCommand.class, onSuccess, onFailure);
+		GenericCommandHandler.sendCommand(this.requestChannel, gfc, PeersCommand.class, onSuccess, onFailure);
 	}
 
 	public void scheduleUpdates() {
-		var tc = this;
 		var update = new AnnounceCommand(Main.getConfigurationManager().peerPort(), FileInventory.getInstance().getAllFiles(), true);
-		GenericCommandHandler.sendCommand(this.channel, update, OkCommand.class,
+		GenericCommandHandler.sendCommand(this.announceUpdateChannel, update, OkCommand.class,
 				(unused) -> {
 					try {
-						Thread.sleep(30000);
-						tc.scheduleUpdates(); // avoid using this as it's ambiguous
+						Thread.sleep(Main.getConfigurationManager().updateTrackerIntervalMS());
+						this.scheduleUpdates();
 					} catch (InterruptedException ignored) {
 					}
 				},
@@ -54,7 +80,7 @@ public class TrackerConnection {
 					if (throwable instanceof ConnectionClosedByRemoteException) {
 						Logger.error("Tracker has gone down. Exiting...");
 						try {
-							channel.close();
+							announceUpdateChannel.close();
 						} catch (IOException ignored) {
 							System.exit(1);
 						}
@@ -62,8 +88,8 @@ public class TrackerConnection {
 					}
 					Logger.warn("There was a problem with the update command.");
 					try {
-						Thread.sleep(30000);
-						tc.scheduleUpdates(); // avoid using the 'this' keyword as it's ambiguous
+						Thread.sleep(Main.getConfigurationManager().updateTrackerIntervalMS());
+						this.scheduleUpdates();
 					} catch (InterruptedException ignored) {
 					}
 				});

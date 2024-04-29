@@ -21,6 +21,8 @@ public class ListParser<T> implements IParser<List<T>> {
 	public List<T> parse(String input) throws ParserException {
 		var splitted = input.split(" ");
 		List<T> toReturn = new ArrayList<>();
+		if(input.isEmpty())
+			return toReturn;
 		int idx = 0;
 		while(idx < splitted.length){
 			Pair<T, Integer> result = this.consumerFunction.apply(splitted, idx);

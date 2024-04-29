@@ -39,12 +39,7 @@ public class Main {
 		SwingUtilities.invokeLater(() -> {
 			cl.show(cards, "MAIN_FORM");
 		});
-		new Thread(() -> {
-			try {
-				Thread.sleep(30000);
-			} catch (InterruptedException ignored) {}
-			trackerConnection.scheduleUpdates();
-		}).start();
+
 
 	}
 
