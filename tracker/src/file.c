@@ -97,9 +97,9 @@ int check_criteria(struct criteria *crit, struct file *f) {
 	// Check filesize
 	if (strcmp(crit->element, "filesize") == 0) {
 		switch (crit->comp) {
-		case EQ: return (atoi(crit->value) == f->filesize); break;
-		case LT: return (atoi(crit->value) > f->filesize); break;
-		case GT: return (atoi(crit->value) < f->filesize); break;
+		case EQ: return (atoll(crit->value) == f->filesize); break;
+		case LT: return (atoll(crit->value) > f->filesize); break;
+		case GT: return (atoll(crit->value) < f->filesize); break;
 		default: return -1; break;
 		}
 	}
@@ -107,9 +107,9 @@ int check_criteria(struct criteria *crit, struct file *f) {
 	// Check piecesize
 	if (strcmp(crit->element, "piecesize") == 0) {
 		switch (crit->comp) {
-		case EQ: return (atoi(crit->value) == f->piecesize); break;
-		case LT: return (atoi(crit->value) > f->piecesize); break;
-		case GT: return (atoi(crit->value) < f->piecesize); break;
+		case EQ: return (atoll(crit->value) == f->piecesize); break;
+		case LT: return (atoll(crit->value) > f->piecesize); break;
+		case GT: return (atoll(crit->value) < f->piecesize); break;
 		default: return -1; break;
 		}
 	}
