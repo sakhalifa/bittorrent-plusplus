@@ -26,8 +26,7 @@ void test_parser_getfile() {
 void test_parser_announce() {
 	printf("\t%s", __func__);
 
-	char command[] = "announce listen 1005 seed [ImTheVeryLongName 1024 256 "
-	                 "ImTheKey] leech [Key2 key3]";
+	char command[] = "announce listen 1005 seed [ImTheVeryLongName 1024 256 ImTheKey] leech [Key2 key3]";
 
 	struct command *parsed = parsing(command);
 	assert(parsed != NULL);
