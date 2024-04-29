@@ -19,7 +19,7 @@ int main() {
 
 	// Test command.c
     printf("TEST COMMAND\n");
-	// test_command_announce();
+	test_command_announce();
 	test_command_getfile();
 	test_command_update();
 

@@ -6,8 +6,8 @@
 struct file {
 	char *name;
 	char *key;
-	int filesize;
-	int piecesize;
+	long long int filesize;
+	long long int piecesize;
 	int nb_peers;
 	struct peer **peers;
 };
@@ -41,7 +41,7 @@ struct file *seek_filename(char *key, struct file **files, int *size);
 
 /* Dynamically allocate a struct file
  */
-struct file *create_file(char *name, int filesize, int piecesize, char *key);
+struct file *create_file(char *name, long long int filesize, int piecesize, char *key);
 
 /* Free a struct file (and its attribute)
  */

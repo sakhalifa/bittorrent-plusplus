@@ -52,7 +52,7 @@ struct file *seek_filename(char *key, struct file **files, int *size) {
 	return NULL;
 }
 
-struct file *create_file(char *name, int filesize, int piecesize, char *key) {
+struct file *create_file(char *name, long long int filesize, int piecesize, char *key) {
 	struct file *f = malloc(sizeof(struct file));
 	f->name        = malloc(sizeof(char) * (strlen(name) + 1));
 	f->name        = strcpy(f->name, name);
@@ -119,20 +119,20 @@ int check_criteria(struct criteria *crit, struct file *f) {
 
 char *file_to_string(struct file *f) {
 	int size = strlen(f->key) + strlen(f->name) +
-	    snprintf(NULL, 0, "%d", f->filesize) +
-	    snprintf(NULL, 0, "%d", f->piecesize) + 4;
+	    snprintf(NULL, 0, "%lld", f->filesize) +
+	    snprintf(NULL, 0, "%lld", f->piecesize) + 4;
 	char *string = malloc(sizeof(char) * size);
 	strcpy(string, f->name);
 	strcat(string, " ");
-	char filesize_length = snprintf(NULL, 0, "%d", f->filesize) + 1;
+	char filesize_length = snprintf(NULL, 0, "%lld", f->filesize) + 1;
 	char *filesize       = malloc(sizeof(char) * filesize_length);
-	snprintf(filesize, filesize_length, "%d", f->filesize);
+	snprintf(filesize, filesize_length, "%lld", f->filesize);
 	strcat(string, filesize);
 	free(filesize);
 	strcat(string, " ");
-	char piecesize_length = snprintf(NULL, 0, "%d", f->piecesize) + 1;
+	char piecesize_length = snprintf(NULL, 0, "%lld", f->piecesize) + 1;
 	char *piecesize       = malloc(sizeof(char) * piecesize_length);
-	snprintf(piecesize, piecesize_length, "%d", f->piecesize);
+	snprintf(piecesize, piecesize_length, "%lld", f->piecesize);
 	strcat(string, piecesize);
 	free(piecesize);
 	strcat(string, " ");
