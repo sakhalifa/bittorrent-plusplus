@@ -102,7 +102,7 @@ void test_command_getfile() {
 	printf("\tOK\n");
 }
 
-void test_command_update() {
+void test_command_look() {
 	printf("\t%s", __func__);
 
 	int nb_files        = 4;
@@ -136,9 +136,7 @@ void test_command_update() {
 
 	char *res = look(*arg, files, &nb_files, p);
 
-
-	assert(strcmp(res,
-	    "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
+	assert(strcmp(res, "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
 
 	free_peer(p);
 	free(res);
@@ -154,5 +152,60 @@ void test_command_update() {
 	}
 	free(files);
 
+	printf("\tOK\n");
+}
+
+void test_command_update() {
+	printf("\t%s", __func__);
+
+	int nb_files        = 4;
+	struct file **files = malloc(sizeof(struct file *) * nb_files);
+	files[0]            = create_file("Name1", 1024, 256, "Key1");
+	files[1]            = create_file("Name2", 2048, 32, "Key2");
+	files[2]            = create_file("Name3", 2048, 16, "Key3");
+	files[3]            = create_file("Name4", 7171, 727, "Key7");
+	files[0]->nb_peers  = 1;
+	files[0]->peers     = malloc(sizeof(struct peer *));
+	files[0]->peers[0]  = create_peer("first", 1111);
+	files[1]->nb_peers  = 1;
+	files[1]->peers     = malloc(sizeof(struct peer *));
+	files[1]->peers[0]  = create_peer("first", 1111);
+	files[2]->nb_peers  = 1;
+	files[2]->peers     = malloc(sizeof(struct peer *));
+	files[2]->peers[0]  = create_peer("second", 2222);
+	files[3]->nb_peers  = 1;
+	files[3]->peers     = malloc(sizeof(struct peer *));
+	files[3]->peers[0]  = create_peer("first", 2222);
+
+	struct peer *p = create_peer("pizza", 0000);
+
+	struct update *arg = malloc(sizeof(struct update));
+	arg->nb_key        = 2;
+	arg->key_list      = malloc(sizeof(char *) * arg->nb_key);
+	arg->key_list[0]   = strdup("Key2");
+	arg->key_list[1]   = strdup("Key7");
+
+	char *res = update(*arg, files, &nb_files, p);
+
+	assert(strcmp(res, "ok") == 0);
+	assert(files[1]->nb_peers == 2);
+	assert(files[3]->nb_peers == 2);
+	assert(files[0]->nb_peers == 1);
+	assert(files[2]->nb_peers == 1);
+	assert(files[1]->peers[1]->port == 0000);
+	assert(files[3]->peers[1]->port == 0000);
+	assert(strcmp(files[1]->peers[1]->ip, "pizza") == 0);
+	assert(strcmp(files[3]->peers[1]->ip, "pizza") == 0);
+
+	for (int i = 0; i < arg->nb_key; i++) {
+		free(arg->key_list[i]);
+	}
+	free(arg->key_list);
+	free(arg);
+	for (int i = 0; i < nb_files; i++) {
+		free_file(files[i]);
+	}
+	free(files);
+	free_peer(p);
 	printf("\tOK\n");
 }

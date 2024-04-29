@@ -12,7 +12,7 @@ char *announce(
 	for (int i = 0; i < arg.nb_key; i++) {
 		files = add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-	return "ok\n";
+	return "ok";
 }
 
 char *getfile(
@@ -55,7 +55,7 @@ char *update(
 	for (i = 0; i < arg.nb_key; i++) {
 		add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-	return "ok\n";
+	return "ok";
 }
 
 char *look(
