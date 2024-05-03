@@ -49,7 +49,7 @@ public class TrackerConnection {
 			});
 			new Thread(() -> {
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(Main.getConfigurationManager().updateTrackerIntervalMS());
 				} catch (InterruptedException ignored) {
 				}
 				this.scheduleUpdates();
