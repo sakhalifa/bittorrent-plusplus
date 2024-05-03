@@ -4,11 +4,10 @@ import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class AtomicBitSet implements Cloneable {
+public class AtomicBitSet {
 	private final AtomicIntegerArray array;
 	@Getter
 	private final int length;
@@ -77,8 +76,96 @@ public class AtomicBitSet implements Cloneable {
 		return ByteBuffer.wrap(res);
 	}
 
+	public ExistingBitSetIterator existingIterator(){
+		return new ExistingBitSetIterator(this);
+	}
+
 	@Override
 	public String toString() {
 		return SerializationUtils.CHARSET.decode(toByteBuffer()).toString();
+	}
+
+	public NotExistingBitSetIterator notExistingIterator() {
+		return new NotExistingBitSetIterator(this);
+	}
+
+	public static class ExistingBitSetIterator implements Iterator<Long>, Iterable<Long>{
+		private long cursorPosition;
+		private final AtomicBitSet bs;
+
+
+		private void moveToFirstExisting(){
+			int arrayIdx = (int) (cursorPosition / 32);
+			while(arrayIdx < bs.array.length() && bs.array.get(arrayIdx) == 0){
+				arrayIdx++;
+			}
+			long cursor = Math.max(arrayIdx * 32L, cursorPosition + 1);
+			while(cursor < bs.getLength() && !bs.get(cursor))
+				cursor++;
+			cursorPosition = cursor;
+		}
+
+		public ExistingBitSetIterator(AtomicBitSet bs){
+			cursorPosition = 0;
+			this.bs = bs;
+			this.moveToFirstExisting();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return cursorPosition < bs.getLength();
+		}
+
+		@Override
+		public Long next() {
+			long cursor = cursorPosition++;
+			this.moveToFirstExisting();
+			return cursor;
+		}
+
+		@Override
+		public Iterator<Long> iterator() {
+			return this;
+		}
+	}
+
+	public static class NotExistingBitSetIterator implements Iterator<Long>, Iterable<Long>{
+		private long cursorPosition;
+		private final AtomicBitSet bs;
+
+
+		private void moveToFirstNotExisting(){
+			int arrayIdx = (int) (cursorPosition / 32);
+			while(arrayIdx < bs.array.length() && bs.array.get(arrayIdx) == -1){
+				arrayIdx++;
+			}
+			long cursor = Math.max(arrayIdx * 32L, cursorPosition + 1);
+			while(cursor < bs.getLength() && bs.get(cursor))
+				cursor++;
+			cursorPosition = cursor;
+		}
+
+		public NotExistingBitSetIterator(AtomicBitSet bs){
+			cursorPosition = 0;
+			this.bs = bs;
+			this.moveToFirstNotExisting();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return cursorPosition < bs.getLength();
+		}
+
+		@Override
+		public Long next() {
+			long cursor = cursorPosition;
+			this.moveToFirstNotExisting();
+			return cursor;
+		}
+
+		@Override
+		public Iterator<Long> iterator() {
+			return this;
+		}
 	}
 }
