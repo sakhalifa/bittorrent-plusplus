@@ -42,6 +42,8 @@ public class GreedyDownloader extends FileDownloader {
         pc.getPeers().stream().forEach(
                 it -> {
                     InterestedCommand ic = new InterestedCommand(super.targetHash);
+
+
                 }
         );
     }
