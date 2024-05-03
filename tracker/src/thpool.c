@@ -5,31 +5,6 @@
 
 #include "thpool.h"
 
-typedef struct task_queue {
-	int count;
-	task_t *front;
-	task_t *rear;
-	pthread_mutex_t m_rw;
-} task_queue_t;
-
-typedef struct task {
-	int task_id;
-	void *p_func;
-	task_t *prev;
-} task_t;
-
-typedef struct thread {
-	int id;
-	pthread_t *p_thread;
-	pthread_mutex_t m_thread;
-} thread_t;
-
-typedef struct th_pool {
-	int size;
-	thread_t **threads;
-	task_queue_t queue;
-} th_pool_t;
-
 task_queue_t *task_queue_init() {
 	task_queue_t *q = malloc(sizeof(task_queue_t));
 	q->count        = 0;
@@ -40,7 +15,7 @@ task_queue_t *task_queue_init() {
 	return q;
 }
 
-void *task_queue_push(task_queue_t *q, task_t *t) {
+void task_queue_push(task_queue_t *q, task_t *t) {
 	pthread_mutex_lock(&(q->m_rw));
 	if (q->count == 0) {
 		q->front = t;
@@ -61,6 +36,7 @@ task_t *task_queue_pull(task_queue_t *q) {
 		q->count = 0;
 		t        = q->front;
 		q->front = NULL;
+		q->rear  = NULL;
 	}
 	if (q->count > 1 && q->front != NULL) {
 		q->count--;
@@ -81,26 +57,56 @@ void task_queue_clear(task_queue_t *q) {
 	q->rear  = NULL;
 }
 
-void *task_destroy(task_queue_t *q) {
+void task_destroy(task_queue_t *q) {
 	task_queue_clear(q);
 	free(q);
 }
 
 void *thread_function(void *arg) {
+	printf("threads are running");
 	return NULL;
 }
 
-th_pool_t *th_pool_init(int size) {
-	th_pool_t *th_pool = malloc(sizeof(th_pool_t));
-	pthread_t **pool    = malloc(sizeof(thread_t) * size);
-	for (int i = 0; i < size; i++) {
-		thread_t *thread = malloc(sizeof(thread));
-		pthread_create(pool[i], NULL, (void * (*)(void *))thread_function, NULL);
-		thread->id = i;
-        thread->p_thread = pool[i];
-	}
+void thread_init(thpool_t *thpool, thread_t **pool, int id) {
+	*pool = malloc(sizeof(thread_t));
+	(*pool)->id = id;
+	pthread_create((*pool)->p_thread, NULL, (void *(*)(void *))thread_function, NULL);
 }
 
+void thread_destroy(thread_t *thread) {
+	pthread_mutex_destroy(&thread->m_thread);
+	free(thread->p_thread);
+}
 
+thpool_t *thpool_init(int size) {
+	thpool_t *thpool    = malloc(sizeof(thpool_t));
+	thread_t **pool = malloc(sizeof(thread_t) * size);
+	thpool->threads = pool;
 
+	for (int i = 0; i < size; i++) {
+		thread_init(thpool, &thpool->threads[i], i);
+	}
 
+	return thpool;
+}
+
+void thpool_add_work(thpool_t *thpool, void (*task)(void *), void *arg) {
+	task_t *new_task = malloc(sizeof(task_t));
+	new_task->p_func = task;
+	new_task->arg    = arg;
+
+	task_queue_push(&thpool->queue, new_task);
+}
+
+void thpool_destroy(thpool_t *thpool) {
+
+	for (int i = 0; i < thpool->size; i++) {
+		thread_destroy(thpool->threads[i]);
+	}
+
+	while (thpool->size != 0) {
+		free(task_queue_pull(&thpool->queue));
+	}
+
+	free(thpool);
+}

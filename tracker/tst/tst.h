@@ -20,4 +20,10 @@ void test_command_look();
 void test_command_getfile();
 void test_command_update();
 
+void test_task_queue_init();
+void test_task_queue_push();
+void test_task_queue_pull();
+void test_task_queue_clear();
+
+
 #endif
