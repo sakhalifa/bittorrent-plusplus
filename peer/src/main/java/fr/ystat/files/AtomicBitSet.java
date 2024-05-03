@@ -37,6 +37,22 @@ public class AtomicBitSet {
 			array.set(i, bitSet.array.get(i));
 	}
 
+	/**
+	 * Returns a new atomicbitset that is the result of the nor operation between the two sets.
+	 * This semantically returns the bitset that has all the elements that are inside neither other sets.
+	 * @param bs another bitset
+	 * @return the bitset that has all the elements that are inside neither other sets;
+	 */
+	public AtomicBitSet nor(AtomicBitSet bs){
+		if(bs.getLength() != this.getLength())
+			throw new IllegalArgumentException("Invalid BitSet!");
+		AtomicBitSet result = new AtomicBitSet(this.getLength());
+		for(int i = 0; i < array.length(); i++){
+			result.array.set(i, ~(array.get(i) | bs.array.get(i)));
+		}
+		return result;
+	}
+
 	public void fill() {
 		for(int i = 0; i < array.length(); i++)
 			array.set(i, -1);
@@ -80,13 +96,13 @@ public class AtomicBitSet {
 		return new ExistingBitSetIterator(this);
 	}
 
+	public NotExistingBitSetIterator notExistingIterator() {
+		return new NotExistingBitSetIterator(this);
+	}
+
 	@Override
 	public String toString() {
 		return SerializationUtils.CHARSET.decode(toByteBuffer()).toString();
-	}
-
-	public NotExistingBitSetIterator notExistingIterator() {
-		return new NotExistingBitSetIterator(this);
 	}
 
 	public static class ExistingBitSetIterator implements Iterator<Long>, Iterable<Long>{
@@ -106,7 +122,7 @@ public class AtomicBitSet {
 		}
 
 		public ExistingBitSetIterator(AtomicBitSet bs){
-			cursorPosition = 0;
+			cursorPosition = -1;
 			this.bs = bs;
 			this.moveToFirstExisting();
 		}
@@ -118,7 +134,7 @@ public class AtomicBitSet {
 
 		@Override
 		public Long next() {
-			long cursor = cursorPosition++;
+			long cursor = cursorPosition;
 			this.moveToFirstExisting();
 			return cursor;
 		}
@@ -146,7 +162,7 @@ public class AtomicBitSet {
 		}
 
 		public NotExistingBitSetIterator(AtomicBitSet bs){
-			cursorPosition = 0;
+			cursorPosition = -1;
 			this.bs = bs;
 			this.moveToFirstNotExisting();
 		}
