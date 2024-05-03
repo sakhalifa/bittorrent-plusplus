@@ -51,15 +51,11 @@ char *getfile(
 
 char *update(
     struct update arg, struct file **files, int *nb_file, struct peer *peer) {
-	int i, j;
+	int i;
 	for (i = 0; i < arg.nb_key; i++) {
-		for (j = 0; i < *nb_file; i++) {
-			if (!strcmp(files[j]->name, arg.key_list[i])) {
-				add_leech(arg.key_list[i], files, nb_file, peer);
-			}
-		}
+		add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-	return "ok\n";
+	return "ok";
 }
 
 char *look(

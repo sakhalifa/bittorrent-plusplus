@@ -68,19 +68,20 @@ int main(int argc, char const *argv[]) {
 	struct file **files = malloc(sizeof(struct file *) * (*nb_file));
 	struct peer *peers[MAX_PEER + 3];
 
-	struct file *f2 = malloc(sizeof(struct file));
-	f2->filesize    = 1024;
-	f2->piecesize   = 256;
-	f2->key         = strdup("MeKey");
-	f2->name        = strdup("heheheha");
-	f2->nb_peers    = 1;
+	// this will work for now, find another solution later
+	struct file *root_file = malloc(sizeof(struct file));
+	root_file->filesize    = 42;
+	root_file->piecesize   = 42;
+	root_file->key         = strdup("root");
+	root_file->name        = strdup("root");
+	root_file->nb_peers    = 1;
 
-	struct peer* p2 = malloc(sizeof(struct peer)); 
-	p2->ip = strdup("127.0.0.1");
-	p2->port = 3000;
-	f2->peers = &p2;
+	struct peer *root_peer = malloc(sizeof(struct peer));
+	root_peer->ip          = strdup("0.0.0.0");
+	root_peer->port        = 42;
+	root_file->peers       = &root_peer;
 
-	files[0] = f2;
+	files[0] = root_file;
 
 	// main loop
 	for (;;) {
@@ -135,7 +136,11 @@ int main(int argc, char const *argv[]) {
 								send(i, response, strlen(response), 0);
 								break;
 							case LOOK:
-								/* code */
+								response =
+								    announce(*(struct announce *)c->command_arg,
+								        files, nb_file, peers[i]);
+								send(i, response, strlen(response), 0);
+								break;
 								break;
 							case GETFILE:
 								response =
