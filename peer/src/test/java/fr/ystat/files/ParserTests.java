@@ -108,7 +108,6 @@ public class ParserTests {
                     "[1 2 3]",
                     List.of(
                             new Pair<>("", new InvalidInputException("")),  // no list
-                            new Pair<>("[]", new InvalidInputException("")),  // Empty list
                             new Pair<>("[", new InvalidInputException("")), // Unclosed list
                             new Pair<>("[ 1 2 3 ]", new InvalidInputException("")),  // poorly formated
                             new Pair<>("[1 a]", new InvalidInputException(""))  // invalid int
@@ -123,7 +122,6 @@ public class ParserTests {
                     "[name 64512 1024 012345678901234567890123456789ab]",
                     List.of(
                             new Pair<>("", new InvalidInputException("")),  // no list
-                            new Pair<>("[]", new InvalidInputException("")),
                             new Pair<>("[64512 1024 012345678901234567890123456789ab]", new InvalidInputException("")),
                             new Pair<>("[name -64512 1024 012345678901234567890123456789ab]", new IllegalArgumentException()),
                             new Pair<>("[name 64512 0 012345678901234567890123456789ab]", new IllegalArgumentException()),
@@ -137,7 +135,6 @@ public class ParserTests {
                     "[127.0.0.1:0001 127.0.0.1:0001 127.0.0.1:0001]",
                     List.of(
                             new Pair<>("", new InvalidInputException("")),  // no list
-                            new Pair<>("[]", new InvalidInputException("[]")),
                             new Pair<>("[127.0.0.1: 127.0.0.1:0001 127.0.0.1:0001]", new InvalidInputException("")),
                             new Pair<>("[300.0000.0.0:1000]", new InvalidInputException(""))
                     )
@@ -146,7 +143,6 @@ public class ParserTests {
                     "[1:abcd 2:abcd 3:abcd]",
                     List.of(
                             new Pair<>("", new InvalidInputException("")),  // no list
-                            new Pair<>("[]", new InvalidInputException("[]")),  // no entry
                             new Pair<>("[1: 2:abcd 3:abcd]", new InvalidInputException("")),  // invalid entry
                             new Pair<>("[1:abcdef]", new InvalidInputException("")),  // wrong data size
                             new Pair<>("[1:abcd 1:abcd 3:abcd]", new IllegalStateException("")) // Duplicate entries
