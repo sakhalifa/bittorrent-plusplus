@@ -2,11 +2,9 @@ package fr.ystat.files;
 
 import fr.ystat.Main;
 import fr.ystat.files.exceptions.PartitionException;
-import lombok.Getter;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.BitSet;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
@@ -39,6 +37,14 @@ public class DownloadedFile extends StockedFile {
 
     public DownloadedFile(String name, long size, long pieceSize, String hash) {
         this(new FileProperties(name, size, pieceSize, hash));
+    }
+
+    public void addPartition(int partitionIndex, byte[] data, Consumer<Throwable> onFailure) {
+        try {
+            addPartition(partitionIndex, data);
+        } catch (PartitionException | IOException e) {
+            onFailure.accept(e);
+        }
     }
 
     public void addPartition(int partitionIndex, byte[] data) throws PartitionException, IOException {

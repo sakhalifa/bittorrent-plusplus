@@ -43,12 +43,12 @@ public class AtomicBitSet {
 	 * @param bs another bitset
 	 * @return the bitset that has all the elements that are inside neither other sets;
 	 */
-	public AtomicBitSet nor(AtomicBitSet bs){
+	public AtomicBitSet andNot(AtomicBitSet bs){
 		if(bs.getLength() != this.getLength())
 			throw new IllegalArgumentException("Invalid BitSet!");
 		AtomicBitSet result = new AtomicBitSet(this.getLength());
 		for(int i = 0; i < array.length(); i++){
-			result.array.set(i, ~(array.get(i) | bs.array.get(i)));
+			result.array.set(i, array.get(i) & ~bs.array.get(i));
 		}
 		return result;
 	}
@@ -61,6 +61,18 @@ public class AtomicBitSet {
 	public void empty(){
 		for(int i = 0; i < array.length(); i++)
 			array.set(i, 0);
+	}
+
+	/**
+	 * Copy the state of the given bitset
+	 *
+	 * @param bs the bitset to copy
+	 */
+	public void update(AtomicBitSet bs){
+		if(bs.getLength() != this.getLength())
+			throw new IllegalArgumentException("Invalid BitSet!");
+		for(int i = 0; i < array.length(); i++)
+			this.array.set(i, bs.array.get(i));
 	}
 
 	public void set(long n) {

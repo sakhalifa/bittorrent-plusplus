@@ -1,56 +1,44 @@
 package fr.ystat.peer.leecher;
 
 import fr.ystat.Main;
-import fr.ystat.files.DownloadedFile;
-import fr.ystat.files.StockedFile;
 import fr.ystat.handlers.GenericCommandHandler;
+import fr.ystat.peer.commands.DataCommand;
+import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
 import fr.ystat.peer.commands.InterestedCommand;
-import fr.ystat.peer.seeder.Seeder;
-import fr.ystat.tracker.handlers.TrackerConnectionHandler;
-import fr.ystat.util.Pair;
-import lombok.Getter;
+import fr.ystat.peer.leecher.downloader.SeederAttachedDownload;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class SeederConnection {
 	private final InetSocketAddress seederAddress;
 	private final AsynchronousSocketChannel haveChannel;
 	private final AsynchronousSocketChannel requestChannel;
+	private final Future<Void> requestChannelFuture;
 
-	private Thread haveScheduler;
+	private final Set<SeederAttachedDownload> downloads = new HashSet<>();
+	private void addDownload(SeederAttachedDownload download){
+		this.downloads.add(download);
+	}
+	private void removeDownload(SeederAttachedDownload download){
+		this.downloads.remove(download);
+	}
 
-	static class ConnectionEntry {
-		@Getter
-		private final SeederConnection connection;
-		private int connectionAmount = 1;
 
-        ConnectionEntry(SeederConnection connection) {
-            this.connection = connection;
-        }
+	static final private ConcurrentHashMap<InetSocketAddress, SeederConnection> seederConnections = new ConcurrentHashMap<>();
+	static final private ReentrantLock seederConnectionLock = new ReentrantLock();
 
-		public void incrementUsage(){
-			connectionAmount += 1;
-		}
-
-		public void decrementUsage(){
-			connectionAmount -= 1;
-		}
-    }
-
-	// Value is : connection to amount of time that the connection is currently used
-	static final private HashMap<InetSocketAddress, ConnectionEntry> seederConnections = new HashMap<>();
 
 	private SeederConnection(InetSocketAddress seederAddress) throws IOException {
 		this.seederAddress = seederAddress;
@@ -62,69 +50,109 @@ public class SeederConnection {
 
 		Logger.trace("Connecting to {}:{}", this.seederAddress.getHostString(), this.seederAddress.getPort());
 
-		this.requestChannel.connect(this.seederAddress);
-		this.haveChannel.connect(this.seederAddress);
-	}
+		this.requestChannelFuture = this.requestChannel.connect(this.seederAddress);
 
-	public static SeederConnection newConnection(InetSocketAddress seederAddress) throws IOException {
-		var entry = seederConnections.get(seederAddress);
+		this.haveChannel.connect(this.seederAddress, null, new CompletionHandler<Void, Void>() {
 
-		if (entry == null){
-			SeederConnection connection = new SeederConnection(seederAddress);
-			seederConnections.put(seederAddress, new ConnectionEntry(connection));
-			return connection;
-		}
-		entry.incrementUsage();
-		return entry.connection;
-	}
+			@Override
+			public void completed(Void result, Void attachment) {
+				new Thread(() -> {
+					while (true){
+						try {
+							Thread.sleep(Main.getConfigurationManager().updatePeersIntervalMS());
+						} catch (InterruptedException ignored) {}
+						notifySeeders();
+                    }
+				}).start();
+			}
 
-	public void close() throws IOException {
-		var entry = seederConnections.get(this.seederAddress);
-		if (entry == null){
-			// If it is already closed maybe ?
-			// I mean just give up already
-			return;
-		}
-		entry.decrementUsage();
-		if (entry.connectionAmount == 0){
-			seederConnections.remove(this.seederAddress);
-			entry.connection.requestChannel.close();
-			entry.connection.haveChannel.close();
-		}
-
-	}
-
-	public void beginDownload(DownloadedFile file, Consumer<HaveCommand> onEachSuccess, Consumer<Throwable> onEachFailure) throws IOException {
-		if (haveScheduler.isAlive()){
-			throw new IllegalStateException("Only one download at a time by connection is allowed!");
-		}
-		haveScheduler = new Thread(() -> {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					// It is not busy waiting, it is fine, interval should be in second time unit
-					Thread.sleep(Main.getConfigurationManager().updatePeersIntervalMS());
-				} catch (InterruptedException ignored) {
-				}
-				// launch have update
-				HaveCommand hc = new HaveCommand(file);
-				GenericCommandHandler.sendCommand(this.haveChannel, hc, HaveCommand.class, onEachSuccess, onEachFailure);
+			@Override
+			public void failed(Throwable exc, Void attachment) {
 
 			}
 		});
-		haveScheduler.start();
-
 	}
 
-	public void endDownload(){
-		haveScheduler.interrupt();
+	private void ensureChannelAreReady(Consumer<Throwable> onFailure){
+		if (this.requestChannelFuture.isDone()) return;
+		synchronized (this.requestChannelFuture){
+			if (this.requestChannelFuture.isDone()) return;
+			try {
+				this.requestChannelFuture.get();
+			} catch (InterruptedException | ExecutionException e) {
+				onFailure.accept(e);
+			}
+		}
+	}
+
+	public static SeederConnection newConnection(InetSocketAddress seederAddress, SeederAttachedDownload download) throws IOException {
+		SeederConnection connection = seederConnections.get(seederAddress);
+		if (connection == null){
+			// TODO : maybe prevent new connection from being established if we are already saturated
+			// Semaphore time ? :D
+			connection = new SeederConnection(seederAddress);
+			seederConnections.put(seederAddress, connection);
+			return connection;
+		}
+
+		synchronized (seederConnections.get(seederAddress)) {
+			seederConnections.get(seederAddress).addDownload(download);
+		}
+
+		return connection;
+	}
+
+	public void close(SeederAttachedDownload download, Consumer<Throwable> onFailure) {
+        try {
+            close(download);
+        } catch (IOException e) {
+            onFailure.accept(e);
+        }
+    }
+
+	public void close(SeederAttachedDownload download) throws IOException {
+		synchronized (this) {
+			removeDownload(download);
+			if (downloads.isEmpty()){
+				requestChannel.close();
+				haveChannel.close();
+				try {
+					seederConnectionLock.lock();
+					seederConnections.remove(this.seederAddress);
+				} finally {
+					seederConnectionLock.unlock();
+				}
+			}
+		}
+	}
+
+	private void notifySeeders() {
+		// For each download we are currently doing, get our most recent bitset of the partitions of the local file
+		// and send it happily to our seeders
+		synchronized (this) {
+			downloads.forEach(it -> {
+				HaveCommand hc = new HaveCommand(it.getTarget().getProperties().getHash(), it.getTarget().getBitSet());
+				sendHave(hc, haveCommand -> {
+					// Update local download latestBitSets
+					it.updateLatestBitSet(haveCommand.getBitSet());
+				}, throwable -> {});
+			});
+		}
 	}
 
 	public void sendInterested(InterestedCommand ic, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure){
+		ensureChannelAreReady(onFailure);
 		GenericCommandHandler.sendCommand(this.requestChannel, ic, HaveCommand.class, onSuccess, onFailure);
 	}
 
-	public void sendGetPieces(){
+	public void sendGetPieces(GetPiecesCommand gpc, Consumer<DataCommand> onSuccess, Consumer<Throwable> onFailure){
+		ensureChannelAreReady(onFailure);
+		GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure);
+	}
 
+	public void sendHave(HaveCommand hc, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure){
+		ensureChannelAreReady(onFailure);
+		GenericCommandHandler.sendCommand(this.haveChannel, hc, HaveCommand.class, onSuccess, onFailure);
 	}
 
 
