@@ -11,6 +11,7 @@ import fr.ystat.peer.leecher.exceptions.FileAlreadyDownloadingException;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousSocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,8 @@ public class SeederAttachedDownload {
     private final AtomicBitSet latestBitSet;
 
     private final int max_piece_amount_by_message;
+
+    private final AsynchronousSocketChannel requestChannel;
 
     @Getter
     private final DownloadedFile target;
@@ -58,15 +61,9 @@ public class SeederAttachedDownload {
                     synchronized (latestBitSet) {
                         latestBitSet.update(haveCommand.getBitSet());
                     }
-                    continueWhileDownloadIsNotOver();
+                    progress();
                 },
                 this::giveUp);
-    }
-
-    private void continueWhileDownloadIsNotOver(){
-        while (!isDownloadOver){
-            progress();
-        }
     }
 
     private void progress() {
