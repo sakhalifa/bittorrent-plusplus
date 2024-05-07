@@ -7,6 +7,10 @@ import lombok.Getter;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.BitSet;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class DownloadedFile extends StockedFile {
 
@@ -20,11 +24,13 @@ public class DownloadedFile extends StockedFile {
     private final AtomicBitSet bitSet;
     private final File[] partitionedFiles;
     private final File parentFolder;
+    private final Queue<BiConsumer<StockedFile, Integer>> onPartitionAddedListeners;
 
 
     public DownloadedFile(FileProperties properties) throws IllegalArgumentException {
         super(properties);
 
+        this.onPartitionAddedListeners = new ConcurrentLinkedQueue<>();
         this.bitSet = new AtomicBitSet(properties);
         this.partitionedFiles = new File[bitSet.getLength()];
         parentFolder = new File(downloadFolder, getProperties().getName());
@@ -50,6 +56,9 @@ public class DownloadedFile extends StockedFile {
 
         partitionedFiles[partitionIndex] = addedPartition;
         bitSet.set(partitionIndex);
+        for(var listener : onPartitionAddedListeners) {
+            listener.accept(this, partitionIndex);
+        }
     }
 
     /**
@@ -81,5 +90,13 @@ public class DownloadedFile extends StockedFile {
     @Override
     public String toString() {
         return this.getProperties().getHash();
+    }
+
+    public void addOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener){
+        onPartitionAddedListeners.add(listener);
+    }
+
+    public void removeOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener){
+        onPartitionAddedListeners.remove(listener);
     }
 }

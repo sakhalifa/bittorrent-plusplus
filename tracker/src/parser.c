@@ -5,7 +5,7 @@
 #include "file.h"
 #include "parser.h"
 
-void* error_command(char *error) {
+void *error_command(char *error) {
 	printf("Error: unknown command\n");
 	if (error != NULL) {
 		printf("\t%s\n", error);
@@ -26,7 +26,7 @@ char **string_to_list_key(
 	return list;
 }
 
-struct file ** string_to_list_file(
+struct file **string_to_list_file(
     char *string, struct file **files, int *size, const char *separator) {
 	char *file = strtok(string, separator); // Filename
 	while (file != NULL) {
@@ -53,7 +53,7 @@ enum comparator convert_char_comparator(char c) {
 	return 0;
 }
 
-struct criteria ** string_to_list_criteria(
+struct criteria **string_to_list_criteria(
     char *string, struct criteria *crit[], int *size, const char *separator) {
 	char *save_p;
 	char *criteria = strtok_r(string, separator, &save_p);
@@ -77,9 +77,8 @@ struct criteria ** string_to_list_criteria(
 		           &save_p); // set criteria to next elmt (since strtok was used, need
 		// to reset to string)
 	}
-	return  crit;
+	return crit;
 }
-
 
 struct command *parsing(char *command) {
 	const char *separator         = " "; // Separator in command is blank " "
@@ -98,7 +97,7 @@ struct command *parsing(char *command) {
 		// Check if next word is "listen", otherwise error
 		char *check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "listen") != 0) {
-			return error_command(NULL);
+			return error_command("listen");
 		}
 
 		int port = atoi(strtok(NULL, separator));
@@ -106,7 +105,7 @@ struct command *parsing(char *command) {
 		// Check if next word is "seed", otherwise error
 		check = strtok(NULL, separator);
 		if (check == NULL || strcmp(check, "seed") != 0) {
-			return error_command(NULL);
+			return error_command("seed");
 		}
 
 		char *string_files = strtok(NULL, right_bracket_separator);
@@ -172,7 +171,7 @@ struct command *parsing(char *command) {
 		struct criteria **crit =
 		    malloc(sizeof(struct criteria *)); // TO BE FREED (and its elements)
 		int size = 0;
-		crit = string_to_list_criteria(criterias, crit, &size, separator);
+		crit     = string_to_list_criteria(criterias, crit, &size, separator);
 
 		struct command *command = malloc(sizeof(struct command));
 

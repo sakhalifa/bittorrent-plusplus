@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Seeder {
 	private final AsynchronousServerSocketChannel serverChannel;
-	private AtomicInteger numberOfConnections;
+	private final AtomicInteger numberOfConnections;
 
 	public Seeder() throws IOException {
 		this.numberOfConnections = new AtomicInteger(0);
