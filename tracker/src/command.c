@@ -18,6 +18,11 @@ char *announce(
 char *getfile(
     struct getfile arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct file *file = seek_filename(arg.key, files, nb_file);
+	if (file == NULL) {
+		char * r = malloc(sizeof(char) * (strlen("peers")) + 1);
+		strcpy(r, "peers");
+		return r;
+	}
 	int length        = 9 + strlen(arg.key);
 	for (int i = 0; i < file->nb_peers; i++) {
 		length += strlen(file->peers[i]->ip) +
@@ -63,20 +68,22 @@ char *look(
 	struct file **res = NULL;
 	int size_res      = 0;
 
-	for (int i = 0; i < *nb_file; i++) {
-		int passed = 0;
-		for (int j = 0; j < arg.nb_criteria; j++) {
-			passed += check_criteria(arg.criteria[j], files[i]);
-		}
-		if (passed == arg.nb_criteria) {
-			if (size_res == 0) {
-				res = malloc(sizeof(struct file *));
-			} else {
-				res = realloc(res, sizeof(struct file *) * (size_res + 1));
+	if (arg.nb_criteria != 0) {
+		for (int i = 0; i < *nb_file; i++) {
+			int passed = 0;
+			for (int j = 0; j < arg.nb_criteria; j++) {
+				passed += check_criteria(arg.criteria[j], files[i]);
 			}
-			res[size_res] = create_file(files[i]->name, files[i]->filesize,
-			    files[i]->piecesize, files[i]->key);
-			size_res++;
+			if (passed == arg.nb_criteria) {
+				if (size_res == 0) {
+					res = malloc(sizeof(struct file *));
+				} else {
+					res = realloc(res, sizeof(struct file *) * (size_res + 1));
+				}
+				res[size_res] = create_file(files[i]->name, files[i]->filesize,
+				    files[i]->piecesize, files[i]->key);
+				size_res++;
+			}
 		}
 	}
 

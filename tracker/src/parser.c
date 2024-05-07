@@ -167,18 +167,20 @@ struct command *parsing(char *command) {
 
 		criterias = strtok(criterias, left_bracket_separator);
 
-		// Get criteria list
-		struct criteria **crit =
-		    malloc(sizeof(struct criteria *)); // TO BE FREED (and its elements)
-		int size = 0;
-		crit     = string_to_list_criteria(criterias, crit, &size, separator);
-
 		struct command *command = malloc(sizeof(struct command));
 
 		struct look *arg = malloc(sizeof(struct look));
 
+		int size = 0;
+		if (criterias != NULL) {
+			// Get criteria list
+			struct criteria **crit = malloc(
+			    sizeof(struct criteria *)); // TO BE FREED (and its elements)
+			crit = string_to_list_criteria(criterias, crit, &size, separator);
+			arg->criteria = crit;
+		}
+
 		arg->nb_criteria = size;
-		arg->criteria    = crit;
 
 		command->command_name = LOOK;
 		command->command_arg  = (void *)arg;
@@ -242,7 +244,8 @@ struct command *parsing(char *command) {
 			size_update += strlen(leech_key);
 		}
 
-		char *all_key = malloc(sizeof(char) * (size_update + 1 + ((seed_key != NULL) && (leech_key != NULL))));
+		char *all_key = malloc(sizeof(char) *
+		    (size_update + 1 + ((seed_key != NULL) && (leech_key != NULL))));
 		if (seed_key != NULL) {
 			strcpy(all_key, seed_key);
 		}
@@ -250,12 +253,13 @@ struct command *parsing(char *command) {
 			if (seed_key != NULL) {
 				strcat(all_key, " ");
 				strcat(all_key, leech_key);
-			}
-			else {
+			} else {
 				strcpy(all_key, leech_key);
 			}
 		}
-		// Need to manually put \0 in the string if there are no seed/leech keys in order to "initialize" all_key string. Otherwise it's filled with random bullsh*t
+		// Need to manually put \0 in the string if there are no seed/leech keys
+		// in order to "initialize" all_key string. Otherwise it's filled with
+		// random bullsh*t
 		if ((seed_key == NULL) && (leech_key == NULL)) {
 			all_key[0] = '\0';
 		}
