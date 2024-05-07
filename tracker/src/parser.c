@@ -255,6 +255,7 @@ struct command *parsing(char *command) {
 				strcpy(all_key, leech_key);
 			}
 		}
+		// Need to manually put \0 in the string if there are no seed/leech keys in order to "initialize" all_key string. Otherwise it's filled with random bullsh*t
 		if ((seed_key == NULL) && (leech_key == NULL)) {
 			all_key[0] = '\0';
 		}
