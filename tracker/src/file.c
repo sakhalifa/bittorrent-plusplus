@@ -8,7 +8,6 @@ struct file **add_seed(
     struct file *f, struct file **files, int *size, struct peer *peer) {
 	struct file *file = seek_filename(f->key, files, size);
 	if (file == NULL) {
-		printf("\non l'a pas ff\n");
 		*size += 1;
 		files = realloc(files, sizeof(struct file *) * (*size));
 		files[*size - 1] =
