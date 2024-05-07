@@ -2,6 +2,7 @@ package fr.ystat.peer.leecher.downloader;
 
 import fr.ystat.files.DownloadedFile;
 import fr.ystat.files.FileInventory;
+import fr.ystat.files.FileProperties;
 import fr.ystat.files.StockedFile;
 import fr.ystat.peer.leecher.exceptions.DownloadException;
 import fr.ystat.peer.leecher.exceptions.InvalidDownloaderException;
@@ -16,15 +17,13 @@ public abstract class FileDownloader {
         this.target = target;
     }
 
-    public static FileDownloader create(String targetHash, Class<? extends FileDownloader> downloaderClass) throws DownloadException {
-        StockedFile localVersion = FileInventory.getInstance().getStockedFile(targetHash);
-        if (null == localVersion){
-            // Should not happen as our GUI does not allow it, however, for more complete implementation, you may
-            // want to do the following steps
-            // Retrieve the file info from the tracker
-            // Send a look command.
+    public static FileDownloader create(FileProperties properties, Class<? extends FileDownloader> downloaderClass) throws DownloadException {
 
-            throw new DownloadException("Downloading without local file information is not yet allowed");
+        StockedFile localVersion = FileInventory.getInstance().getStockedFile(properties.getHash());
+        if (localVersion == null){
+            // Add it :D
+            localVersion = new DownloadedFile(properties);
+            FileInventory.getInstance().addStockedFile(localVersion);
         }
 
         if (!(localVersion instanceof DownloadedFile file_to_download)){
@@ -38,5 +37,5 @@ public abstract class FileDownloader {
     }
 
 
-    abstract void startDownload() throws DownloadException;
+    public abstract void startDownload() throws DownloadException;
 }

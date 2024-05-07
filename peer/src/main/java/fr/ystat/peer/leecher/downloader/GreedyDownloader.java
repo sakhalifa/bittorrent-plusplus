@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class GreedyDownloader extends FileDownloader {
 
-    protected GreedyDownloader(DownloadedFile target) {
+    public GreedyDownloader(DownloadedFile target) {
         super(target);
         reservationBitSet = target.getBitSet();
     }
@@ -20,7 +20,7 @@ public class GreedyDownloader extends FileDownloader {
     private final AtomicBitSet reservationBitSet;
 
     @Override
-    void startDownload() throws DownloadException {
+    public void startDownload() throws DownloadException {
         sendTrackerFileRequest();
     }
 

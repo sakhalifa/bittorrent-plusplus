@@ -4,17 +4,22 @@ import fr.ystat.Main;
 import fr.ystat.files.AtomicBitSet;
 import fr.ystat.files.DownloadedFile;
 import fr.ystat.files.exceptions.PartitionException;
+import fr.ystat.handlers.GenericCommandHandler;
+import fr.ystat.peer.commands.DataCommand;
 import fr.ystat.peer.commands.GetPiecesCommand;
+import fr.ystat.peer.commands.HaveCommand;
 import fr.ystat.peer.commands.InterestedCommand;
 import fr.ystat.peer.leecher.SeederConnection;
 import fr.ystat.peer.leecher.exceptions.FileAlreadyDownloadingException;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SeederAttachedDownload {
     private SeederConnection connection;
@@ -31,7 +36,11 @@ public class SeederAttachedDownload {
 
     private boolean isDownloadOver = false;
 
-    public SeederAttachedDownload(DownloadedFile target, AtomicBitSet reservationBitSet) {
+    public SeederAttachedDownload(DownloadedFile target, AtomicBitSet reservationBitSet) throws IOException {
+
+        this.requestChannel = AsynchronousSocketChannel.open();
+        this.requestChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+
         this.max_piece_amount_by_message =
                 (int) (Main.getConfigurationManager().maxMessageSize() / target.getProperties().getSize());
         this.target = target;
@@ -48,6 +57,9 @@ public class SeederAttachedDownload {
 
     public void startDownloadOnSeeder(SeederConnection connection) throws FileAlreadyDownloadingException {
         if (connection == null) throw new IllegalArgumentException("connection cannot be null");
+
+        this.requestChannel.connect(connection.getSeederAddress());
+
         if (this.connection != null) throw new FileAlreadyDownloadingException();
         this.connection = connection;
 
@@ -56,14 +68,22 @@ public class SeederAttachedDownload {
         // tryDownloadABit with the latest version of the seeder's AtomicBitSet.
 
         InterestedCommand ic = new InterestedCommand(target.getProperties().getHash());
-        connection.sendInterested(ic,
-                haveCommand -> {
-                    synchronized (latestBitSet) {
-                        latestBitSet.update(haveCommand.getBitSet());
-                    }
-                    progress();
-                },
-                this::giveUp);
+        sendInterested(ic,
+            haveCommand -> {
+                synchronized (latestBitSet) {
+                    latestBitSet.update(haveCommand.getBitSet());
+                }
+                progress();
+            },
+            this::giveUp);
+    }
+
+    public void sendInterested(InterestedCommand ic, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure) {
+        GenericCommandHandler.sendCommand(this.requestChannel, ic, HaveCommand.class, onSuccess, onFailure);
+    }
+
+    public void sendGetPieces(GetPiecesCommand gpc, Consumer<DataCommand> onSuccess, Consumer<Throwable> onFailure) {
+        GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure);
     }
 
     private void progress() {
@@ -83,7 +103,7 @@ public class SeederAttachedDownload {
 
         GetPiecesCommand gpc = new GetPiecesCommand(target.getProperties().getHash(), toDownload);
 
-        connection.sendGetPieces(gpc, dataCommand -> {
+        sendGetPieces(gpc, dataCommand -> {
             dataCommand.getDataMap().forEach(
                     (index, data) -> {
                         // If we add a partition, and it yields an error.
@@ -108,6 +128,10 @@ public class SeederAttachedDownload {
 
         }, this::giveUp);
 
+    }
+
+    public void close() throws IOException {
+        this.requestChannel.close();
     }
 
     private List<Integer> extractValues(Iterator<Long> iterator, int N){

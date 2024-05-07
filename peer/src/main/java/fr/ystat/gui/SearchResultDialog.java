@@ -6,6 +6,9 @@ import fr.ystat.files.DownloadedFile;
 import fr.ystat.files.FileInventory;
 import fr.ystat.files.FileProperties;
 import fr.ystat.files.StockedFile;
+import fr.ystat.peer.leecher.downloader.FileDownloader;
+import fr.ystat.peer.leecher.downloader.GreedyDownloader;
+import fr.ystat.peer.leecher.exceptions.DownloadException;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -93,7 +96,15 @@ public class SearchResultDialog extends JDialog {
 					button.setEnabled(false);
 					this.pack();
 					System.out.println(properties);
-				});
+
+                    try {
+                        FileDownloader downloader = FileDownloader.create(properties, GreedyDownloader.class);
+						downloader.startDownload();
+                    } catch (DownloadException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                });
 			}
 
 			innerPane.add(button, constraints);

@@ -7,6 +7,7 @@ import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
 import fr.ystat.peer.commands.InterestedCommand;
 import fr.ystat.peer.leecher.downloader.SeederAttachedDownload;
+import lombok.Getter;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -21,26 +22,21 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class SeederConnection {
+    @Getter
     private final InetSocketAddress seederAddress;
     private final AsynchronousSocketChannel haveChannel;
-    private final Future<Void> requestChannelFuture;
 
     static final private ConcurrentHashMap<InetSocketAddress, SeederConnection> seederConnections = new ConcurrentHashMap<>();
 
     private final Set<SeederAttachedDownload> downloads = ConcurrentHashMap.newKeySet();
 
-
     private SeederConnection(InetSocketAddress seederAddress) throws IOException {
         this.seederAddress = seederAddress;
-        this.requestChannel = AsynchronousSocketChannel.open();
-        this.requestChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
         this.haveChannel = AsynchronousSocketChannel.open();
         this.haveChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
         Logger.trace("Connecting to {}:{}", this.seederAddress.getHostString(), this.seederAddress.getPort());
-
-        this.requestChannelFuture = this.requestChannel.connect(this.seederAddress);
 
         this.haveChannel.connect(this.seederAddress, null, new CompletionHandler<Void, Void>() {
 
@@ -62,18 +58,6 @@ public class SeederConnection {
 
             }
         });
-    }
-
-    private void ensureChannelAreReady(Consumer<Throwable> onFailure) {
-        if (this.requestChannelFuture.isDone()) return;
-        synchronized (this.requestChannelFuture) {
-            if (this.requestChannelFuture.isDone()) return;
-            try {
-                this.requestChannelFuture.get();
-            } catch (InterruptedException | ExecutionException e) {
-                onFailure.accept(e);
-            }
-        }
     }
 
     public static SeederConnection newConnection(InetSocketAddress seederAddress, SeederAttachedDownload download) throws IOException {
@@ -102,10 +86,10 @@ public class SeederConnection {
     }
 
     public void close(SeederAttachedDownload download) throws IOException {
+        download.close();
 		downloads.remove(download);
          if (downloads.isEmpty()) {
              synchronized (this) {
-                 requestChannel.close();
                  haveChannel.close();
              }
             seederConnections.remove(this.seederAddress);
@@ -125,18 +109,7 @@ public class SeederConnection {
         });
     }
 
-    public void sendInterested(InterestedCommand ic, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure) {
-        ensureChannelAreReady(onFailure);
-        GenericCommandHandler.sendCommand(this.requestChannel, ic, HaveCommand.class, onSuccess, onFailure);
-    }
-
-    public void sendGetPieces(GetPiecesCommand gpc, Consumer<DataCommand> onSuccess, Consumer<Throwable> onFailure) {
-        ensureChannelAreReady(onFailure);
-        GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure);
-    }
-
     public void sendHave(HaveCommand hc, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure) {
-        ensureChannelAreReady(onFailure);
         GenericCommandHandler.sendCommand(this.haveChannel, hc, HaveCommand.class, onSuccess, onFailure);
     }
 

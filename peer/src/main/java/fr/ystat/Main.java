@@ -108,6 +108,5 @@ public class Main {
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
 				Main.configurationManager.trackerPort(),
 				Main::handleTrackerConnection);
-
 	}
 }
