@@ -39,6 +39,8 @@ int main(int argc, char const *argv[]) {
 	if (socketfd < 0)
 		error("ERROR opening socket");
 
+	fprintf(stderr, "\nsocketfd %d\n", socketfd);
+
 	bzero((char *)&serv_addr, sizeof(serv_addr));
 	port = atoi(argv[1]);
 
@@ -92,6 +94,8 @@ int main(int argc, char const *argv[]) {
 		}
 		for (int i = 3; i <= fdmax; i++) {
 			if (FD_ISSET(i, &read_fds)) {
+				fprintf(stderr, "\nsocketfd %d\n", i);
+
 				if (i == socketfd) {
 					// handle new connections
 					int addrlen = sizeof cli_addr;
@@ -134,25 +138,28 @@ int main(int argc, char const *argv[]) {
 								    announce(*(struct announce *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
+								send(i, "\n", 1, 0);
 								break;
 							case LOOK:
 								response =
-								    announce(*(struct announce *)c->command_arg,
+								    look(*(struct look *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
-								break;
+								send(i, "\n", 1, 0);
 								break;
 							case GETFILE:
 								response =
 								    getfile(*(struct getfile *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
+								send(i, "\n", 1, 0);
 								break;
 							case UPDATE:
 								response =
 								    update(*(struct update *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
+								send(i, "\n", 1, 0);
 								break;
 							default: break;
 							}

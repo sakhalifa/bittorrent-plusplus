@@ -20,10 +20,13 @@ void test_command_look();
 void test_command_getfile();
 void test_command_update();
 
+
+// THREAD POOL
 void test_task_queue_init();
 void test_task_queue_push();
 void test_task_queue_pull();
 void test_task_queue_clear();
-
+void test_thpool_init();
+void test_thpool_add_work();
 
 #endif

@@ -233,11 +233,31 @@ struct command *parsing(char *command) {
 		seed_key  = strtok(seed_key, left_bracket_separator);
 		leech_key = strtok(leech_key, left_bracket_separator);
 
-		char *all_key =
-		    malloc(sizeof(char) * (strlen(seed_key) + strlen(leech_key) + 2));
-		strcpy(all_key, seed_key);
-		strcat(all_key, " ");
-		strcat(all_key, leech_key);
+		long int size_update = 0;
+
+		if (seed_key != NULL) {
+			size_update += strlen(seed_key);
+		}
+		if (leech_key != NULL) {
+			size_update += strlen(leech_key);
+		}
+
+		char *all_key = malloc(sizeof(char) * (size_update + 1 + ((seed_key != NULL) && (leech_key != NULL))));
+		if (seed_key != NULL) {
+			strcpy(all_key, seed_key);
+		}
+		if (leech_key != NULL) {
+			if (seed_key != NULL) {
+				strcat(all_key, " ");
+				strcat(all_key, leech_key);
+			}
+			else {
+				strcpy(all_key, leech_key);
+			}
+		}
+		if ((seed_key == NULL) && (leech_key == NULL)) {
+			all_key[0] = '\0';
+		}
 
 		// Get all keys
 		char **list = malloc(sizeof(char *)); // TO BE FREED (and its elements)

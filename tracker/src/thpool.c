@@ -63,25 +63,31 @@ void task_destroy(task_queue_t *q) {
 }
 
 void *thread_function(void *arg) {
-	printf("threads are running");
 	return NULL;
 }
 
 void thread_init(thpool_t *thpool, thread_t **pool, int id) {
-	*pool = malloc(sizeof(thread_t));
+	*pool       = malloc(sizeof(thread_t));
 	(*pool)->id = id;
-	pthread_create((*pool)->p_thread, NULL, (void *(*)(void *))thread_function, NULL);
+	pthread_create(
+	    &((*pool)->p_thread), NULL, (void *(*)(void *))thread_function, NULL);
+	pthread_detach(
+	    (*pool)->p_thread); // should fix memory leak ? (possibly lost)
 }
 
 void thread_destroy(thread_t *thread) {
-	pthread_mutex_destroy(&thread->m_thread);
-	free(thread->p_thread);
+	// pthread_mutex_destroy(&thread->m_thread); // cause valgrind errors
+	free(thread);
 }
 
 thpool_t *thpool_init(int size) {
-	thpool_t *thpool    = malloc(sizeof(thpool_t));
-	thread_t **pool = malloc(sizeof(thread_t) * size);
-	thpool->threads = pool;
+	thpool_t *thpool = malloc(sizeof(thpool_t));
+	thread_t **pool  = malloc(sizeof(thread_t) * size);
+	thpool->threads  = pool;
+	thpool->size     = size;
+
+	task_queue_t *queue = task_queue_init();
+	thpool->queue       = *queue;
 
 	for (int i = 0; i < size; i++) {
 		thread_init(thpool, &thpool->threads[i], i);
@@ -90,7 +96,7 @@ thpool_t *thpool_init(int size) {
 	return thpool;
 }
 
-void thpool_add_work(thpool_t *thpool, void (*task)(void *), void *arg) {
+void thpool_add_work(thpool_t *thpool, void *(*task)(void *), void *arg) {
 	task_t *new_task = malloc(sizeof(task_t));
 	new_task->p_func = task;
 	new_task->arg    = arg;
@@ -104,9 +110,10 @@ void thpool_destroy(thpool_t *thpool) {
 		thread_destroy(thpool->threads[i]);
 	}
 
-	while (thpool->size != 0) {
+	while (thpool->queue.count != 0) {
 		free(task_queue_pull(&thpool->queue));
 	}
 
+	free(thpool->threads);
 	free(thpool);
 }

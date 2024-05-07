@@ -132,20 +132,43 @@ void test_command_look() {
 	arg->criteria[0] = crit;
 	arg->criteria[1] = crit2;
 
+	struct criteria *crit3 = malloc(sizeof(struct criteria));
+	crit3->comp            = EQ;
+	crit3->element         = malloc(sizeof(char) * (strlen("filename") + 1));
+	strcpy(crit3->element, "filename");
+	crit3->value = malloc(sizeof(char) * (strlen("Name3") + 1));
+	strcpy(crit3->value, "Name3");
+
+	struct look *arg2 = malloc(sizeof(struct look));
+	arg2->nb_criteria  = 1;
+	arg2->criteria     = malloc(sizeof(struct criteria *) * arg2->nb_criteria);
+	arg2->criteria[0]  = crit3;
+
 	struct peer *p = create_peer("pizza", 0000);
 
 	char *res = look(*arg, files, &nb_files, p);
 
 	assert(strcmp(res, "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
 
+	char *res2 = look(*arg2, files, &nb_files, p);
+
+	assert(strcmp(res2, "list [Name3 2048 16 Key3]") == 0);
+
 	free_peer(p);
 	free(res);
+	free(res2);
 
 	for (int i = 0; i < arg->nb_criteria; i++) {
 		free_criteria(arg->criteria[i]);
 	}
 	free(arg->criteria);
 	free(arg);
+
+	for (int i = 0; i < arg2->nb_criteria; i++) {
+		free_criteria(arg2->criteria[i]);
+	}
+	free(arg2->criteria);
+	free(arg2);
 
 	for (int i = 0; i < nb_files; i++) {
 		free_file(files[i]);

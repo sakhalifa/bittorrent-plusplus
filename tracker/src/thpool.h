@@ -15,13 +15,13 @@ typedef struct task_queue {
 
 typedef struct task {
 	void *arg;
-	void *p_func;
+	void *(*p_func)(void *arg);  /* function pointer */
 	task_t *prev;
 } task_t;
 
 typedef struct thread {
 	int id;
-	pthread_t *p_thread;
+	pthread_t p_thread;
 	pthread_mutex_t m_thread;
 } thread_t;
 
@@ -31,11 +31,10 @@ typedef struct thpool {
 	task_queue_t queue;
 } thpool_t;
 
-
 thpool_t *thpool_init(int num_threads);
-void thpool_add_work(thpool_t *thpool, void (*task)(void *), void *arg);
+void thpool_add_work(thpool_t *thpool, void *(*task)(void *), void *arg) ;
 void thpool_destroy(thpool_t *thpool);
-void thread_destroy(thread_t* thread);
+void thread_destroy(thread_t *thread);
 
 // remove this before release
 task_queue_t *task_queue_init();

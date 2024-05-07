@@ -26,7 +26,8 @@ void test_parser_getfile() {
 void test_parser_announce() {
 	printf("\t%s", __func__);
 
-	char command[] = "announce listen 1005 seed [ImTheVeryLongName 1024 256 ImTheKey] leech [Key2 key3]";
+	char command[] = "announce listen 1005 seed [ImTheVeryLongName 1024 256 "
+	                 "ImTheKey] leech [Key2 key3]";
 
 	struct command *parsed = parsing(command);
 	assert(parsed != NULL);
@@ -110,6 +111,47 @@ void test_parser_update() {
 	free(arg->key_list);
 	free(arg);
 	free(parsed);
+
+	char command2[]         = "update seed [Key1] leech []";
+	struct command *parsed2 = parsing(command2);
+	struct update *arg2     = (struct update *)parsed2->command_arg;
+
+	assert(arg2->nb_key == 1);
+	assert(strcmp(arg2->key_list[0], "Key1") == 0);
+
+	for (int i = 0; i < arg2->nb_key; i++) {
+		free(arg2->key_list[i]);
+	}
+
+	free(arg2->key_list);
+	free(arg2);
+	free(parsed2);
+
+	char command3[]         = "update seed [] leech [Key1]";
+	struct command *parsed3 = parsing(command3);
+	struct update *arg3     = (struct update *)parsed3->command_arg;
+
+	assert(arg3->nb_key == 1);
+	assert(strcmp(arg3->key_list[0], "Key1") == 0);
+
+	for (int i = 0; i < arg3->nb_key; i++) {
+		free(arg3->key_list[i]);
+	}
+
+	free(arg3->key_list);
+	free(arg3);
+	free(parsed3);
+
+
+	char command4[]         = "update seed [] leech []";
+	struct command *parsed4 = parsing(command4);
+	struct update *arg4     = (struct update *)parsed4->command_arg;
+
+	assert(arg4->nb_key == 0);
+
+	free(arg4->key_list);
+	free(arg4);
+	free(parsed4);
 
 	printf("\tOK\n");
 }

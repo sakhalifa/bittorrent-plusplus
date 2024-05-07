@@ -29,6 +29,8 @@ int main() {
 	test_task_queue_push();
 	test_task_queue_pull();
 	test_task_queue_clear();
-	
+	test_thpool_init();
+	test_thpool_add_work();
+
 	return 0;
 }

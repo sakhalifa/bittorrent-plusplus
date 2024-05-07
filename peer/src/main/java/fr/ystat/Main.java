@@ -4,7 +4,6 @@ import fr.ystat.config.IConfigurationManager;
 import fr.ystat.config.JsonConfigurationManager;
 import fr.ystat.config.exceptions.ConfigException;
 import fr.ystat.files.CompletedFile;
-import fr.ystat.files.DownloadedFile;
 import fr.ystat.files.FileInventory;
 import fr.ystat.gui.LoadingForm;
 import fr.ystat.gui.MainForm;
@@ -15,7 +14,6 @@ import lombok.Getter;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -39,8 +37,6 @@ public class Main {
 		SwingUtilities.invokeLater(() -> {
 			cl.show(cards, "MAIN_FORM");
 		});
-
-
 	}
 
 	private static void validateConfiguration(IConfigurationManager config) {
@@ -101,14 +97,17 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		configurationManager = new JsonConfigurationManager();
 		validateConfiguration(configurationManager);
-		FileInventory.getInstance().addStockedFile(
-				CompletedFile.fromLocalFile(new File("./file_a.dat"), 2048L)
-		);
-		FileInventory.getInstance().addStockedFile(
-				CompletedFile.fromLocalFile(new File("./bee_movie.txt"), 2048L)
-		);
+		for (String arg : args) {
+			FileInventory.getInstance().addStockedFile(
+					CompletedFile.fromLocalFile(new File("./" + arg), 2048L)
+			);
+		}
 		seeder = new Seeder();
-		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"), 6666, Main::handleTrackerConnection);
+
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
+		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
+				Main.configurationManager.trackerPort(),
+				Main::handleTrackerConnection);
+
 	}
 }

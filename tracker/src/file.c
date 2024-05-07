@@ -96,12 +96,12 @@ int isnumber(char *str) {
 int check_criteria(struct criteria *crit, struct file *f) {
 	// Check filename
 	if (strcmp(crit->element, "filename") == 0 && crit->comp == EQ) {
-		return strcmp(crit->value, f->name);
+		return strcmp(crit->value, f->name) == 0;
 	}
 
 	// Check key
 	if (strcmp(crit->element, "key") == 0 && crit->comp == EQ) {
-		return strcmp(crit->value, f->key);
+		return strcmp(crit->value, f->key) == 0;
 	}
 
 	// Check filesize
