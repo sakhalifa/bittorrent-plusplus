@@ -8,6 +8,7 @@ struct file **add_seed(
     struct file *f, struct file **files, int *size, struct peer *peer) {
 	struct file *file = seek_filename(f->key, files, size);
 	if (file == NULL) {
+		printf("\non l'a pas ff\n");
 		*size += 1;
 		files = realloc(files, sizeof(struct file *) * (*size));
 		files[*size - 1] =
@@ -24,9 +25,7 @@ struct file **add_seed(
 		return NULL;
 	}
 
-	file->nb_peers++;
-	file->peers = realloc(file->peers, sizeof(struct peer *) * file->nb_peers);
-	file->peers[file->nb_peers - 1] = create_peer(peer->ip, peer->port);
+	add_leech(f->key, files, size, peer);
 	return files;
 }
 
@@ -35,6 +34,12 @@ struct file **add_leech(
 	struct file *file = seek_filename(key, files, size);
 	if (file == NULL) {
 		return NULL; // File not found
+	}
+
+	for (int i = 0; i < file->nb_peers; i++) {
+		if (peer->port == file->peers[i]->port && strcmp(peer->ip, file->peers[i]->ip) == 0) {
+			return NULL;
+		}
 	}
 
 	file->nb_peers++;

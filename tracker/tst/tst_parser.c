@@ -84,6 +84,15 @@ void test_parser_look() {
 	free(arg);
 	free(parsed);
 
+	char command2[] = "look []";
+	struct command *parsed2 = parsing(command2);
+	struct look *arg2 = (struct look *)parsed2->command_arg;
+
+	assert(arg2->nb_criteria == 0);
+
+	free(arg2);
+	free(parsed2);
+
 	printf("\tOK\n");
 }
 
