@@ -19,6 +19,8 @@ public final class GenericCommandHandler {
 																 Class<T> expectedReturnCommandClass,
 																 Consumer<T> onFinished,
 																 Consumer<Throwable> onFailed){
+
+		System.out.println("Sent " + commandToSend.serialize());
 		channel.write(SerializationUtils.toByteBuffer(commandToSend), channel, new CompletionHandler<>() {
 			@Override
 			public void completed(Integer bytesWritten, AsynchronousSocketChannel channel) {

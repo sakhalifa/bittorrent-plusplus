@@ -31,9 +31,14 @@ public class AnnounceCommand implements ISendableCommand {
 	public String serialize() {
 		Stream<DownloadedFile> partialFiles = SerializationUtils.filterByType(seedingFiles.stream(), DownloadedFile.class);
 		Stream<CompletedFile> completeFiles = SerializationUtils.filterByType(seedingFiles.stream(), CompletedFile.class);
+		if (isUpdate){
+			return String.format(
+					"update seed %s leech %s",
+					SerializationUtils.streamToString(completeFiles),
+					SerializationUtils.streamToString(partialFiles));
+		}
 		return String.format(
-				"%s listen %d seed %s leech %s",
-				isUpdate ? "update" : "announce",
+				"announce listen %d seed %s leech %s",
 				port,
 				SerializationUtils.streamToString(completeFiles),
 				SerializationUtils.streamToString(partialFiles));

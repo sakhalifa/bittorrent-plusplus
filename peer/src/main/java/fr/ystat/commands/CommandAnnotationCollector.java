@@ -57,7 +57,6 @@ public final class CommandAnnotationCollector {
 	public static IReceivableCommand beginParsing(String input) throws ParserException {
 		input = input.substring(0, input.length() - 1); // Only remove last \n. No trimming as it tends to break the command "have"
 		String commandName = getCommandName(input);
-//		System.out.println("Command name : " + commandName);
 		return getCommandParser(commandName).parse(input);
 	}
 
