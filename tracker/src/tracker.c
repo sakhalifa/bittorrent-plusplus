@@ -138,28 +138,28 @@ int main(int argc, char const *argv[]) {
 								    announce(*(struct announce *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								send(i, "\n\n", 2, 0);
 								break;
 							case LOOK:
 								response =
 								    look(*(struct look *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								send(i, "\n\n", 2, 0);
 								break;
 							case GETFILE:
 								response =
 								    getfile(*(struct getfile *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								send(i, "\n\n", 2, 0);
 								break;
 							case UPDATE:
 								response =
 								    update(*(struct update *)c->command_arg,
 								        files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								send(i, "\n\n", 2, 0);
 								break;
 							default: break;
 							}
