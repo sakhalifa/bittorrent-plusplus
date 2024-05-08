@@ -31,6 +31,9 @@ public class Main {
 
 	public static void handleTrackerConnection() {
 		seeder.serve();
+		if (cards == null){
+			createAndShowGUI();
+		}
 		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
 		frame.pack();
 		CardLayout cl = (CardLayout) cards.getLayout();
@@ -108,5 +111,6 @@ public class Main {
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
 				Main.configurationManager.trackerPort(),
 				Main::handleTrackerConnection);
+
 	}
 }
