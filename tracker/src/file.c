@@ -98,6 +98,11 @@ int isnumber(char *str) {
 }
 
 int check_criteria(struct criteria *crit, struct file *f) {
+	// Check comparator is not unknown
+	if (crit->comp == -1) {
+		return 0;
+	}
+
 	// Check filename
 	if (strcmp(crit->element, "filename") == 0 && crit->comp == EQ) {
 		return strcmp(crit->value, f->name) == 0;
@@ -110,7 +115,7 @@ int check_criteria(struct criteria *crit, struct file *f) {
 
 	// Check filesize
 	if (strcmp(crit->element, "filesize") == 0) {
-		if (!(isnumber(crit->value))) {
+		if (!(isnumber(crit->value)) || strcmp(crit->value, "") == 0) {
 			return -1;
 		}
 		switch (crit->comp) {
@@ -123,7 +128,7 @@ int check_criteria(struct criteria *crit, struct file *f) {
 
 	// Check piecesize
 	if (strcmp(crit->element, "piecesize") == 0) {
-		if (!(isnumber(crit->value))) {
+		if (!(isnumber(crit->value)) || strcmp(crit->value, "") == 0) {
 			return -1;
 		}
 		switch (crit->comp) {

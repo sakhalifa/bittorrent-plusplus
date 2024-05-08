@@ -94,8 +94,6 @@ int main(int argc, char const *argv[]) {
 		}
 		for (int i = 3; i <= fdmax; i++) {
 			if (FD_ISSET(i, &read_fds)) {
-				fprintf(stderr, "\nsocketfd %d\n", i);
-
 				if (i == socketfd) {
 					// handle new connections
 					int addrlen = sizeof cli_addr;
@@ -130,6 +128,7 @@ int main(int argc, char const *argv[]) {
 						struct command *c;
 						char *response;
 						buffer[n - 2] = '\0';
+						fprintf(stderr, "socket %d: \"%s\"\n", i, buffer);
 						if ((c = parsing(buffer)) != NULL) {
 							count_error[i] = 0;
 							switch (c->command_name) {
@@ -141,9 +140,8 @@ int main(int argc, char const *argv[]) {
 								send(i, "\n", 1, 0);
 								break;
 							case LOOK:
-								response =
-								    look(*(struct look *)c->command_arg,
-								        files, nb_file, peers[i]);
+								response = look(*(struct look *)c->command_arg,
+								    files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
 								send(i, "\n", 1, 0);
 								break;
