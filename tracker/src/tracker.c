@@ -129,7 +129,7 @@ int main(int argc, char const *argv[]) {
 					} else {
 						struct command *c;
 						char *response;
-						buffer[n - 2] = '\0';
+						buffer[n - 1] = '\0';
 						if ((c = parsing(buffer)) != NULL) {
 							count_error[i] = 0;
 							switch (c->command_name) {
