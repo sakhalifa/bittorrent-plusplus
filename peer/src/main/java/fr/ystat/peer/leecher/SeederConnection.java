@@ -2,10 +2,7 @@ package fr.ystat.peer.leecher;
 
 import fr.ystat.Main;
 import fr.ystat.handlers.GenericCommandHandler;
-import fr.ystat.peer.commands.DataCommand;
-import fr.ystat.peer.commands.GetPiecesCommand;
 import fr.ystat.peer.commands.HaveCommand;
-import fr.ystat.peer.commands.InterestedCommand;
 import fr.ystat.peer.leecher.downloader.SeederAttachedDownload;
 import lombok.Getter;
 import org.tinylog.Logger;
@@ -17,8 +14,6 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class SeederConnection {
@@ -36,7 +31,7 @@ public class SeederConnection {
         this.haveChannel = AsynchronousSocketChannel.open();
         this.haveChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
-        Logger.trace("Connecting to {}:{}", this.seederAddress.getHostString(), this.seederAddress.getPort());
+        Logger.trace("[HAVE CHANNEL] Connecting to {}:{}", this.seederAddress.getHostString(), this.seederAddress.getPort());
 
         this.haveChannel.connect(this.seederAddress, null, new CompletionHandler<Void, Void>() {
 
@@ -73,7 +68,7 @@ public class SeederConnection {
         synchronized (seederConnections.get(seederAddress)) {
             seederConnections.get(seederAddress).downloads.add(download);
         }
-
+        Logger.trace("Established new connection to " + seederAddress.getHostName());
         return connection;
     }
 
@@ -86,10 +81,12 @@ public class SeederConnection {
     }
 
     public void close(SeederAttachedDownload download) throws IOException {
+
         download.close();
 		downloads.remove(download);
          if (downloads.isEmpty()) {
              synchronized (this) {
+                 Logger.trace("Closing connection to " + this.seederAddress.getHostName());
                  haveChannel.close();
              }
             seederConnections.remove(this.seederAddress);

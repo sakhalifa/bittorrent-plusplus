@@ -1,5 +1,5 @@
 {
-  "peerPort": 5697,
+  "peerPort": 5698,
   "trackerPort": 6666,
   "trackerIP": "127.0.0.1",
   "maxLeechers": 100,

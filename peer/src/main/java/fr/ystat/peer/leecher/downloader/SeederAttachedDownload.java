@@ -12,10 +12,12 @@ import fr.ystat.peer.commands.InterestedCommand;
 import fr.ystat.peer.leecher.SeederConnection;
 import fr.ystat.peer.leecher.exceptions.FileAlreadyDownloadingException;
 import lombok.Getter;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -58,24 +60,35 @@ public class SeederAttachedDownload {
     public void startDownloadOnSeeder(SeederConnection connection) throws FileAlreadyDownloadingException {
         if (connection == null) throw new IllegalArgumentException("connection cannot be null");
 
-        this.requestChannel.connect(connection.getSeederAddress());
-
         if (this.connection != null) throw new FileAlreadyDownloadingException();
         this.connection = connection;
+        Logger.trace("[REQUEST CHANNEL][file: {}] Connecting to {}:{}",
+                this.target.getProperties().getName(),
+                this.connection.getSeederAddress().getHostString(),
+                this.connection.getSeederAddress().getPort());
+        this.requestChannel.connect(connection.getSeederAddress(), null, new CompletionHandler<Void, Void>() {
+            @Override
+            public void completed(Void result, Void attachment) {
+                InterestedCommand ic = new InterestedCommand(target.getProperties().getHash());
+                sendInterested(ic,
+                        haveCommand -> {
+                            synchronized (latestBitSet) {
+                                latestBitSet.update(haveCommand.getBitSet());
+                                Logger.trace("Updating latest bitset");
+                            }
+                            progress();
+                        },
+                        (t) -> {});
+            }
+
+            @Override
+            public void failed(Throwable exc, Void attachment) {}
+        });
 
         // This will handle the first answer of haveCommand.
         // We are (mainly) interested in the AtomicBitSet of the seeder. Hence, we should try to trigger
         // tryDownloadABit with the latest version of the seeder's AtomicBitSet.
 
-        InterestedCommand ic = new InterestedCommand(target.getProperties().getHash());
-        sendInterested(ic,
-            haveCommand -> {
-                synchronized (latestBitSet) {
-                    latestBitSet.update(haveCommand.getBitSet());
-                }
-                progress();
-            },
-            this::giveUp);
     }
 
     public void sendInterested(InterestedCommand ic, Consumer<HaveCommand> onSuccess, Consumer<Throwable> onFailure) {
@@ -97,6 +110,8 @@ public class SeederAttachedDownload {
         }
 
         if (toDownload.isEmpty()){
+            Logger.trace("Nothing to download, closing attachedDownload");
+            connection.close(this, this::giveUp);
             isDownloadOver = true;
             return;
         }
@@ -131,6 +146,7 @@ public class SeederAttachedDownload {
     }
 
     public void close() throws IOException {
+        Logger.trace("Stopping seederAttachedDownload of " + this.getTarget().getProperties().getName());
         this.requestChannel.close();
     }
 

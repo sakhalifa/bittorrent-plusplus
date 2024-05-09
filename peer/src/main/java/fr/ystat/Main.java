@@ -98,7 +98,14 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		configurationManager = new JsonConfigurationManager();
+
+		// Simple trick to set up leecher and seeder on 2 different port.
+		if (args.length == 0) {
+			configurationManager = new JsonConfigurationManager("config2.json");
+		} else {
+			configurationManager = new JsonConfigurationManager();
+		}
+
 		validateConfiguration(configurationManager);
 		for (String arg : args) {
 			FileInventory.getInstance().addStockedFile(

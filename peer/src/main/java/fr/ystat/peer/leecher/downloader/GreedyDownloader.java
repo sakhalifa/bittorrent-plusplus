@@ -7,6 +7,7 @@ import fr.ystat.peer.leecher.SeederConnection;
 import fr.ystat.peer.leecher.exceptions.DownloadException;
 import fr.ystat.tracker.commands.client.PeersCommand;
 import fr.ystat.tracker.commands.server.GetFileCommand;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 
@@ -32,9 +33,10 @@ public class GreedyDownloader extends FileDownloader {
     public void askPeers(PeersCommand pc){
         pc.getPeers().parallelStream().forEach(
             it -> {
-                SeederConnection connection = null;
-                SeederAttachedDownload download = null;
+                SeederConnection connection;
+                SeederAttachedDownload download;
                 try {
+                    Logger.trace("Creating seederAttachedDownload");
                     download = new SeederAttachedDownload(target, reservationBitSet);
 
                     // This step could be blocking if seeder connections are saturated
@@ -43,16 +45,9 @@ public class GreedyDownloader extends FileDownloader {
                     // This bad boy will work his way out of it.
                     download.startDownloadOnSeeder(connection);
 
-                    connection.close(download);
-
                 } catch (IOException | DownloadException e) {
                     // If we fail to connect retry X amount of time or just go to the next peer
                     this.giveUp(e);
-                } finally {
-                    // download != null could be removed but for sanity reasons let's keep it :)
-                    if (connection != null && download != null) {
-                        connection.close(download, this::giveUp);
-                    }
                 }
             }
         );
