@@ -43,6 +43,7 @@ public class SeederAttachedDownload {
 
         this.max_piece_amount_by_message =
                 (int) (Main.getConfigurationManager().maxMessageSize() / target.getProperties().getSize());
+        Logger.trace("Max piece amount by message {}", max_piece_amount_by_message);
         this.target = target;
         this.reservationBitSet = reservationBitSet;
         latestBitSet = target.getBitSet();

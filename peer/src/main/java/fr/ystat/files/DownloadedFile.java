@@ -2,6 +2,7 @@ package fr.ystat.files;
 
 import fr.ystat.Main;
 import fr.ystat.files.exceptions.PartitionException;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.tinylog.Logger;
 
@@ -23,6 +24,7 @@ public class DownloadedFile extends StockedFile {
 
     private final AtomicBitSet bitSet;
     private final File[] partitionedFiles;
+    @Getter
     private final File parentFolder;
     private final Queue<BiConsumer<StockedFile, Integer>> onPartitionAddedListeners;
 

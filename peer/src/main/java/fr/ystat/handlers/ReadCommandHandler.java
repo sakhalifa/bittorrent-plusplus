@@ -63,7 +63,7 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		if (buffer.get(bytesRead - 1) == '\n') {
 			// Finished reading a protocol message
 			String wholeMessage = messageBuilder.toString();
-			Logger.trace("Received message : {" + wholeMessage.substring(0, wholeMessage.length() - 1) + "}");
+//			Logger.trace("Received message : {" + wholeMessage.substring(0, wholeMessage.length() - 1) + "}");
 			messageBuilder.setLength(0);
 			try {
 				this.commandConsumer.accept(CommandAnnotationCollector.beginParsing(wholeMessage));

@@ -56,15 +56,15 @@ public class AtomicBitSet {
 	}
 
 	public boolean isFilled(){
-		for(int i = 0; i < array.length(); i++){
-			// 1023 in decimal => 11111111 in binary
-			if (array.get(i) != 1023 && array.get(i) != -1){
+		for(int i = 0; i < array.length() - 1; i++){
+			if (array.get(i) != -1){
 				Logger.trace("Bitset not filled at {}, value {}", i, array.get(i));
 				return false;
 			}
 		}
-		Logger.trace("Bitset not filled");
-		return true;
+		boolean isFilled = array.get(array.length() - 1) == (1 << (length % 32)) - 1;
+		Logger.trace("Bitset filled ? {} : {} =?= {}", isFilled, array.get(array.length() - 1), (1 << (length % 32)) - 1);
+		return isFilled;
 	}
 
 	public void fill() {
