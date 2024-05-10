@@ -2,6 +2,8 @@ package fr.ystat.files;
 
 import fr.ystat.Main;
 import fr.ystat.files.exceptions.PartitionException;
+import lombok.SneakyThrows;
+import org.tinylog.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -52,12 +54,14 @@ public class DownloadedFile extends StockedFile {
             throw new PartitionException(String.format("Partition %d already present.", partitionIndex));
         }
 
+
         // Create the partition
         File addedPartition = new File(parentFolder, String.format("%s.%d", PARTITION_BASE_NAME, partitionIndex));
         boolean created = addedPartition.createNewFile();
         // Ensure that it went well
         if (! created) throw new PartitionException("Could not create new partition");
         // Write the data inside
+        Logger.trace("Writing into file {} : {}", addedPartition.getName(), data);
         writeFile(addedPartition, data);
 
         partitionedFiles[partitionIndex] = addedPartition;
@@ -65,6 +69,34 @@ public class DownloadedFile extends StockedFile {
         for(var listener : onPartitionAddedListeners) {
             listener.accept(this, partitionIndex);
         }
+
+        handleCompleteness();
+
+    }
+
+    @SneakyThrows
+    private void handleCompleteness(){
+        if (!bitSet.isFilled()) return;
+
+        Logger.trace("Writing full file {}_final", parentFolder.getName());
+
+        // Create final file
+        File finalFile = new File(downloadFolder, parentFolder.getName() + "_final");
+        FileWriter writer = new FileWriter(finalFile);
+
+        for (File partitionedFile : partitionedFiles) {
+            BufferedReader reader = new BufferedReader(new FileReader(partitionedFile));
+            String line;
+            while ((line = reader.readLine()) != null){
+                writer.write(line);
+                writer.write(System.lineSeparator());
+            }
+            reader.close();
+        }
+
+        writer.close();
+
+        Logger.trace("Full file {}_final wrote",  parentFolder.getName());
     }
 
     /**

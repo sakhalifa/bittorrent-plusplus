@@ -1,7 +1,7 @@
 package fr.ystat.files;
 
-import lombok.Getter;
 import lombok.Value;
+import org.tinylog.Logger;
 
 @Value
 public class FileProperties {
@@ -19,6 +19,7 @@ public class FileProperties {
 			throw new IllegalArgumentException("File total size must be greater than 1 byte.");
 		}
 		this.pieceSize = pieceSize;
+		Logger.trace("New piece size of size {}", pieceSize);
 		this.size = size;
 
 		if (name.contains("/")) {

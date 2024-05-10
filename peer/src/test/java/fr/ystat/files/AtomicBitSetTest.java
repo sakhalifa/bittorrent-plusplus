@@ -3,6 +3,7 @@ package fr.ystat.files;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AtomicBitSetTest {
 
@@ -54,6 +55,21 @@ public class AtomicBitSetTest {
             assertEquals(trueSet.get(i), falseSetThatWillReachTruth.get(i));
         }
 
+    }
+
+    @Test
+    public void testAtomicBitSetIsFilled(){
+        int bitSetsLength = 10;
+        AtomicBitSet trueSet = new AtomicBitSet(bitSetsLength);
+        trueSet.fill();
+        assertTrue(trueSet.isFilled());
+
+        AtomicBitSet set2 = new AtomicBitSet(bitSetsLength);
+        for (int i = 0; i < 10; i++) {
+            assertFalse(set2.get(i));
+            set2.set(i);
+        }
+        assertTrue(set2.isFilled());
     }
 
 }

@@ -2,6 +2,7 @@ package fr.ystat.files;
 
 import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
+import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ public class AtomicBitSet {
 
 	public AtomicBitSet(int length) {
 		this.length = length;
+		Logger.trace("New atomicBitSet of size {}", length);
 		int intLength = (length + 31) >>> 5; // unsigned / 32
 		array = new AtomicIntegerArray(intLength);
 	}
@@ -51,6 +53,18 @@ public class AtomicBitSet {
 			result.array.set(i, array.get(i) & ~bs.array.get(i));
 		}
 		return result;
+	}
+
+	public boolean isFilled(){
+		for(int i = 0; i < array.length(); i++){
+			// 1023 in decimal => 11111111 in binary
+			if (array.get(i) != 1023 && array.get(i) != -1){
+				Logger.trace("Bitset not filled at {}, value {}", i, array.get(i));
+				return false;
+			}
+		}
+		Logger.trace("Bitset not filled");
+		return true;
 	}
 
 	public void fill() {

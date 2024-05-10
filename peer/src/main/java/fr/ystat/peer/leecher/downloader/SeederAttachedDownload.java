@@ -36,8 +36,6 @@ public class SeederAttachedDownload {
 
     private final AtomicBitSet reservationBitSet;
 
-    private boolean isDownloadOver = false;
-
     public SeederAttachedDownload(DownloadedFile target, AtomicBitSet reservationBitSet) throws IOException {
 
         this.requestChannel = AsynchronousSocketChannel.open();
@@ -74,7 +72,7 @@ public class SeederAttachedDownload {
                         haveCommand -> {
                             synchronized (latestBitSet) {
                                 latestBitSet.update(haveCommand.getBitSet());
-                                Logger.trace("Updating latest bitset");
+                                Logger.trace("Updating latest bitset {}", latestBitSet);
                             }
                             progress();
                         },
@@ -112,7 +110,6 @@ public class SeederAttachedDownload {
         if (toDownload.isEmpty()){
             Logger.trace("Nothing to download, closing attachedDownload");
             connection.close(this, this::giveUp);
-            isDownloadOver = true;
             return;
         }
 
