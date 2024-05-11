@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
+#include "command.h" 
 #include "thpool.h"
 #include "tst.h"
 
@@ -56,6 +58,11 @@ void test_task_queue_pull() {
 	t1->p_func = NULL;
 	t1->prev   = NULL;
 
+	task_t *t3 = malloc(sizeof(task_t));
+	t1->arg    = NULL;
+	t1->p_func = NULL;
+	t1->prev   = NULL;
+
 	task_queue_push(q, t1);
 
 	assert(q->front == t1);
@@ -70,8 +77,24 @@ void test_task_queue_pull() {
 
 	assert(t2 == t1);
 
-	free(t1);
+	task_queue_push(q, t1);
+	task_queue_push(q, t3);
+
+	assert(q->front == t1);
+	assert(q->rear == t3);
+	assert(q->count == 2);
+
+	task_queue_pull(q);
+	task_queue_pull(q);
+
+	assert(q->front == NULL);
+	assert(q->rear == NULL);
+	assert(q->count == 0);
+
+	task_queue_clear(q);
 	free(q);
+	free(t1);
+	free(t3);
 	printf("\tOK\n");
 }
 
@@ -110,28 +133,36 @@ void test_thpool_init() {
 	printf("\t%s", __func__);
 	thpool_t *thpool = thpool_init(pool_size);
 
+	sleep(1); // FIXME (Je sais, ça dégoute)
+
 	assert(thpool->size == pool_size);
 	assert(&thpool->queue != NULL);
 	assert(thpool->threads != NULL);
-
+	assert(thpool->threads_alive == pool_size);
+	assert(thpool->threads_working == 0);
+	
 	thpool_destroy(thpool);
 	printf("\tOK\n");
 }
 
 void* mock_command(void *arg) {
-	return NULL;
+	return (char*)arg;
 }
 
 void test_thpool_add_work() {
 	printf("\t%s", __func__);
 	thpool_t *thpool = thpool_init(pool_size);
 
-	thpool_add_work(thpool, mock_command, NULL);
+	thpool_add_work(thpool, mock_command, "It's working!");
 
 	assert(thpool->queue.count == 1);
 	assert(thpool->queue.rear->p_func == mock_command);
 	assert(thpool->queue.front->p_func == mock_command);
 
+	thpool_add_work(thpool, mock_command, "First task");
+	thpool_add_work(thpool, mock_command, "Second task");
+
+	thpool_wait(thpool);
 	thpool_destroy(thpool);
 	printf("\tOK\n");
 }
