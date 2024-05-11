@@ -32,7 +32,6 @@ void task_queue_push(task_queue_t *q, task_t *t) {
 	// fprintf(stderr, "sem value: %d\n", sem_value); // debug print
 	if (sem_value == 0)
 		sem_post(&(q->has_task));
-
 	q->count++;
 	pthread_mutex_unlock(&(q->m_rw));
 }
@@ -61,7 +60,7 @@ task_t *task_queue_pull(task_queue_t *q) {
 		t        = q->front;
 		q->front = t->prev;
 		sem_getvalue(&(q->has_task), &sem_value);
-			// fprintf(stderr, "sem value: %d\n", sem_value); // debug print
+		// fprintf(stderr, "sem value: %d\n", sem_value); // debug print
 		if (sem_value == 0)
 			sem_post(&(q->has_task));
 	}
@@ -93,7 +92,7 @@ void *thread_function(thread_t *thread) {
 
 	pthread_mutex_lock(&thpool->m_count);
 	// fprintf(stderr, "thread n°%d is alive, total thread alive: %d \n",
-	    // thread->id, thpool->threads_alive); // debug printf
+	// thread->id, thpool->threads_alive); // debug printf
 	thpool->threads_alive++;
 	pthread_mutex_unlock(&thpool->m_count);
 

@@ -148,7 +148,7 @@ void test_command_look() {
 
 	char *res = look(*arg, files, &nb_files, p);
 
-	// assert(strcmp(res, "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
+	assert(strcmp(res, "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
 
 	char *res2 = look(*arg2, files, &nb_files, p);
 
