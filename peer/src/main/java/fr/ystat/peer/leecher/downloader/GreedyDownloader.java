@@ -55,5 +55,6 @@ public class GreedyDownloader extends FileDownloader {
 
     private void giveUp(Throwable t) {
         // it's over sadly, you did your best
+        Logger.trace("Giving up on download, got {}", t);
     }
 }

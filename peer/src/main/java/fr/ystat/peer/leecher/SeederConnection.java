@@ -67,6 +67,7 @@ public class SeederConnection {
 
         synchronized (seederConnections.get(seederAddress)) {
             seederConnections.get(seederAddress).downloads.add(download);
+            Logger.trace("Adding download");
         }
         Logger.trace("Established new connection to " + seederAddress.getHostName());
         return connection;
@@ -96,8 +97,10 @@ public class SeederConnection {
     private void notifySeeders() {
         // For each download we are currently doing, get our most recent bitset of the partitions of the local file
         // and send it happily to our seeders
+        Logger.trace("Notifying seeder");
         downloads.forEach(it -> {
             HaveCommand hc = new HaveCommand(it.getTarget().getProperties().getHash(), it.getTarget().getBitSet());
+            Logger.trace("Sending have for download {}", it.getTarget().getProperties().getName());
             sendHave(hc, haveCommand -> {
                 // Update local download latestBitSets
                 it.updateLatestBitSet(haveCommand.getBitSet());

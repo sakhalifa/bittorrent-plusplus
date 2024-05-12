@@ -22,12 +22,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static java.lang.Math.min;
 
 public class SeederAttachedDownload {
     private SeederConnection connection;
     private final AtomicBitSet latestBitSet;
 
     private final int max_piece_amount_by_message;
+
+
+    // Play with this value if you feel like it.
+    private final static int estimated_message_header = 1024;
 
     private final AsynchronousSocketChannel requestChannel;
 
@@ -41,8 +48,9 @@ public class SeederAttachedDownload {
         this.requestChannel = AsynchronousSocketChannel.open();
         this.requestChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
-        this.max_piece_amount_by_message =
-                (int) (Main.getConfigurationManager().maxMessageSize() / target.getProperties().getSize());
+//        this.max_piece_amount_by_message =
+//                (int) (Main.getConfigurationManager().maxMessageSize() - estimated_message_header) / target.getProperties().getSize());
+        this.max_piece_amount_by_message = 1;
         Logger.trace("Max piece amount by message {}", max_piece_amount_by_message);
         this.target = target;
         this.reservationBitSet = reservationBitSet;
@@ -75,7 +83,11 @@ public class SeederAttachedDownload {
                                 latestBitSet.update(haveCommand.getBitSet());
                                 Logger.trace("Updating latest bitset {}", latestBitSet);
                             }
-                            progress();
+                            try {
+                                progress();
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
                         },
                         (t) -> {});
             }
@@ -98,7 +110,7 @@ public class SeederAttachedDownload {
         GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure);
     }
 
-    private void progress() {
+    private void progress() throws InterruptedException {
         List<Integer> toDownload;
         synchronized (latestBitSet){
             synchronized (reservationBitSet) {
@@ -107,11 +119,18 @@ public class SeederAttachedDownload {
                 toDownload.forEach(reservationBitSet::set);  // set the bits as reserved
             }
         }
+        Logger.trace("Scheduling download of {}", toDownload.stream().map(Object::toString).collect(Collectors.joining(", ")));
 
         if (toDownload.isEmpty()){
-            Logger.trace("Nothing to download, closing attachedDownload");
-            connection.close(this, this::giveUp);
-            return;
+            if (reservationBitSet.isFilled()){
+                Logger.trace("Nothing more to download, closing attachedDownload");
+                connection.close(this, this::giveUp);
+                return;
+            }
+            Logger.trace("Waiting a bit to resume download");
+            Thread.sleep(1000);
+            progress();
+
         }
 
         GetPiecesCommand gpc = new GetPiecesCommand(target.getProperties().getHash(), toDownload);
@@ -137,7 +156,11 @@ public class SeederAttachedDownload {
                     }
             );
             // now we want to loop back to see what else we can fetch.
-            progress();
+            try {
+                progress();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
         }, this::giveUp);
 
@@ -159,5 +182,6 @@ public class SeederAttachedDownload {
 
     private void giveUp(Throwable t) {
         // it's over sadly, you did your best
+        Logger.trace("Giving up on seeder attached download, got {}", t);
     }
 }

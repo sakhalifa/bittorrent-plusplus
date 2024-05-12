@@ -65,14 +65,17 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 			String wholeMessage = messageBuilder.toString();
 //			Logger.trace("Received message : {" + wholeMessage.substring(0, wholeMessage.length() - 1) + "}");
 			messageBuilder.setLength(0);
+			Logger.trace("Done reading");
 			try {
 				this.commandConsumer.accept(CommandAnnotationCollector.beginParsing(wholeMessage));
+				Logger.trace("Done parsing");
 				buffer.clear();
 			} catch (ParserException e) {
 				this.onFailure.accept(e);
 			}
 		} else {
 			// Still reading that message...
+			Logger.trace("Reading...");
 			clientChannel.read(buffer, buffer, this);
 		}
 	}
