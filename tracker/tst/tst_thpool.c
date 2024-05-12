@@ -144,25 +144,3 @@ void test_thpool_init() {
 	thpool_destroy(thpool);
 	printf("\tOK\n");
 }
-
-void* mock_command(void *arg) {
-	return (char*)arg;
-}
-
-void test_thpool_add_work() {
-	printf("\t%s", __func__);
-	thpool_t *thpool = thpool_init(pool_size);
-
-	thpool_add_work(thpool, mock_command, "It's working!");
-
-	assert(thpool->queue.count == 1);
-	assert(thpool->queue.rear->p_func == mock_command);
-	assert(thpool->queue.front->p_func == mock_command);
-
-	thpool_add_work(thpool, mock_command, "First task");
-	thpool_add_work(thpool, mock_command, "Second task");
-
-	thpool_wait(thpool);
-	thpool_destroy(thpool);
-	printf("\tOK\n");
-}

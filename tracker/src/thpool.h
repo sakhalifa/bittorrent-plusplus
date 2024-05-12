@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include "file.h"
+#include "command.h"
 
 typedef struct thread thread_t;
 typedef struct thpool thpool_t;
@@ -19,7 +21,8 @@ typedef struct task_queue {
 
 typedef struct task {
 	void *arg;
-	void *(*p_func)(void *arg);  /* function pointer */
+	int fd;
+	char *(*p_func)(void *, struct file** , int*, struct peer*);
 	task_t *prev;
 } task_t;
 
@@ -40,8 +43,15 @@ typedef struct thpool {
 	pthread_cond_t threads_all_idle;
 } thpool_t;
 
+typedef struct arg {
+	void* command;
+	struct file** file;
+	int* nb_file;
+	struct peer* peer; 
+} arg_t;
+
 thpool_t *thpool_init(int num_threads);
-void thpool_add_work(thpool_t *thpool, void *(*task)(void *), void *arg) ;
+void thpool_add_work(thpool_t *thpool, char *(*task)(void *, struct file** , int*, struct peer*), void *arg, int fd) ;
 void thpool_destroy(thpool_t *thpool);
 void thpool_wait(thpool_t *thpool);
 

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <string.h>
 
 #include "thpool.h"
 
@@ -104,16 +106,19 @@ void *thread_function(thread_t *thread) {
 		thpool->threads_working++;
 		pthread_mutex_unlock(&thpool->m_count);
 
-		void *(*func_buff)(void *);
-		void *arg_buff;
-		char *ret_value;
+		char *(*func_buff)(void *, struct file** , int*, struct peer*);
+		arg_t *arg_buff;
+		char *response;
 		task_t *task = task_queue_pull(&thpool->queue);
 
 		if (task) {
 			func_buff = task->p_func;
-			arg_buff  = task->arg;
-			ret_value = (char *)func_buff(arg_buff);
-			fprintf(stderr, "[done by thread %d]\n", thread->id);
+			arg_buff  = (arg_t*)task->arg;
+			response = func_buff(arg_buff->command, arg_buff->file, arg_buff->nb_file, arg_buff->peer);
+			printf("my response: %s", response);
+			send(task->fd, response, strlen(response), 0);
+			send(task->fd, "\n", 1, 0);
+			// fprintf(stderr, "[done by thread %d]\n", thread->id); // debug print
 			free(task);
 		}
 
@@ -125,7 +130,6 @@ void *thread_function(thread_t *thread) {
 		}
 
 		pthread_mutex_unlock(&thpool->m_count);
-		return ret_value;
 	}
 
 	pthread_mutex_lock(&thpool->m_count);
@@ -170,11 +174,11 @@ thpool_t *thpool_init(int size) {
 	return thpool;
 }
 
-void thpool_add_work(thpool_t *thpool, void *(*task)(void *), void *arg) {
+void thpool_add_work(thpool_t *thpool, char *(*task)(void *, struct file** , int*, struct peer*), void *arg, int fd) {
 	task_t *new_task = malloc(sizeof(task_t));
 	new_task->p_func = task;
 	new_task->arg    = arg;
-
+	new_task->fd = fd;
 	task_queue_push(&thpool->queue, new_task);
 }
 

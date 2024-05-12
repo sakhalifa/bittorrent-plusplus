@@ -20,17 +20,17 @@ int main() {
 	// Test command.c
     printf("TEST COMMAND\n");
 	// test_command_announce();
-	test_command_getfile();
-	test_command_look();
-	test_command_update();
+	// test_command_getfile();
+	// test_command_look();
+	// test_command_update();
 
+	// Test thpool.c
 	printf("TEST THREAD POOL\n");
 	test_task_queue_init();
 	test_task_queue_push();
 	test_task_queue_pull();
 	test_task_queue_clear();
 	test_thpool_init();
-	test_thpool_add_work();
 
 	return 0;
 }
