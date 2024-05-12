@@ -8,6 +8,7 @@ import org.tinylog.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
@@ -64,6 +65,14 @@ public class DownloadedFile extends StockedFile {
         if (! created) throw new PartitionException("Could not create new partition");
         // Write the data inside
         Logger.trace("Writing into file {} : {}", addedPartition.getName(), data);
+
+        // for the Last partition, we don't want to write everything
+        if (partitionIndex == partitionedFiles.length - 1) {
+            int length = (int) (this.getProperties().getSize() % this.getProperties().getPieceSize());
+            Logger.trace("Last partition size {}", length);
+            data = Arrays.copyOfRange(data, 0, length);
+
+        }
         writeFile(addedPartition, data);
 
         partitionedFiles[partitionIndex] = addedPartition;
@@ -84,20 +93,26 @@ public class DownloadedFile extends StockedFile {
 
         // Create final file
         File finalFile = new File(downloadFolder, parentFolder.getName() + "_final");
-        FileWriter writer = new FileWriter(finalFile);
-
-        for (File partitionedFile : partitionedFiles) {
-            BufferedReader reader = new BufferedReader(new FileReader(partitionedFile));
-            String line;
-            while ((line = reader.readLine()) != null){
-                writer.write(line);
-                writer.write(System.lineSeparator());
+        try (FileWriter writer = new FileWriter(finalFile)) {
+            for (File partitionedFile : partitionedFiles) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(partitionedFile))) {
+                    String line;
+                    boolean firstLine = true;
+                    while ((line = reader.readLine()) != null) {
+                        if (!firstLine) {
+                            writer.write(System.lineSeparator());
+                        } else {
+                            firstLine = false;
+                        }
+                        writer.write(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        writer.close();
-
         Logger.trace("Full file {}_final wrote",  parentFolder.getName());
     }
 

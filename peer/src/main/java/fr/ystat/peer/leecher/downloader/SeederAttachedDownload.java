@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
+
 
 public class SeederAttachedDownload {
     private SeederConnection connection;
@@ -32,9 +34,9 @@ public class SeederAttachedDownload {
 
     private final int max_piece_amount_by_message;
 
-
     // Play with this value if you feel like it.
     private final static int estimated_message_header = 1024;
+    private final static int max_piece_amount = 100;
 
     private final AsynchronousSocketChannel requestChannel;
 
@@ -48,9 +50,10 @@ public class SeederAttachedDownload {
         this.requestChannel = AsynchronousSocketChannel.open();
         this.requestChannel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
-//        this.max_piece_amount_by_message =
-//                (int) (Main.getConfigurationManager().maxMessageSize() - estimated_message_header) / target.getProperties().getSize());
-        this.max_piece_amount_by_message = 1;
+        this.max_piece_amount_by_message =
+                min(max_piece_amount, max(1, (int)
+                        ((Main.getConfigurationManager().maxMessageSize() - estimated_message_header) / (target.getProperties().getPieceSize() + 10))));
+//        this.max_piece_amount_by_message = 1;
         Logger.trace("Max piece amount by message {}", max_piece_amount_by_message);
         this.target = target;
         this.reservationBitSet = reservationBitSet;
@@ -61,7 +64,9 @@ public class SeederAttachedDownload {
     public void updateLatestBitSet(AtomicBitSet updatedBitSet) {
         synchronized (latestBitSet) {
             latestBitSet.update(updatedBitSet);
+            Logger.trace("Updating latest bitset {}", latestBitSet);
         }
+
     }
 
     public void startDownloadOnSeeder(SeederConnection connection) throws FileAlreadyDownloadingException {
@@ -79,10 +84,7 @@ public class SeederAttachedDownload {
                 InterestedCommand ic = new InterestedCommand(target.getProperties().getHash());
                 sendInterested(ic,
                         haveCommand -> {
-                            synchronized (latestBitSet) {
-                                latestBitSet.update(haveCommand.getBitSet());
-                                Logger.trace("Updating latest bitset {}", latestBitSet);
-                            }
+                            updateLatestBitSet(haveCommand.getBitSet());
                             try {
                                 progress();
                             } catch (InterruptedException e) {
@@ -106,8 +108,8 @@ public class SeederAttachedDownload {
         GenericCommandHandler.sendCommand(this.requestChannel, ic, HaveCommand.class, onSuccess, onFailure);
     }
 
-    public void sendGetPieces(GetPiecesCommand gpc, Consumer<DataCommand> onSuccess, Consumer<Throwable> onFailure) {
-        GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure);
+    public void sendGetPieces(GetPiecesCommand gpc, Consumer<DataCommand> onSuccess, Consumer<Throwable> onFailure, Long expectedAnswerSize) {
+        GenericCommandHandler.sendCommand(this.requestChannel, gpc, DataCommand.class, onSuccess, onFailure, expectedAnswerSize);
     }
 
     private void progress() throws InterruptedException {
@@ -134,6 +136,18 @@ public class SeederAttachedDownload {
         }
 
         GetPiecesCommand gpc = new GetPiecesCommand(target.getProperties().getHash(), toDownload);
+
+        // Data will be of format "data[size 4] [space of size 1] hash[size 32] [space of size 1] [(bracket of size 1)  partition_index:piece_size (bracket of size 1)
+        long data_part_size = 0;
+        for (Integer i : toDownload) {
+            data_part_size += i.toString().length();
+        }
+        data_part_size += 2L * toDownload.size(); // ":" and " "
+        data_part_size += target.getProperties().getPieceSize() * toDownload.size();
+
+        // 2 spaces, 32 for has size, 2 brackets
+        Long expectedAnswerSize = "data".length() + 2 + 32 + 2 + data_part_size;
+        Logger.trace("Expected answer size {}", expectedAnswerSize);
 
         sendGetPieces(gpc, dataCommand -> {
             dataCommand.getDataMap().forEach(
@@ -162,7 +176,7 @@ public class SeederAttachedDownload {
                 throw new RuntimeException(e);
             }
 
-        }, this::giveUp);
+        }, this::giveUp, expectedAnswerSize);
 
     }
 

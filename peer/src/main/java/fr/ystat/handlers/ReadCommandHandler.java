@@ -23,14 +23,19 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 	private final Consumer<IReceivableCommand> commandConsumer;
 	private final Consumer<Throwable> onFailure;
 	private long readBytes;
+	private final Long expectedMessageBytesSize;
 
 
-	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Consumer<IReceivableCommand> commandConsumer, Consumer<Throwable> onFailure) {
+	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Consumer<IReceivableCommand> commandConsumer, Consumer<Throwable> onFailure, Long expectedMessageBytesSize) {
 		this.clientChannel = clientChannel;
 		this.commandConsumer = commandConsumer;
 		this.onFailure = onFailure;
 		this.messageBuilder = new StringBuilder();
+		this.expectedMessageBytesSize = expectedMessageBytesSize;
+	}
 
+	public ReadCommandHandler(AsynchronousSocketChannel clientChannel, Consumer<IReceivableCommand> commandConsumer, Consumer<Throwable> onFailure) {
+		this(clientChannel, commandConsumer, onFailure, null);
 	}
 
 	public void startReading() {
@@ -60,7 +65,8 @@ public class ReadCommandHandler implements CompletionHandler<Integer, ByteBuffer
 		buffer.flip();
 		messageBuilder.append(SerializationUtils.CHARSET.decode(buffer));
 		buffer.flip();
-		if (buffer.get(bytesRead - 1) == '\n') {
+		if (buffer.get(bytesRead - 1) == '\n' && (expectedMessageBytesSize == null || readBytes == expectedMessageBytesSize)) {
+
 			// Finished reading a protocol message
 			String wholeMessage = messageBuilder.toString();
 //			Logger.trace("Received message : {" + wholeMessage.substring(0, wholeMessage.length() - 1) + "}");

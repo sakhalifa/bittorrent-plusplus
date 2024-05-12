@@ -13,12 +13,23 @@ import java.util.function.Consumer;
 
 public final class GenericCommandHandler {
 
+
+	public static<T extends IReceivableCommand> void sendCommand(AsynchronousSocketChannel channel,
+																 ISendableCommand commandToSend,
+																 Class<T> expectedReturnCommandClass,
+																 Consumer<T> onFinished,
+																 Consumer<Throwable> onFailed
+																 ){
+		sendCommand(channel, commandToSend, expectedReturnCommandClass, onFinished, onFailed, null);
+	}
+
 	@SneakyThrows
 	public static<T extends IReceivableCommand> void sendCommand(AsynchronousSocketChannel channel,
 																 ISendableCommand commandToSend,
 																 Class<T> expectedReturnCommandClass,
 																 Consumer<T> onFinished,
-																 Consumer<Throwable> onFailed){
+																 Consumer<Throwable> onFailed,
+																 Long expectedAnswerByteSize){
 
 		System.out.println("Sent " + commandToSend.serialize());
 		channel.write(SerializationUtils.toByteBuffer(commandToSend), channel, new CompletionHandler<>() {
@@ -34,7 +45,9 @@ public final class GenericCommandHandler {
 						return;
 					}
 					onFinished.accept(expectedReturnCommandClass.cast(cmd));
-				}, onFailed);
+				},
+						onFailed,
+						expectedAnswerByteSize);
 				v.startReading();
 			}
 
