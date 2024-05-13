@@ -16,142 +16,133 @@ import java.util.function.Consumer;
 
 public class DownloadedFile extends StockedFile {
 
-    private static final File downloadFolder;
-    static {
-        downloadFolder = new File(Main.getConfigurationManager().downloadFolderPath());
-    }
+	private static final File downloadFolder;
 
-    private static final String PARTITION_BASE_NAME = "partition";
+	static {
+		downloadFolder = new File(Main.getConfigurationManager().downloadFolderPath());
+	}
 
-    private final AtomicBitSet bitSet;
-    private final File[] partitionedFiles;
-    @Getter
-    private final File parentFolder;
-    private final Queue<BiConsumer<StockedFile, Integer>> onPartitionAddedListeners;
+	private static final String PARTITION_BASE_NAME = "partition";
 
-
-    public DownloadedFile(FileProperties properties) throws IllegalArgumentException {
-        super(properties);
-
-        this.onPartitionAddedListeners = new ConcurrentLinkedQueue<>();
-        this.bitSet = new AtomicBitSet(properties);
-        this.partitionedFiles = new File[bitSet.getLength()];
-        parentFolder = new File(downloadFolder, getProperties().getName());
-        parentFolder.mkdir();
-    }
-
-    public DownloadedFile(String name, long size, long pieceSize, String hash) {
-        this(new FileProperties(name, size, pieceSize, hash));
-    }
-
-    public void addPartition(int partitionIndex, byte[] data, Consumer<Throwable> onFailure) {
-        try {
-            addPartition(partitionIndex, data);
-        } catch (PartitionException | IOException e) {
-            onFailure.accept(e);
-        }
-    }
-
-    public void addPartition(int partitionIndex, byte[] data) throws PartitionException, IOException {
-        if (bitSet.get(partitionIndex)) {
-            throw new PartitionException(String.format("Partition %d already present.", partitionIndex));
-        }
+	private final AtomicBitSet bitSet;
+	private final File[] partitionedFiles;
+	@Getter
+	private final File parentFolder;
+	private final Queue<BiConsumer<StockedFile, Integer>> onPartitionAddedListeners;
 
 
-        // Create the partition
-        File addedPartition = new File(parentFolder, String.format("%s.%d", PARTITION_BASE_NAME, partitionIndex));
-        boolean created = addedPartition.createNewFile();
-        // Ensure that it went well
-        if (! created) throw new PartitionException("Could not create new partition");
-        // Write the data inside
-        Logger.trace("Writing into file {} : {}", addedPartition.getName(), data);
+	public DownloadedFile(FileProperties properties) throws IllegalArgumentException {
+		super(properties);
 
-        // for the Last partition, we don't want to write everything
-        if (partitionIndex == partitionedFiles.length - 1) {
-            int length = (int) (this.getProperties().getSize() % this.getProperties().getPieceSize());
-            Logger.trace("Last partition size {}", length);
-            data = Arrays.copyOfRange(data, 0, length);
+		this.onPartitionAddedListeners = new ConcurrentLinkedQueue<>();
+		this.bitSet = new AtomicBitSet(properties);
+		this.partitionedFiles = new File[bitSet.getLength()];
+		parentFolder = new File(downloadFolder, getProperties().getName());
+		parentFolder.mkdir();
+	}
 
-        }
-        writeFile(addedPartition, data);
+	public DownloadedFile(String name, long size, long pieceSize, String hash) {
+		this(new FileProperties(name, size, pieceSize, hash));
+	}
 
-        partitionedFiles[partitionIndex] = addedPartition;
-        bitSet.set(partitionIndex);
-        for(var listener : onPartitionAddedListeners) {
-            listener.accept(this, partitionIndex);
-        }
+	public void addPartition(int partitionIndex, byte[] data, Consumer<Throwable> onFailure) {
+		try {
+			addPartition(partitionIndex, data);
+		} catch (PartitionException | IOException e) {
+			onFailure.accept(e);
+		}
+	}
 
-        handleCompleteness();
+	public void addPartition(int partitionIndex, byte[] data) throws PartitionException, IOException {
+		if (bitSet.get(partitionIndex)) {
+			throw new PartitionException(String.format("Partition %d already present.", partitionIndex));
+		}
 
-    }
 
-    @SneakyThrows
-    private void handleCompleteness(){
-        if (!bitSet.isFilled()) return;
+		// Create the partition
+		File addedPartition = new File(parentFolder, String.format("%s.%d", PARTITION_BASE_NAME, partitionIndex));
+		boolean created = addedPartition.createNewFile();
+		// Ensure that it went well
+		if (!created) throw new PartitionException("Could not create new partition");
+		// Write the data inside
+		Logger.trace("Writing into file {} : {}", addedPartition.getName(), data);
 
-        Logger.trace("Writing full file {}_final", parentFolder.getName());
+		// for the Last partition, we don't want to write everything
+		if (partitionIndex == partitionedFiles.length - 1) {
+			int length = (int) (this.getProperties().getSize() % this.getProperties().getPieceSize());
+			Logger.trace("Last partition size {}", length);
+			data = Arrays.copyOfRange(data, 0, length);
 
-        // Create final file
-        File finalFile = new File(downloadFolder, parentFolder.getName() + "_final");
-        try (FileWriter writer = new FileWriter(finalFile)) {
-            for (File partitionedFile : partitionedFiles) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(partitionedFile))) {
-                    String line;
-                    boolean firstLine = true;
-                    while ((line = reader.readLine()) != null) {
-                        if (!firstLine) {
-                            writer.write(System.lineSeparator());
-                        } else {
-                            firstLine = false;
-                        }
-                        writer.write(line);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Logger.trace("Full file {}_final wrote",  parentFolder.getName());
-    }
+		}
+		writeFile(addedPartition, data);
 
-    /**
-     * Write data inside given file.
-     */
-    private void writeFile(File file, byte[] data) throws IOException {
-        try (FileOutputStream stream = new FileOutputStream(file)) {
-            stream.write(data);
-        }
-    }
+		partitionedFiles[partitionIndex] = addedPartition;
+		bitSet.set(partitionIndex);
+		for (var listener : onPartitionAddedListeners) {
+			listener.accept(this, partitionIndex);
+		}
 
-    /**
-     * Get a **copy** of the partition bitset.
-     * @return a **copy** of the partition bitset
-     */
-    public AtomicBitSet getBitSet(){
-        return new AtomicBitSet(bitSet);
-    }
+		handleCompleteness();
 
-    @Override
-    public byte[] getPartition(int partitionIndex) throws PartitionException, IOException {
-        if (! bitSet.get(partitionIndex)) {
-            throw new PartitionException(String.format("Partition %d not present.", partitionIndex));
-        }
-        File partition = partitionedFiles[partitionIndex];
-        return Files.readAllBytes(partition.toPath());
-    }
+	}
 
-    @Override
-    public String toString() {
-        return this.getProperties().getHash();
-    }
+	@SneakyThrows
+	private void handleCompleteness() {
+		if (!bitSet.isFilled()) return;
 
-    public void addOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener){
-        onPartitionAddedListeners.add(listener);
-    }
+		Logger.trace("Writing full file {}_final", parentFolder.getName());
 
-    public void removeOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener){
-        onPartitionAddedListeners.remove(listener);
-    }
+		// Create final file
+		File finalFile = new File(downloadFolder, parentFolder.getName() + "_final");
+		try (var outFile = new RandomAccessFile(finalFile, "rw");
+			 var outChannel = outFile.getChannel()) {
+			for (File partitionedFile : partitionedFiles) {
+				try (var inFile = new RandomAccessFile(partitionedFile, "r");
+					 var inChannel = inFile.getChannel()) {
+					inChannel.transferTo(0, inChannel.size(), outChannel);
+				}
+			}
+		}
+		Logger.trace("Full file {}_final wrote", parentFolder.getName());
+	}
+
+	/**
+	 * Write data inside given file.
+	 */
+	private void writeFile(File file, byte[] data) throws IOException {
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			stream.write(data);
+		}
+	}
+
+	/**
+	 * Get a **copy** of the partition bitset.
+	 *
+	 * @return a **copy** of the partition bitset
+	 */
+	public AtomicBitSet getBitSet() {
+		return new AtomicBitSet(bitSet);
+	}
+
+	@Override
+	public byte[] getPartition(int partitionIndex) throws PartitionException, IOException {
+		if (!bitSet.get(partitionIndex)) {
+			throw new PartitionException(String.format("Partition %d not present.", partitionIndex));
+		}
+		File partition = partitionedFiles[partitionIndex];
+		return Files.readAllBytes(partition.toPath());
+	}
+
+	@Override
+	public String toString() {
+		return this.getProperties().getHash();
+	}
+
+	public void addOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener) {
+		onPartitionAddedListeners.add(listener);
+	}
+
+	public void removeOnPartitionAddedListener(BiConsumer<StockedFile, Integer> listener) {
+		onPartitionAddedListeners.remove(listener);
+	}
 }

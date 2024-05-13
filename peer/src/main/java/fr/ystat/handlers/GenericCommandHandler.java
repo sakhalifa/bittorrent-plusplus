@@ -6,6 +6,7 @@ import fr.ystat.commands.exceptions.UnexpectedCommandException;
 import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
 import lombok.SneakyThrows;
+import org.tinylog.Logger;
 
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -31,7 +32,7 @@ public final class GenericCommandHandler {
 																 Consumer<Throwable> onFailed,
 																 Long expectedAnswerByteSize){
 
-		System.out.println("Sent " + commandToSend.serialize());
+		Logger.trace("Sent " + commandToSend.serialize());
 		channel.write(SerializationUtils.toByteBuffer(commandToSend), channel, new CompletionHandler<>() {
 			@Override
 			public void completed(Integer bytesWritten, AsynchronousSocketChannel channel) {

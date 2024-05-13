@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ClientHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
 
 	private final AtomicInteger numberOfConnections;
+	private final int maxNumberOfConnections;
 	private ReadCommandHandler readCommandHandler;
 	private ExecuteCommandHandler executeCommandHandler;
 	private AsynchronousSocketChannel clientChannel;
@@ -23,6 +24,7 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 
 	public ClientHandler(AtomicInteger numberOfConnections) {
 		this.numberOfConnections = numberOfConnections;
+		this.maxNumberOfConnections = Main.getConfigurationManager().maxLeechers() * 2;
 	}
 
 
@@ -57,9 +59,7 @@ public class ClientHandler implements CompletionHandler<AsynchronousSocketChanne
 	@Override
 	public void completed(AsynchronousSocketChannel clientChannel, AsynchronousServerSocketChannel serverChannel) {
 		serverChannel.accept(serverChannel, new ClientHandler(numberOfConnections));
-		Logger.debug(numberOfConnections.get());
-		Logger.debug(Main.getConfigurationManager().maxLeechers());
-		if (numberOfConnections.getAndIncrement() >= Main.getConfigurationManager().maxLeechers()) {
+		if (numberOfConnections.getAndIncrement() >= this.maxNumberOfConnections) {
 			Logger.trace("Max leechers reached. Closing...");
 			numberOfConnections.decrementAndGet();
 			try {
