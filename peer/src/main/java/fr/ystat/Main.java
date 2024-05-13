@@ -31,9 +31,6 @@ public class Main {
 
 	public static void handleTrackerConnection() {
 		seeder.serve();
-		if (cards == null){
-			createAndShowGUI();
-		}
 		cards.add(new MainForm().getContentPane(), "MAIN_FORM");
 		frame.pack();
 		CardLayout cl = (CardLayout) cards.getLayout();
@@ -88,7 +85,6 @@ public class Main {
 		frame = new JFrame("Bittorrent plus plus ultra dingue");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		frame.add(new LoadingForm().getContentPanel());
-		cards = new JPanel(new CardLayout());
 		cards.add(new LoadingForm().getContentPane(), "LOADING_FORM");
 		frame.getContentPane().add(cards, BorderLayout.CENTER);
 		//Display the window.
@@ -113,7 +109,7 @@ public class Main {
 			);
 		}
 		seeder = new Seeder();
-
+		cards = new JPanel(new CardLayout());
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
 		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
 				Main.configurationManager.trackerPort(),

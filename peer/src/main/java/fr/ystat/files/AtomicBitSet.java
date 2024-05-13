@@ -62,7 +62,7 @@ public class AtomicBitSet {
 				return false;
 			}
 		}
-		boolean isFilled = array.get(array.length() - 1) == (1 << (length % 32)) - 1;
+		boolean isFilled = array.get(array.length() -1) == -1 || array.get(array.length() - 1) == (1 << (length % 32)) - 1;
 		Logger.trace("Bitset filled ? {} : {} =?= {}", isFilled, array.get(array.length() - 1), (1 << (length % 32)) - 1);
 		return isFilled;
 	}
