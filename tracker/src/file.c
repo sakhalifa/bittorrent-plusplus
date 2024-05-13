@@ -6,7 +6,9 @@
 
 struct file **add_seed(
     struct file *f, struct file **files, int *size, struct peer *peer) {
+	printf("\npizza1\n");
 	struct file *file = seek_filename(f->key, files, size);
+	printf("\npizza2\n");
 	if (file == NULL) {
 		*size += 1;
 		files = realloc(files, sizeof(struct file *) * (*size));

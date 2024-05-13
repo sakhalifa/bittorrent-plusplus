@@ -11,8 +11,10 @@
 
 #include "command.h"
 #include "parser.h"
+#include "thpool.h"
 
-#define MAX_PEER 10
+#define MAX_PEER    10
+#define THREAD_POOL 8
 
 #define BUFFER_SIZE 2000
 
@@ -41,8 +43,6 @@ int main(int argc, char const *argv[]) {
 	if (socketfd < 0)
 		error("ERROR opening socket");
 
-	fprintf(stderr, "\nsocketfd %d\n", socketfd);
-
 	bzero((char *)&serv_addr, sizeof(serv_addr));
 	port = atoi(argv[1]);
 
@@ -69,7 +69,8 @@ int main(int argc, char const *argv[]) {
 	int *nb_file = malloc(sizeof(int));
 	*nb_file     = 1;
 
-	struct file **files = malloc(sizeof(struct file *) * (*nb_file));
+	struct file **files  = malloc(sizeof(struct file *) * (*nb_file));
+	struct file ***p_files = &files;
 	struct peer *peers[MAX_PEER + 3];
 
 	// this will work for now, find another solution later
@@ -86,6 +87,8 @@ int main(int argc, char const *argv[]) {
 	root_file->peers       = &root_peer;
 
 	files[0] = root_file;
+
+	thpool_t *thpool = thpool_init(THREAD_POOL);
 
 	// main loop
 	for (;;) {
@@ -128,42 +131,30 @@ int main(int argc, char const *argv[]) {
 						count_error[i] = 0;
 					} else {
 						struct command *c;
-						char *response;
-						buffer[n - 2] = '\0';
-						fprintf(stderr, "socket %d: \"%s\"\n", i, buffer);
+						buffer[n - 1] = '\0';
 						if ((c = parsing(buffer)) != NULL) {
+							arg_t *arg     = malloc(sizeof(arg_t));
+							arg->command   = (void *)c->command_arg;
+							arg->file      = p_files;
+							arg->nb_file   = nb_file;
+							arg->peer      = peers[i];
 							count_error[i] = 0;
 							switch (c->command_name) {
 							case ANNOUNCE:
-								files =
-								    announce(*(struct announce *)c->command_arg,
-								        files, nb_file, peers[i]);
-								send(i, "ok", strlen("ok"), 0);
-								send(i, "\n", 1, 0);
+								thpool_add_work(thpool, announce, arg, i);
 								break;
 							case LOOK:
-								fprintf(stderr, "files %s\n", files[1]->name);
-								response = look(*(struct look *)c->command_arg,
-								    files, nb_file, peers[i]);
-								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								thpool_add_work(thpool, look, arg, i);
 								break;
 							case GETFILE:
-								response =
-								    getfile(*(struct getfile *)c->command_arg,
-								        files, nb_file, peers[i]);
-								send(i, response, strlen(response), 0);
-								send(i, "\n", 1, 0);
+								thpool_add_work(thpool, getfile, arg, i);
 								break;
 							case UPDATE:
-								files =
-								    update(*(struct update *)c->command_arg,
-								        files, nb_file, peers[i]);
-								send(i, "ok", strlen("ok"), 0);
-								send(i, "\n", 1, 0);
+								thpool_add_work(thpool, update, arg, i);
 								break;
 							default: break;
 							}
+							free(arg);
 						} else {
 							count_error[i]++;
 							char *error_message = "Unknown command\n";
