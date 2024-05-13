@@ -105,7 +105,7 @@ public class Main {
 		validateConfiguration(configurationManager);
 		for (String arg : args) {
 			FileInventory.getInstance().addStockedFile(
-					CompletedFile.fromLocalFile(new File("./" + arg), 2048L)
+					CompletedFile.fromLocalFile(new File(arg), 2048L)
 			);
 		}
 		seeder = new Seeder();
