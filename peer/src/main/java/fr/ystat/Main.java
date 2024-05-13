@@ -111,7 +111,7 @@ public class Main {
 		seeder = new Seeder();
 		cards = new JPanel(new CardLayout());
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
-		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
+		trackerConnection = new TrackerConnection(InetAddress.getByName(configurationManager.trackerIP()),
 				Main.configurationManager.trackerPort(),
 				Main::handleTrackerConnection);
 
