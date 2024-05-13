@@ -12,7 +12,7 @@ struct file {
 	struct peer **peers;
 };
 
-enum comparator { LT = -1, EQ = 0, GT = 1 };
+enum comparator { LT = 0, EQ = 1, GT = 2 };
 
 struct criteria {
 	char *element; // Name of the criteria

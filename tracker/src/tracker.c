@@ -14,6 +14,8 @@
 
 #define MAX_PEER 10
 
+#define BUFFER_SIZE 2000
+
 void error(char *msg) {
 	perror(msg);
 	exit(1);
@@ -63,7 +65,7 @@ int main(int argc, char const *argv[]) {
 
 	int n;
 	int count_error[MAX_PEER];
-	char buffer[256];
+	char buffer[BUFFER_SIZE];
 	int *nb_file = malloc(sizeof(int));
 	*nb_file     = 1;
 
@@ -114,7 +116,7 @@ int main(int argc, char const *argv[]) {
 						}
 					}
 				} else {
-					if ((n = recv(i, buffer, 256, 0)) <= 0) {
+					if ((n = recv(i, buffer, BUFFER_SIZE, 0)) <= 0) {
 						if (n == 0) {
 							fprintf(stderr, "tracker: socket %d disconnected\n",
 							    i); // connection closed
@@ -133,13 +135,14 @@ int main(int argc, char const *argv[]) {
 							count_error[i] = 0;
 							switch (c->command_name) {
 							case ANNOUNCE:
-								response =
+								files =
 								    announce(*(struct announce *)c->command_arg,
 								        files, nb_file, peers[i]);
-								send(i, response, strlen(response), 0);
+								send(i, "ok", strlen("ok"), 0);
 								send(i, "\n", 1, 0);
 								break;
 							case LOOK:
+								fprintf(stderr, "files %s\n", files[1]->name);
 								response = look(*(struct look *)c->command_arg,
 								    files, nb_file, peers[i]);
 								send(i, response, strlen(response), 0);
@@ -153,10 +156,10 @@ int main(int argc, char const *argv[]) {
 								send(i, "\n", 1, 0);
 								break;
 							case UPDATE:
-								response =
+								files =
 								    update(*(struct update *)c->command_arg,
 								        files, nb_file, peers[i]);
-								send(i, response, strlen(response), 0);
+								send(i, "ok", strlen("ok"), 0);
 								send(i, "\n", 1, 0);
 								break;
 							default: break;

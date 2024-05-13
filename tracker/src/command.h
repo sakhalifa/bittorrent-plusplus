@@ -3,8 +3,6 @@
 
 #include "file.h"
 
-
-
 enum command_num {
 	ANNOUNCE,
 	LOOK,
@@ -44,7 +42,7 @@ struct update {
  * the tracker get the peer's port and can update its database whit provided
  * pieces of informations (seeded and leeched files by the peer).
  */
-char *announce(
+struct file **announce(
     struct announce arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* LOOK COMMAND :
@@ -65,10 +63,7 @@ char *getfile(
  * and leeches.
  * the tracker update its database accordingly.
  */
-char *update(
+struct file **update(
     struct update arg, struct file **files, int *nb_file, struct peer *peer);
-
-
-
 
 #endif

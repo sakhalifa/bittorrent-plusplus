@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *announce(
+struct file **announce(
     struct announce arg, struct file **files, int *nb_file, struct peer *peer) {
 	peer->port = arg.port;
 	for (int i = 0; i < arg.nb_file; i++) {
@@ -12,18 +12,18 @@ char *announce(
 	for (int i = 0; i < arg.nb_key; i++) {
 		files = add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-	return "ok";
+	return files;
 }
 
 char *getfile(
     struct getfile arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct file *file = seek_filename(arg.key, files, nb_file);
 	if (file == NULL) {
-		char * r = malloc(sizeof(char) * (strlen("peers")) + 1);
+		char *r = malloc(sizeof(char) * (strlen("peers")) + 1);
 		strcpy(r, "peers");
 		return r;
 	}
-	int length        = 9 + strlen(arg.key);
+	int length = 9 + strlen(arg.key);
 	for (int i = 0; i < file->nb_peers; i++) {
 		length += strlen(file->peers[i]->ip) +
 		    snprintf(NULL, 0, "%d", file->peers[i]->port) + 1;
@@ -54,13 +54,13 @@ char *getfile(
 	return res;
 }
 
-char *update(
+struct file **update(
     struct update arg, struct file **files, int *nb_file, struct peer *peer) {
 	int i;
 	for (i = 0; i < arg.nb_key; i++) {
-		add_leech(arg.key_list[i], files, nb_file, peer);
+		files = add_leech(arg.key_list[i], files, nb_file, peer);
 	}
-	return "ok";
+	return files;
 }
 
 char *look(

@@ -102,7 +102,7 @@ int check_criteria(struct criteria *crit, struct file *f) {
 	if (crit->comp == -1) {
 		return 0;
 	}
-
+	
 	// Check filename
 	if (strcmp(crit->element, "filename") == 0 && crit->comp == EQ) {
 		return strcmp(crit->value, f->name) == 0;

@@ -77,7 +77,6 @@ struct criteria **string_to_list_criteria(
 			c->value = malloc(sizeof(char) * (strlen(value) + 1));
 			strcpy(c->value, value);
 		}
-		printf("\nyo %s\n", c->value);
 		crit[*size - 1] = c;
 		criteria        = strtok_r(NULL, separator,
 		           &save_p); // set criteria to next elmt (since strtok was used, need
@@ -125,7 +124,6 @@ struct command *parsing(char *command) {
 		if (check == NULL || strcmp(check, "leech") != 0) {
 			return error_command(NULL);
 		}
-
 		char *leech_key = strtok(NULL, right_bracket_separator);
 		// Check left Bracket for leech
 		if (leech_key[0] != '[') {
@@ -135,7 +133,6 @@ struct command *parsing(char *command) {
 		// Remove left brackets
 		string_files = strtok(string_files, left_bracket_separator);
 		leech_key    = strtok(leech_key, left_bracket_separator);
-
 		// Get owned files
 		struct file **files = malloc(sizeof(struct file *));
 		int size_file       = 0;
