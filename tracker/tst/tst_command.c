@@ -33,7 +33,7 @@ void test_command_announce() {
 	arg->key_list[0]     = malloc(sizeof(char) * (strlen("Key2") + 1));
 	arg->key_list[0]     = strcpy(arg->key_list[0], "Key2");
 
-	char *res = announce(*arg, files, &nb_files, p3);
+	char *res = announce(arg, files, &nb_files, p3);
 
 	assert(strcmp(res, "ok") == 0);
 	assert(p3->port == 1234);
@@ -86,7 +86,7 @@ void test_command_getfile() {
 
 	struct peer *p3 = create_peer("0.0.0.0", 1234);
 
-	char *res = getfile(*arg, files, &nb_files, p3);
+	char *res = getfile(arg, files, &nb_files, p3);
 
 	assert(strcmp(res, "peers Key1 [5.5.5.5:5555 0.0.0.0:6969]") == 0);
 
@@ -146,11 +146,11 @@ void test_command_look() {
 
 	struct peer *p = create_peer("pizza", 0000);
 
-	char *res = look(*arg, files, &nb_files, p);
+	char *res = look(arg, files, &nb_files, p);
 
 	assert(strcmp(res, "list [Name1 1024 256 Key1 Name2 2048 32 Key2]") == 0);
 
-	char *res2 = look(*arg2, files, &nb_files, p);
+	char *res2 = look(arg2, files, &nb_files, p);
 
 	assert(strcmp(res2, "list [Name3 2048 16 Key3]") == 0);
 
@@ -208,7 +208,7 @@ void test_command_update() {
 	arg->key_list[0]   = strdup("Key2");
 	arg->key_list[1]   = strdup("Key7");
 
-	char *res = update(*arg, files, &nb_files, p);
+	char *res = update(arg, files, &nb_files, p);
 
 	assert(strcmp(res, "ok") == 0);
 	assert(files[1]->nb_peers == 2);

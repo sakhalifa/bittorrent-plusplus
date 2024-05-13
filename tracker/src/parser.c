@@ -50,7 +50,7 @@ enum comparator convert_char_comparator(char c) {
 	case ('>'): return GT;
 	default: error_command("Comparator unknown");
 	}
-	return 0;
+	return -1;
 }
 
 struct criteria **string_to_list_criteria(
@@ -70,8 +70,14 @@ struct criteria **string_to_list_criteria(
 		c->element         = malloc(sizeof(char) * (strlen(elmt) + 1));
 		strcpy(c->element, elmt);
 		char *value = strtok(NULL, quote);
-		c->value    = malloc(sizeof(char) * (strlen(value) + 1));
-		strcpy(c->value, value);
+		if (value == NULL) {
+			c->value    = malloc(sizeof(char));
+			c->value[0] = '\0';
+		} else {
+			c->value = malloc(sizeof(char) * (strlen(value) + 1));
+			strcpy(c->value, value);
+		}
+		printf("\nyo %s\n", c->value);
 		crit[*size - 1] = c;
 		criteria        = strtok_r(NULL, separator,
 		           &save_p); // set criteria to next elmt (since strtok was used, need
