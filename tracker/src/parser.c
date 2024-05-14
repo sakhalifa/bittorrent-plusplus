@@ -105,7 +105,8 @@ struct command *parsing(char *command) {
 			return error_command("listen");
 		}
 
-		int port = atoi(strtok(NULL, separator));
+		int* port = malloc(sizeof(int));
+		*port = atoi(strtok(NULL, separator));
 
 		// Check if next word is "seed", otherwise error
 		check = strtok(NULL, separator);

@@ -3,23 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *announce(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
-	struct announce *arg = (struct announce *)v_arg;
-	peer->port           = arg->port;
-	for (int i = 0; i < arg->nb_file; i++) {
-		*files = add_seed(arg->file_list[i], *files, nb_file, peer);
+char *announce(void *v_arg, struct file **files, int *nb_file, struct peer *peer) {
+	peer->port = *((struct announce *)(v_arg))->port; // crash because of "peer->port"
+
+	for (int i = 0; i < *nb_file; i++) {
+		files = add_seed(
+		    ((struct announce *)(v_arg))->file_list[i], files, nb_file, peer);
 	}
-	for (int i = 0; i < arg->nb_key; i++) {
-		*files = add_leech(arg->key_list[i], *files, nb_file, peer);
+	for (int i = 0; i < ((struct announce *)(v_arg))->nb_key; i++) {
+		files = add_leech(
+		    ((struct announce *)(v_arg))->key_list[i], files, nb_file, peer);
 	}
 	return "ok";
 }
 
 char *getfile(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
+    void *v_arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct getfile *arg = (struct getfile *)v_arg;
-	struct file *file   = seek_filename(arg->key, *files, nb_file);
+	struct file *file   = seek_filename(arg->key, files, nb_file);
 	if (file == NULL) {
 		char *r = malloc(sizeof(char) * (strlen("peers")) + 1);
 		strcpy(r, "peers");
@@ -57,16 +58,16 @@ char *getfile(
 }
 
 char *update(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
+    void *v_arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct update *arg = (struct update *)v_arg;
 	int i;
 	for (i = 0; i < arg->nb_key; i++) {
-		add_leech(arg->key_list[i], *files, nb_file, peer);
+		add_leech(arg->key_list[i], files, nb_file, peer);
 	}
 	return "ok";
 }
 
-char *look(void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
+char *look(void *v_arg, struct file **files, int *nb_file, struct peer *peer) {
 	struct look *arg  = (struct look *)v_arg;
 	struct file **res = NULL;
 	int size_res      = 0;
@@ -75,7 +76,7 @@ char *look(void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
 		for (int i = 0; i < *nb_file; i++) {
 			int passed = 0;
 			for (int j = 0; j < arg->nb_criteria; j++) {
-				passed += check_criteria(arg->criteria[j], *files[i]);
+				passed += check_criteria(arg->criteria[j], files[i]);
 			}
 			if (passed == arg->nb_criteria) {
 				if (size_res == 0) {
@@ -83,8 +84,8 @@ char *look(void *v_arg, struct file ***files, int *nb_file, struct peer *peer) {
 				} else {
 					res = realloc(res, sizeof(struct file *) * (size_res + 1));
 				}
-				res[size_res] = create_file((*files)[i]->name, (*files)[i]->filesize,
-				    (*files)[i]->piecesize, (*files)[i]->key);
+				res[size_res] = create_file(files[i]->name, files[i]->filesize,
+				    files[i]->piecesize, files[i]->key);
 				size_res++;
 			}
 		}

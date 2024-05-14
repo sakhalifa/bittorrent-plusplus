@@ -3,6 +3,13 @@
 
 #include "file.h"
 
+typedef struct arg {
+	struct file** files;
+	struct peer* peer; 
+	void* command_arg;
+	int* nb_file;
+} arg_t;
+
 enum command_num {
 	ANNOUNCE,
 	LOOK,
@@ -16,7 +23,7 @@ struct command {
 };
 
 struct announce {
-	int port;
+	int *port;
 	int nb_file;
 	struct file **file_list;
 	int nb_key;
@@ -42,20 +49,19 @@ struct update {
  * the tracker get the peer's port and can update its database whit provided
  * pieces of informations (seeded and leeched files by the peer).
  */
-char *announce(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer);
+char *announce(void *v_arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* LOOK COMMAND :
  * used by the peer to retrieve files with specifics criterias.
  */
-char *look(void *v_arg, struct file ***files, int *nb_file, struct peer *peer);
+char *look(void *v_arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* GETFILE COMMAND :
  * used by the peer to get all peers that own (fully or partially) a file
  * specified with a key.
  */
 char *getfile(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer);
+    void *v_arg, struct file **files, int *nb_file, struct peer *peer);
 
 /* UPDATE COMMAND :
  * allow the peer to inform the tracker which new files he currently owns
@@ -63,6 +69,6 @@ char *getfile(
  * the tracker update its database accordingly.
  */
 char *update(
-    void *v_arg, struct file ***files, int *nb_file, struct peer *peer);
+    void *v_arg, struct file **files, int *nb_file, struct peer *peer);
 
 #endif

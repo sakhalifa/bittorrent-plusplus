@@ -22,12 +22,12 @@ void test_task_queue_push() {
 	task_queue_t *q = task_queue_init();
 
 	task_t *t1 = malloc(sizeof(task_t));
-	t1->arg    = NULL;
+	t1->func_arg    = NULL;
 	t1->p_func = NULL;
 	t1->prev   = NULL;
 
 	task_t *t2 = malloc(sizeof(task_t));
-	t2->arg    = NULL;
+	t2->func_arg    = NULL;
 	t2->p_func = NULL;
 	t2->prev   = t1;
 
@@ -54,12 +54,12 @@ void test_task_queue_pull() {
 	task_queue_t *q = task_queue_init();
 
 	task_t *t1 = malloc(sizeof(task_t));
-	t1->arg    = NULL;
+	t1->func_arg    = NULL;
 	t1->p_func = NULL;
 	t1->prev   = NULL;
 
 	task_t *t3 = malloc(sizeof(task_t));
-	t1->arg    = NULL;
+	t1->func_arg    = NULL;
 	t1->p_func = NULL;
 	t1->prev   = NULL;
 
@@ -103,12 +103,12 @@ void test_task_queue_clear() {
 	task_queue_t *q = task_queue_init();
 
 	task_t *t1 = malloc(sizeof(task_t));
-	t1->arg    = NULL;
+	t1->func_arg    = NULL;
 	t1->p_func = NULL;
 	t1->prev   = NULL;
 
 	task_t *t2 = malloc(sizeof(task_t));
-	t2->arg    = NULL;
+	t2->func_arg    = NULL;
 	t2->p_func = NULL;
 	t2->prev   = NULL;
 

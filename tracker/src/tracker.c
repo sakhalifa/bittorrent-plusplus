@@ -69,9 +69,9 @@ int main(int argc, char const *argv[]) {
 	int *nb_file = malloc(sizeof(int));
 	*nb_file     = 1;
 
-	struct file **files  = malloc(sizeof(struct file *) * (*nb_file));
-	struct file ***p_files = &files;
-	struct peer *peers[MAX_PEER + 3];
+	struct file **files = malloc(sizeof(**files) * (*nb_file));
+	struct peer **peers = malloc(sizeof(struct peer *) * (MAX_PEER + 3));
+
 
 	// this will work for now, find another solution later
 	struct file *root_file = malloc(sizeof(struct file));
@@ -88,9 +88,9 @@ int main(int argc, char const *argv[]) {
 
 	files[0] = root_file;
 
-	thpool_t *thpool = thpool_init(THREAD_POOL);
+	threadpool thpool = thpool_init(THREAD_POOL);
 
-	// main loop
+	// main loop 
 	for (;;) {
 		read_fds = master_fd;
 		if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
@@ -134,24 +134,32 @@ int main(int argc, char const *argv[]) {
 						buffer[n - 1] = '\0';
 						if ((c = parsing(buffer)) != NULL) {
 							arg_t *arg     = malloc(sizeof(arg_t));
-							arg->command   = (void *)c->command_arg;
-							arg->file      = p_files;
+							arg->files     = files;
 							arg->nb_file   = nb_file;
+							printf("%p\n", peers[i]);
 							arg->peer      = peers[i];
 							count_error[i] = 0;
 							switch (c->command_name) {
 							case ANNOUNCE:
+								arg->command_arg =
+								    (struct announce *)c->command_arg;
 								thpool_add_work(thpool, announce, arg, i);
 								break;
-							case LOOK:
-								thpool_add_work(thpool, look, arg, i);
-								break;
-							case GETFILE:
-								thpool_add_work(thpool, getfile, arg, i);
-								break;
-							case UPDATE:
-								thpool_add_work(thpool, update, arg, i);
-								break;
+							// case LOOK:
+							// 	arg->command_arg =
+							// 	    (struct look *)c->command_arg;
+							// 	thpool_add_work(thpool, look, arg, i);
+							// 	break;
+							// case GETFILE:
+							// 	arg->command_arg =
+							// 	    (struct getfile *)c->command_arg;
+							// 	thpool_add_work(thpool, getfile, arg, i);
+							// 	break;
+							// case UPDATE:
+							// 	arg->command_arg =
+							// 	    (struct update *)c->command_arg;
+							// 	thpool_add_work(thpool, update, arg, i);
+							// 	break;
 							default: break;
 							}
 							free(arg);

@@ -50,6 +50,7 @@ struct file **add_leech(
 }
 
 struct file *seek_filename(char *key, struct file **files, int *size) {
+	printf("debug : %p", size);
 	for (unsigned int i = 0; i < *size; i++) {
 		if (strcmp(files[i]->key, key) == 0) {
 			return files[i];
