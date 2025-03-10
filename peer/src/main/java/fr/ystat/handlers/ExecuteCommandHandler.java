@@ -4,6 +4,7 @@ import fr.ystat.commands.IReceivableCommand;
 import fr.ystat.commands.exceptions.CommandException;
 import fr.ystat.io.exceptions.ConnectionClosedByRemoteException;
 import fr.ystat.util.SerializationUtils;
+import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -67,6 +68,7 @@ public class ExecuteCommandHandler implements CompletionHandler<Integer, Void> {
 	public void execute(IReceivableCommand command) {
 		try {
 			String response = command.apply();
+			Logger.trace("Sending answer [{}]", response);
 			toWrite = SerializationUtils.CHARSET.encode(response + "\n");
 			trueLimit = toWrite.limit();
 			toWrite = toWrite.limit(Math.min(WRITE_BUFFER_SIZE, trueLimit));

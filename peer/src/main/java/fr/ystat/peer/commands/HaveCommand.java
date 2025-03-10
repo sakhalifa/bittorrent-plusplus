@@ -2,10 +2,7 @@ package fr.ystat.peer.commands;
 
 import fr.ystat.commands.*;
 import fr.ystat.commands.exceptions.CommandException;
-import fr.ystat.files.AtomicBitSet;
-import fr.ystat.files.FileInventory;
-import fr.ystat.files.FileProperties;
-import fr.ystat.files.StockedFile;
+import fr.ystat.files.*;
 import fr.ystat.parser.ParserUtils;
 import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
@@ -51,6 +48,11 @@ public class HaveCommand implements ICommand {
     public HaveCommand(String key, AtomicBitSet bitSet){
         this.key = key;
         this.bitSet = bitSet;
+    }
+
+    public HaveCommand(DownloadedFile file){
+        this.key = file.getProperties().getHash();
+        this.bitSet = file.getBitSet();
     }
 
     @Override

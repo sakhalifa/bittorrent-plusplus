@@ -49,7 +49,7 @@ public class TrackerConnection {
 			});
 			new Thread(() -> {
 				try {
-					Thread.sleep(30000);
+					Thread.sleep(Main.getConfigurationManager().updateTrackerIntervalMS());
 				} catch (InterruptedException ignored) {
 				}
 				this.scheduleUpdates();
@@ -71,6 +71,7 @@ public class TrackerConnection {
 		GenericCommandHandler.sendCommand(this.announceUpdateChannel, update, OkCommand.class,
 				(unused) -> {
 					try {
+						Logger.trace("Update tracker interval ms : " + Main.getConfigurationManager().updateTrackerIntervalMS());
 						Thread.sleep(Main.getConfigurationManager().updateTrackerIntervalMS());
 						this.scheduleUpdates();
 					} catch (InterruptedException ignored) {

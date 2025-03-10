@@ -12,6 +12,7 @@ import fr.ystat.parser.exceptions.InvalidInputException;
 import fr.ystat.parser.exceptions.ParserException;
 import fr.ystat.util.SerializationUtils;
 import lombok.Getter;
+import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ class DataParser implements ICommandParser {
 
 	@Override
 	public IReceivableCommand parse(String input) throws ParserException {
-
+		Logger.trace("Beginning data command parsing");
 		String[] splitted = ParserUtils.expectArgs(input, 3, "data");
 
 		String fileHash = ParserUtils.parseKeyCheck(splitted[1]);
@@ -36,26 +37,39 @@ class DataParser implements ICommandParser {
 		long dataLen = file.getProperties().getPieceSize();
 		List<Map.Entry<Integer, ByteBuffer>> dataList = new ArrayList<>();
 		int startIdx = splitted[0].length() + 1 + splitted[1].length() + 1 + 1;
+		Logger.trace("KEYONE");
 		try {
 			String toRead = input.substring(startIdx);
+			Logger.trace("KEYTWO");
 			while (!toRead.isEmpty()) {
+				Logger.trace("KEYTHREE");
 				int firstSepIdx = toRead.indexOf(':');
 				if (firstSepIdx == -1)
 					throw new InvalidInputException(input, "data.badFormat.noDataSep");
+
+
 				String pieceNumStr = toRead.substring(0, firstSepIdx);
+				Logger.trace("Piece number: {}", pieceNumStr);
 				int pieceNum;
 				try {
 					pieceNum = Integer.parseInt(pieceNumStr);
 				} catch (NumberFormatException e) {
 					throw new InvalidInputException(input, "data.badFormat.pieceNumNotANum");
 				}
+				Logger.trace("Before first read");
+				Logger.trace("to read : {}, will get {}", toRead.length(), firstSepIdx + 1 + dataLen);
 				String data = toRead.substring(firstSepIdx + 1, (int) (firstSepIdx + 1 + dataLen));
+				Logger.trace("GOTDATA : [{}]", data);
+				Logger.trace("To read got through");
 				dataList.add(Map.entry(pieceNum, SerializationUtils.CHARSET.encode(data)));
 				toRead = toRead.substring((int) (firstSepIdx + 1 + dataLen + 1));
+				Logger.trace("remaining read go through");
+				Logger.trace("Remaining {}", toRead.length());
 			}
 		} catch (StringIndexOutOfBoundsException e) {
 			throw new InvalidInputException(input, "data.badFormat");
 		}
+		Logger.trace("Parsed data command");
 		return new DataCommand(fileHash, dataList);
 	}
 }

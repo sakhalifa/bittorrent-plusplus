@@ -1,6 +1,7 @@
 package fr.ystat.config;
 
 import com.google.gson.Gson;
+import org.tinylog.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,15 +25,21 @@ public class JsonConfigurationManager implements IConfigurationManager {
 		}
 	}
 
-	public JsonConfigurationManager() {
-		File f = new File("config.json");
+	public JsonConfigurationManager(String configPath){
+		File f = new File(configPath);
 		if (!f.exists())
 			createFileFromResource(f);
 		try(var reader = new FileReader(f)) {
 			this.config = gson.fromJson(reader, JsonConfig.class);
+			Logger.trace("UPDATE TRACKER MS " + this.config.getUpdateTrackerIntervalMS());
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public JsonConfigurationManager() {
+		this("config.json");
 	}
 
 	@Override

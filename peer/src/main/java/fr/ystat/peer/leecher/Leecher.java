@@ -35,7 +35,7 @@ public class Leecher {
 				peersCommand -> {
 					var peers = peersCommand.getPeers();
 					for(var peer : peers){
-						var seederConnection = new SeederConnection(peer);
+//						var seederConnection = new SeederConnection(peer);
 
 					}
 				},

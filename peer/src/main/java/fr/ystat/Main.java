@@ -85,7 +85,6 @@ public class Main {
 		frame = new JFrame("Bittorrent plus plus ultra dingue");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		frame.add(new LoadingForm().getContentPanel());
-		cards = new JPanel(new CardLayout());
 		cards.add(new LoadingForm().getContentPane(), "LOADING_FORM");
 		frame.getContentPane().add(cards, BorderLayout.CENTER);
 		//Display the window.
@@ -95,17 +94,24 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		configurationManager = new JsonConfigurationManager();
+
+		// Simple trick to set up leecher and seeder on 2 different port.
+		if (args.length == 0) {
+			configurationManager = new JsonConfigurationManager("config2.json");
+		} else {
+			configurationManager = new JsonConfigurationManager();
+		}
+
 		validateConfiguration(configurationManager);
 		for (String arg : args) {
 			FileInventory.getInstance().addStockedFile(
-					CompletedFile.fromLocalFile(new File("./" + arg), 2048L)
+					CompletedFile.fromLocalFile(new File(arg), 2048L)
 			);
 		}
 		seeder = new Seeder();
-
+		cards = new JPanel(new CardLayout());
 		SwingUtilities.invokeLater(Main::createAndShowGUI);
-		trackerConnection = new TrackerConnection(InetAddress.getByName("localhost"),
+		trackerConnection = new TrackerConnection(InetAddress.getByName(configurationManager.trackerIP()),
 				Main.configurationManager.trackerPort(),
 				Main::handleTrackerConnection);
 
